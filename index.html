@@ -2,139 +2,189 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>POS System</title>
 
 <style>
-:root{
- --main:#020617;
- --accent:#22c55e;
- --danger:#ef4444;
- --bg:#f1f5f9;
-}
-body{margin:0;font-family:Tahoma;background:var(--bg)}
-header{
-background:linear-gradient(90deg,#020617,#0f172a);
-color:#fff;padding:12px;text-align:center;font-size:18px
-}
-button{
-padding:10px;border:0;border-radius:10px;
-font-size:14px;cursor:pointer
-}
-.btn{background:var(--accent);color:#fff}
-.btn-danger{background:var(--danger);color:#fff}
-input,select{
-padding:10px;width:100%;border-radius:8px;
-border:1px solid #cbd5f5;font-size:14px
-}
+body{font-family:Tahoma;margin:0;background:#f1f5f9}
+header{background:#020617;color:#fff;padding:12px;text-align:center;font-size:18px}
+nav{display:flex;gap:5px;padding:5px}
+button{padding:10px;border:0;border-radius:8px;background:#22c55e;color:#fff;font-size:14px}
+input,select{padding:10px;width:100%;margin:5px 0;font-size:14px}
 .hidden{display:none}
-.card{
-background:#fff;border-radius:12px;
-padding:10px;text-align:center;
-box-shadow:0 3px 8px rgba(0,0,0,.08)
-}
-
-/* layout */
-#cashier{
-padding:10px;
-display:grid;
-grid-template-rows:auto 1fr auto;
-gap:10px
-}
-.top{
-background:#fff;border-radius:12px;
-padding:10px;display:grid;
-grid-template-columns:2fr 1fr 1fr 1fr 1fr;
-gap:6px
-}
-@media(max-width:768px){
-.top{grid-template-columns:1fr 1fr}
-}
-#invoice{
-display:grid;
-grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
-gap:8px
-}
-#total{
-background:#fff;padding:12px;
-border-radius:12px;
-font-size:18px;text-align:center
-}
+.card{background:#fff;padding:10px;border-radius:10px;margin:5px 0;border:1px solid #e5e7eb}
+#invoice .card{display:flex;justify-content:space-between;align-items:center}
+.total{font-size:18px;font-weight:bold;margin:10px 0}
+#suggestions .card{cursor:pointer;background:#e5e7eb}
 </style>
 </head>
 
 <body>
 
-<header>POS System</header>
+<header>نظام نقاط بيع</header>
 
+<nav>
+<button onclick="show('cashier')">🧾 الكاشير</button>
+<button onclick="show('products')">📦 الأصناف</button>
+<button onclick="show('customers')">👤 العملاء</button>
+</nav>
+
+<input id="shopName" placeholder="اسم المحل" oninput="saveShop()">
+
+<!-- الكاشير -->
 <div id="cashier">
-<div class="top">
-<input id="search" placeholder="اسم الصنف">
+<input id="search" placeholder="ابحث عن صنف" oninput="smartSearch()">
+<div id="suggestions"></div>
+
 <input id="qty" type="number" value="1" min="1">
+
 <select id="payType" onchange="toggleCustomer()">
 <option value="cash">نقدي</option>
 <option value="credit">آجل</option>
 </select>
+
 <select id="customer" class="hidden"></select>
-<button class="btn" onclick="addToCart()">إضافة</button>
-<button class="btn" onclick="saveInvoice()">حفظ</button>
-</div>
+
+<button onclick="addToCart()">➕ إضافة للفاتورة</button>
 
 <div id="invoice"></div>
-<div id="total">الإجمالي: 0</div>
+<div class="total" id="total">الإجمالي: 0</div>
+
+<button onclick="printInvoice()">🖨️ طباعة</button>
+<button onclick="saveInvoice()">💾 حفظ الفاتورة</button>
+</div>
+
+<!-- الأصناف -->
+<div id="products" class="hidden">
+<h3>إضافة صنف</h3>
+<input id="pn" placeholder="اسم الصنف">
+<input id="pp" type="number" placeholder="سعر البيع">
+<input id="pc" type="number" placeholder="سعر الشراء">
+<input id="ps" type="number" placeholder="المخزون">
+<button onclick="addProduct()">💾 حفظ الصنف</button>
+<div id="plist"></div>
+</div>
+
+<!-- العملاء -->
+<div id="customers" class="hidden">
+<h3>إضافة عميل</h3>
+<input id="cn" placeholder="اسم العميل">
+<button onclick="addCustomer()">💾 حفظ العميل</button>
+<div id="clist"></div>
 </div>
 
 <script>
-/* ================= CORE ================= */
-const Utils={
- uuid(){return crypto.randomUUID()},
- now(){return new Date().toISOString()},
- assert(c,m){if(!c)throw new Error(m)}
-};
-const Storage={
- key:"POS_REF_V1",
- load(){
-  const r=localStorage.getItem(this.key);
-  if(!r)return {products:[],customers:[],invoices:[]};
-  return JSON.parse(r);
- },
- save(d){localStorage.setItem(this.key,JSON.stringify(d))}
-};
-let DB=Storage.load();
+/* ====== قاعدة البيانات ====== */
+let DB = JSON.parse(localStorage.pos || '{"products":[],"customers":[],"invoices":[]}');
+let cart = [];
 
-/* ===== Products ===== */
-function addProduct(name,price,cost,stock){
- Utils.assert(name,"اسم الصنف مطلوب");
- Utils.assert(price>0,"سعر غير صحيح");
- Utils.assert(stock>=0,"مخزون سالب");
+/* ====== أدوات عامة ====== */
+function save(){ localStorage.pos = JSON.stringify(DB); }
+function show(id){
+ ["cashier","products","customers"].forEach(x=>document.getElementById(x).classList.add("hidden"));
+ document.getElementById(id).classList.remove("hidden");
+}
+
+/* ====== اسم المحل ====== */
+function saveShop(){ localStorage.shopName = shopName.value; }
+shopName.value = localStorage.shopName || "";
+
+/* ====== الأصناف ====== */
+function addProduct(){
+ if(!pn.value || pp.value<=0 || ps.value<0){
+  alert("بيانات الصنف غير صحيحة");
+  return;
+ }
  DB.products.push({
-  id:Utils.uuid(),name,price,cost,stock
+  id:Date.now(),
+  name:pn.value.trim(),
+  price:+pp.value,
+  cost:+pc.value || 0,
+  stock:+ps.value
  });
- Storage.save(DB);
+ pn.value=pp.value=pc.value=ps.value="";
+ save();
+ renderProducts();
 }
 
-/* ===== Customers ===== */
-function addCustomer(name){
+function renderProducts(){
+ plist.innerHTML="";
+ DB.products.forEach(p=>{
+  plist.innerHTML+=`
+  <div class="card">
+   ${p.name}<br>
+   سعر: ${p.price} | مخزون: ${p.stock}
+  </div>`;
+ });
+}
+
+/* ====== العملاء ====== */
+function addCustomer(){
+ if(!cn.value.trim()) return;
  DB.customers.push({
-  id:Utils.uuid(),name,balance:0,locked:false
+  id:Date.now(),
+  name:cn.value.trim(),
+  balance:0,
+  locked:false
  });
- Storage.save(DB);
+ cn.value="";
+ save();
+ renderCustomers();
 }
 
-/* ===== POS ===== */
-let cart=[];
+function renderCustomers(){
+ clist.innerHTML="";
+ customer.innerHTML="<option value=''>اختر عميل</option>";
+ DB.customers.forEach(c=>{
+  clist.innerHTML+=`<div class="card">${c.name} | رصيد: ${c.balance}</div>`;
+  if(!c.locked)
+   customer.innerHTML+=`<option value="${c.id}">${c.name}</option>`;
+ });
+}
+
 function toggleCustomer(){
- customer.classList.toggle("hidden",payType.value!=="credit");
+ customer.classList.toggle("hidden", payType.value!=="credit");
 }
+
+/* ====== البحث الذكي ====== */
+function smartSearch(){
+ let q = search.value.trim();
+ suggestions.innerHTML="";
+ if(q.length===0) return;
+
+ DB.products
+ .filter(p=>p.name.includes(q))
+ .forEach(p=>{
+  suggestions.innerHTML+=`
+   <div class="card" onclick="selectProduct('${p.name.replace(/'/g,"")}')">
+    ${p.name} | ${p.price}
+   </div>`;
+ });
+}
+
+function selectProduct(name){
+ search.value=name;
+ suggestions.innerHTML="";
+}
+
+/* ====== الكاشير ====== */
 function addToCart(){
- const p=DB.products.find(x=>x.name===search.value);
- if(!p)return alert("الصنف غير موجود");
- if(p.stock<qty.value)return alert("نفاد المخزون");
- cart.push({id:p.id,name:p.name,price:p.price,cost:p.cost,qty:+qty.value});
- p.stock-=qty.value;
+ let p = DB.products.find(x=>x.name===search.value);
+ let q = +qty.value;
+
+ if(!p){ alert("الصنف غير موجود"); return; }
+ if(q<=0 || p.stock<q){ alert("كمية غير متاحة"); return; }
+
+ cart.push({...p,qty:q});
+ p.stock-=q;
+
+ search.value="";
+ qty.value=1;
+ suggestions.innerHTML="";
  renderInvoice();
- Storage.save(DB);
+ save();
 }
+
 function renderInvoice(){
  invoice.innerHTML="";
  let t=0;
@@ -142,50 +192,83 @@ function renderInvoice(){
   t+=i.price*i.qty;
   invoice.innerHTML+=`
   <div class="card">
-   <b>${i.name}</b><br>
-   ${i.qty} × ${i.price}<br>
-   <button onclick="removeItem(${idx})">حذف</button>
+   ${i.name} × ${i.qty}
+   <button onclick="removeItem(${idx})">❌</button>
   </div>`;
  });
  total.innerText="الإجمالي: "+t;
 }
+
 function removeItem(i){
- const it=cart.splice(i,1)[0];
- const p=DB.products.find(x=>x.id===it.id);
- p.stock+=it.qty;
+ let it = cart.splice(i,1)[0];
+ let p = DB.products.find(x=>x.id===it.id);
+ if(p) p.stock+=it.qty;
  renderInvoice();
- Storage.save(DB);
+ save();
 }
+
 function saveInvoice(){
- if(cart.length===0)return;
+ if(cart.length===0){ alert("الفاتورة فارغة"); return; }
+
+ let totalVal = cart.reduce((a,i)=>a+i.price*i.qty,0);
+
  if(payType.value==="credit"){
-  if(customer.value==="")return alert("اختر عميل");
-  const c=DB.customers.find(x=>x.id===customer.value);
-  if(c.locked)return alert("العميل مقفول");
-  c.balance+=cart.reduce((a,i)=>a+i.price*i.qty,0);
+  let c = DB.customers.find(x=>x.id==customer.value);
+  if(!c || c.locked){
+   alert("اختر عميل صحيح");
+   return;
+  }
+  c.balance += totalVal;
  }
+
  DB.invoices.push({
-  id:Utils.uuid(),
-  number:Date.now(),
-  date:Utils.now(),
-  type:payType.value,
-  customer:customer.value||null,
+  id:Date.now(),
   items:cart,
-  total:cart.reduce((a,i)=>a+i.price*i.qty,0),
-  profit:cart.reduce((a,i)=>a+(i.price-i.cost)*i.qty,0)
+  total:totalVal,
+  date:new Date().toLocaleString()
  });
- cart=[];renderInvoice();loadCustomers();
- Storage.save(DB);
+
+ cart=[];
+ renderInvoice();
+ renderCustomers();
+ save();
  alert("تم حفظ الفاتورة");
 }
-function loadCustomers(){
- customer.innerHTML="<option value=''>اختر عميل</option>";
- DB.customers.filter(c=>!c.locked)
- .forEach(c=>{
-  customer.innerHTML+=`<option value="${c.id}">${c.name}</option>`;
- });
+
+/* ====== الطباعة ====== */
+function printInvoice(){
+ if(cart.length===0){ alert("لا توجد فاتورة"); return; }
+
+ let shop = localStorage.shopName || "";
+ let win = window.open("","print","width=300");
+
+ let rows = cart.map(i=>`
+ <div style="border:1px dashed #000;padding:5px;margin:3px 0">
+ ${i.name}<br>
+ ${i.qty} × ${i.price} = ${i.qty*i.price}
+ </div>`).join("");
+
+ let totalVal = cart.reduce((a,i)=>a+i.price*i.qty,0);
+
+ win.document.write(`
+ <html><head>
+ <style>body{font-family:Tahoma;font-size:12px}</style>
+ </head><body>
+ <h3 style="text-align:center">${shop}</h3>
+ <hr>
+ ${rows}
+ <hr>
+ <b>الإجمالي: ${totalVal}</b><br>
+ ${new Date().toLocaleString()}
+ <script>window.print();window.close()</script>
+ </body></html>
+ `);
+ win.document.close();
 }
-loadCustomers();
+
+/* ====== تشغيل أولي ====== */
+renderProducts();
+renderCustomers();
 </script>
 
 </body>
