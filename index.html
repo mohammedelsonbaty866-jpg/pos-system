@@ -1,10 +1,192 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>POS System</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>POS System</title>
+
+<style>
+:root{
+ --main:#020617;
+ --accent:#22c55e;
+ --danger:#ef4444;
+ --bg:#f1f5f9;
+}
+body{margin:0;font-family:Tahoma;background:var(--bg)}
+header{
+background:linear-gradient(90deg,#020617,#0f172a);
+color:#fff;padding:12px;text-align:center;font-size:18px
+}
+button{
+padding:10px;border:0;border-radius:10px;
+font-size:14px;cursor:pointer
+}
+.btn{background:var(--accent);color:#fff}
+.btn-danger{background:var(--danger);color:#fff}
+input,select{
+padding:10px;width:100%;border-radius:8px;
+border:1px solid #cbd5f5;font-size:14px
+}
+.hidden{display:none}
+.card{
+background:#fff;border-radius:12px;
+padding:10px;text-align:center;
+box-shadow:0 3px 8px rgba(0,0,0,.08)
+}
+
+/* layout */
+#cashier{
+padding:10px;
+display:grid;
+grid-template-rows:auto 1fr auto;
+gap:10px
+}
+.top{
+background:#fff;border-radius:12px;
+padding:10px;display:grid;
+grid-template-columns:2fr 1fr 1fr 1fr 1fr;
+gap:6px
+}
+@media(max-width:768px){
+.top{grid-template-columns:1fr 1fr}
+}
+#invoice{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+gap:8px
+}
+#total{
+background:#fff;padding:12px;
+border-radius:12px;
+font-size:18px;text-align:center
+}
+</style>
 </head>
+
 <body>
-  <h1>POS System Ready</h1>
+
+<header>POS System</header>
+
+<div id="cashier">
+<div class="top">
+<input id="search" placeholder="اسم الصنف">
+<input id="qty" type="number" value="1" min="1">
+<select id="payType" onchange="toggleCustomer()">
+<option value="cash">نقدي</option>
+<option value="credit">آجل</option>
+</select>
+<select id="customer" class="hidden"></select>
+<button class="btn" onclick="addToCart()">إضافة</button>
+<button class="btn" onclick="saveInvoice()">حفظ</button>
+</div>
+
+<div id="invoice"></div>
+<div id="total">الإجمالي: 0</div>
+</div>
+
+<script>
+/* ================= CORE ================= */
+const Utils={
+ uuid(){return crypto.randomUUID()},
+ now(){return new Date().toISOString()},
+ assert(c,m){if(!c)throw new Error(m)}
+};
+const Storage={
+ key:"POS_REF_V1",
+ load(){
+  const r=localStorage.getItem(this.key);
+  if(!r)return {products:[],customers:[],invoices:[]};
+  return JSON.parse(r);
+ },
+ save(d){localStorage.setItem(this.key,JSON.stringify(d))}
+};
+let DB=Storage.load();
+
+/* ===== Products ===== */
+function addProduct(name,price,cost,stock){
+ Utils.assert(name,"اسم الصنف مطلوب");
+ Utils.assert(price>0,"سعر غير صحيح");
+ Utils.assert(stock>=0,"مخزون سالب");
+ DB.products.push({
+  id:Utils.uuid(),name,price,cost,stock
+ });
+ Storage.save(DB);
+}
+
+/* ===== Customers ===== */
+function addCustomer(name){
+ DB.customers.push({
+  id:Utils.uuid(),name,balance:0,locked:false
+ });
+ Storage.save(DB);
+}
+
+/* ===== POS ===== */
+let cart=[];
+function toggleCustomer(){
+ customer.classList.toggle("hidden",payType.value!=="credit");
+}
+function addToCart(){
+ const p=DB.products.find(x=>x.name===search.value);
+ if(!p)return alert("الصنف غير موجود");
+ if(p.stock<qty.value)return alert("نفاد المخزون");
+ cart.push({id:p.id,name:p.name,price:p.price,cost:p.cost,qty:+qty.value});
+ p.stock-=qty.value;
+ renderInvoice();
+ Storage.save(DB);
+}
+function renderInvoice(){
+ invoice.innerHTML="";
+ let t=0;
+ cart.forEach((i,idx)=>{
+  t+=i.price*i.qty;
+  invoice.innerHTML+=`
+  <div class="card">
+   <b>${i.name}</b><br>
+   ${i.qty} × ${i.price}<br>
+   <button onclick="removeItem(${idx})">حذف</button>
+  </div>`;
+ });
+ total.innerText="الإجمالي: "+t;
+}
+function removeItem(i){
+ const it=cart.splice(i,1)[0];
+ const p=DB.products.find(x=>x.id===it.id);
+ p.stock+=it.qty;
+ renderInvoice();
+ Storage.save(DB);
+}
+function saveInvoice(){
+ if(cart.length===0)return;
+ if(payType.value==="credit"){
+  if(customer.value==="")return alert("اختر عميل");
+  const c=DB.customers.find(x=>x.id===customer.value);
+  if(c.locked)return alert("العميل مقفول");
+  c.balance+=cart.reduce((a,i)=>a+i.price*i.qty,0);
+ }
+ DB.invoices.push({
+  id:Utils.uuid(),
+  number:Date.now(),
+  date:Utils.now(),
+  type:payType.value,
+  customer:customer.value||null,
+  items:cart,
+  total:cart.reduce((a,i)=>a+i.price*i.qty,0),
+  profit:cart.reduce((a,i)=>a+(i.price-i.cost)*i.qty,0)
+ });
+ cart=[];renderInvoice();loadCustomers();
+ Storage.save(DB);
+ alert("تم حفظ الفاتورة");
+}
+function loadCustomers(){
+ customer.innerHTML="<option value=''>اختر عميل</option>";
+ DB.customers.filter(c=>!c.locked)
+ .forEach(c=>{
+  customer.innerHTML+=`<option value="${c.id}">${c.name}</option>`;
+ });
+}
+loadCustomers();
+</script>
+
 </body>
 </html>
