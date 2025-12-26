@@ -7,15 +7,15 @@
 
 <style>
 body{font-family:Tahoma;margin:0;background:#f1f5f9}
-header{background:#020617;color:#fff;padding:12px;text-align:center;font-size:18px}
+header{background:#020617;color:#fff;padding:12px;text-align:center}
 nav{display:flex;gap:5px;padding:5px}
-button{padding:10px;border:0;border-radius:8px;background:#22c55e;color:#fff;font-size:14px}
-input,select{padding:10px;width:100%;margin:5px 0;font-size:14px}
+button{padding:10px;border:0;border-radius:8px;background:#22c55e;color:#fff}
+input,select{padding:10px;width:100%;margin:5px 0}
 .hidden{display:none}
 .card{background:#fff;padding:10px;border-radius:10px;margin:5px 0;border:1px solid #e5e7eb}
-#invoice .card{display:flex;justify-content:space-between;align-items:center}
-.total{font-size:18px;font-weight:bold;margin:10px 0}
+#invoice .card{display:flex;justify-content:space-between}
 #suggestions .card{cursor:pointer;background:#e5e7eb}
+.total{font-weight:bold;margin:10px 0}
 </style>
 </head>
 
@@ -24,19 +24,19 @@ input,select{padding:10px;width:100%;margin:5px 0;font-size:14px}
 <header>نظام نقاط بيع</header>
 
 <nav>
-<button id="btnCashier">🧾 الكاشير</button>
-<button id="btnProducts">📦 الأصناف</button>
-<button id="btnCustomers">👤 العملاء</button>
+<button id="goCashier">🧾 الكاشير</button>
+<button id="goProducts">📦 الأصناف</button>
+<button id="goCustomers">👤 العملاء</button>
 </nav>
 
 <input id="shopName" placeholder="اسم المحل">
 
 <!-- الكاشير -->
-<div id="cashier">
+<section id="cashier">
 <input id="search" placeholder="ابحث عن صنف">
 <div id="suggestions"></div>
 
-<input id="qty" type="number" value="1" min="1">
+<input id="qty" type="number" min="1" value="1">
 
 <select id="payType">
 <option value="cash">نقدي</option>
@@ -45,173 +45,162 @@ input,select{padding:10px;width:100%;margin:5px 0;font-size:14px}
 
 <select id="customer" class="hidden"></select>
 
-<button id="btnAddCart">➕ إضافة للفاتورة</button>
+<button id="addCart">➕ إضافة</button>
 
 <div id="invoice"></div>
 <div class="total" id="total">الإجمالي: 0</div>
 
-<button id="btnPrint">🖨️ طباعة</button>
-<button id="btnSaveInvoice">💾 حفظ الفاتورة</button>
-</div>
+<button id="print">🖨️ طباعة</button>
+<button id="saveInvoice">💾 حفظ</button>
+</section>
 
 <!-- الأصناف -->
-<div id="products" class="hidden">
-<h3>إضافة صنف</h3>
+<section id="products" class="hidden">
 <input id="pn" placeholder="اسم الصنف">
 <input id="pp" type="number" placeholder="سعر البيع">
 <input id="pc" type="number" placeholder="سعر الشراء">
 <input id="ps" type="number" placeholder="المخزون">
-<button id="btnAddProduct">💾 حفظ الصنف</button>
+<button id="addProduct">💾 حفظ الصنف</button>
 <div id="plist"></div>
-</div>
+</section>
 
 <!-- العملاء -->
-<div id="customers" class="hidden">
-<h3>إضافة عميل</h3>
+<section id="customers" class="hidden">
 <input id="cn" placeholder="اسم العميل">
-<button id="btnAddCustomer">💾 حفظ العميل</button>
+<button id="addCustomer">💾 حفظ العميل</button>
 <div id="clist"></div>
-</div>
+</section>
 
 <script>
-/* ===== عناصر ===== */
-const cashier = document.getElementById("cashier");
-const products = document.getElementById("products");
-const customers = document.getElementById("customers");
+document.addEventListener("DOMContentLoaded",()=>{
 
-const shopName = document.getElementById("shopName");
-const search = document.getElementById("search");
-const qty = document.getElementById("qty");
-const payType = document.getElementById("payType");
-const customer = document.getElementById("customer");
-const invoice = document.getElementById("invoice");
-const totalEl = document.getElementById("total");
-const suggestions = document.getElementById("suggestions");
+/* ===== DOM ===== */
+const $ = id=>document.getElementById(id);
+const cashier=$("cashier"),products=$("products"),customers=$("customers");
 
-const pn = document.getElementById("pn");
-const pp = document.getElementById("pp");
-const pc = document.getElementById("pc");
-const ps = document.getElementById("ps");
-const plist = document.getElementById("plist");
+/* ===== DB ===== */
+let DB=JSON.parse(localStorage.pos||'{"products":[],"customers":[],"invoices":[]}');
+let cart=[];
 
-const cn = document.getElementById("cn");
-const clist = document.getElementById("clist");
-
-/* ===== قاعدة بيانات ===== */
-let DB = JSON.parse(localStorage.pos || '{"products":[],"customers":[],"invoices":[]}');
-let cart = [];
-
-function save(){ localStorage.pos = JSON.stringify(DB); }
-
-/* ===== تنقل ===== */
-function show(section){
- [cashier,products,customers].forEach(d=>d.classList.add("hidden"));
- section.classList.remove("hidden");
-}
+/* ===== Helpers ===== */
+const save=()=>localStorage.pos=JSON.stringify(DB);
+const show=sec=>[cashier,products,customers].forEach(s=>s.classList.toggle("hidden",s!==sec));
 
 /* ===== اسم المحل ===== */
-shopName.value = localStorage.shopName || "";
-shopName.oninput = ()=> localStorage.shopName = shopName.value;
+$("shopName").value=localStorage.shopName||"";
+$("shopName").addEventListener("input",e=>localStorage.shopName=e.target.value);
+
+/* ===== تنقل ===== */
+$("goCashier").onclick=()=>show(cashier);
+$("goProducts").onclick=()=>show(products);
+$("goCustomers").onclick=()=>show(customers);
 
 /* ===== الأصناف ===== */
-document.getElementById("btnAddProduct").onclick = ()=>{
- if(!pn.value || pp.value<=0 || ps.value<0) return alert("بيانات غير صحيحة");
- DB.products.push({id:Date.now(),name:pn.value,price:+pp.value,cost:+pc.value||0,stock:+ps.value});
- pn.value=pp.value=pc.value=ps.value="";
- save(); renderProducts();
+$("addProduct").onclick=()=>{
+ if(!$("pn").value||$("pp").value<=0||$("ps").value<0)return alert("بيانات غير صحيحة");
+ DB.products.push({
+  id:Date.now(),
+  name:$("pn").value.trim(),
+  price:+$("pp").value,
+  cost:+$("pc").value||0,
+  stock:+$("ps").value
+ });
+ ["pn","pp","pc","ps"].forEach(i=>$(i).value="");
+ save();renderProducts();
 };
 
 function renderProducts(){
- plist.innerHTML="";
+ $("plist").innerHTML="";
  DB.products.forEach(p=>{
-  plist.innerHTML+=`<div class="card">${p.name} | مخزون: ${p.stock}</div>`;
+  $("plist").innerHTML+=`<div class="card">${p.name} | مخزون: ${p.stock}</div>`;
  });
 }
 
 /* ===== العملاء ===== */
-document.getElementById("btnAddCustomer").onclick = ()=>{
- if(!cn.value) return;
- DB.customers.push({id:Date.now(),name:cn.value,balance:0,locked:false});
- cn.value=""; save(); renderCustomers();
+$("addCustomer").onclick=()=>{
+ if(!$("cn").value)return;
+ DB.customers.push({id:Date.now(),name:$("cn").value,balance:0,locked:false});
+ $("cn").value="";save();renderCustomers();
 };
 
 function renderCustomers(){
- clist.innerHTML="";
- customer.innerHTML="<option value=''>اختر عميل</option>";
+ $("clist").innerHTML="";
+ $("customer").innerHTML="<option value=''>اختر عميل</option>";
  DB.customers.forEach(c=>{
-  clist.innerHTML+=`<div class="card">${c.name} | رصيد: ${c.balance}</div>`;
-  if(!c.locked) customer.innerHTML+=`<option value="${c.id}">${c.name}</option>`;
+  $("clist").innerHTML+=`<div class="card">${c.name} | رصيد: ${c.balance}</div>`;
+  if(!c.locked)$("customer").innerHTML+=`<option value="${c.id}">${c.name}</option>`;
  });
 }
 
-payType.onchange = ()=> customer.classList.toggle("hidden",payType.value!=="credit");
+$("payType").onchange=e=>$("customer").classList.toggle("hidden",e.target.value!=="credit");
 
-/* ===== البحث ===== */
-search.oninput = ()=>{
- let q=search.value.trim();
- suggestions.innerHTML="";
- if(!q) return;
+/* ===== بحث آمن ===== */
+$("search").oninput=e=>{
+ let q=e.target.value.trim();
+ $("suggestions").innerHTML="";
+ if(!q)return;
  DB.products.filter(p=>p.name.includes(q)).forEach(p=>{
-  suggestions.innerHTML+=`<div class="card" onclick="selectProduct('${p.name}')">${p.name}</div>`;
+  let d=document.createElement("div");
+  d.className="card";
+  d.textContent=`${p.name} | ${p.price}`;
+  d.onclick=()=>{$("search").value=p.name;$("suggestions").innerHTML="";};
+  $("suggestions").appendChild(d);
  });
 };
 
-function selectProduct(n){ search.value=n; suggestions.innerHTML=""; }
-
-/* ===== الكاشير ===== */
-document.getElementById("btnAddCart").onclick = ()=>{
- let p=DB.products.find(x=>x.name===search.value);
- let q=+qty.value;
- if(!p||p.stock<q) return alert("غير متاح");
+/* ===== كاشير ===== */
+$("addCart").onclick=()=>{
+ let p=DB.products.find(x=>x.name===$("search").value);
+ let q=+$("qty").value;
+ if(!p||p.stock<q)return alert("غير متاح");
  cart.push({...p,qty:q});
  p.stock-=q;
- search.value=""; qty.value=1;
- renderInvoice(); save();
+ $("search").value="";$("qty").value=1;
+ renderInvoice();save();
 };
 
 function renderInvoice(){
- invoice.innerHTML=""; let t=0;
+ $("invoice").innerHTML="";
+ let t=0;
  cart.forEach((i,idx)=>{
   t+=i.price*i.qty;
-  invoice.innerHTML+=`<div class="card">${i.name} × ${i.qty}
-  <button onclick="removeItem(${idx})">❌</button></div>`;
+  let d=document.createElement("div");
+  d.className="card";
+  d.innerHTML=`${i.name} × ${i.qty}`;
+  let b=document.createElement("button");
+  b.textContent="❌";
+  b.onclick=()=>{cart.splice(idx,1);i.stock+=i.qty;renderInvoice();save();};
+  d.appendChild(b);
+  $("invoice").appendChild(d);
  });
- totalEl.innerText="الإجمالي: "+t;
+ $("total").textContent="الإجمالي: "+t;
 }
 
-function removeItem(i){
- let it=cart.splice(i,1)[0];
- DB.products.find(p=>p.id===it.id).stock+=it.qty;
- renderInvoice(); save();
-}
-
-/* ===== حفظ وطباعة ===== */
-document.getElementById("btnSaveInvoice").onclick = ()=>{
- if(!cart.length) return;
- let t=cart.reduce((a,i)=>a+i.price*i.qty,0);
- if(payType.value==="credit"){
-  let c=DB.customers.find(x=>x.id==customer.value);
-  if(!c) return alert("اختر عميل");
-  c.balance+=t;
+/* ===== حفظ ===== */
+$("saveInvoice").onclick=()=>{
+ if(!cart.length)return;
+ let total=cart.reduce((a,i)=>a+i.price*i.qty,0);
+ if($("payType").value==="credit"){
+  let c=DB.customers.find(x=>x.id===$("customer").value);
+  if(!c)return alert("اختر عميل");
+  c.balance+=total;
  }
- DB.invoices.push({id:Date.now(),items:cart,total:t});
- cart=[]; renderInvoice(); renderCustomers(); save();
+ DB.invoices.push({id:Date.now(),items:cart,total});
+ cart=[];renderInvoice();renderCustomers();save();
  alert("تم الحفظ");
 };
 
-document.getElementById("btnPrint").onclick = ()=>{
- if(!cart.length) return;
+/* ===== طباعة ===== */
+$("print").onclick=()=>{
+ if(!cart.length)return;
  let w=window.open("","p","width=300");
- w.document.write(`<body>${invoice.innerHTML}<script>print();close()</script></body>`);
+ w.document.write(`<h3>${localStorage.shopName||""}</h3><hr>`);
+ cart.forEach(i=>w.document.write(`${i.name} × ${i.qty}<br>`));
+ w.document.write(`<hr><b>${$("total").textContent}</b><script>print();close()</script>`);
 };
 
-/* ===== أزرار التنقل ===== */
-btnCashier.onclick=()=>show(cashier);
-btnProducts.onclick=()=>show(products);
-btnCustomers.onclick=()=>show(customers);
-
-/* ===== تشغيل أولي ===== */
-renderProducts(); renderCustomers();
+renderProducts();renderCustomers();
+});
 </script>
 
 </body>
