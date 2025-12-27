@@ -1,75 +1,153 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <title>نظام الكاشير | POS System</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <title>نظام كاشير احترافي</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- CSS -->
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="print.css" media="print" />
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f172a">
 
+  <style>
+    body{
+      margin:0;
+      font-family:Tahomа, Arial;
+      background:#f1f5f9;
+    }
+    header{
+      background:#0f172a;
+      color:#fff;
+      padding:12px;
+      text-align:center;
+      font-size:18px;
+    }
+
+    .container{
+      display:grid;
+      grid-template-columns:2fr 1fr;
+      gap:10px;
+      padding:10px;
+    }
+
+    @media(max-width:768px){
+      .container{grid-template-columns:1fr}
+    }
+
+    /* المنتجات */
+    #products{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+      gap:10px;
+    }
+    .product{
+      background:#fff;
+      border-radius:12px;
+      padding:12px;
+      text-align:center;
+      box-shadow:0 3px 8px rgba(0,0,0,.08);
+      cursor:pointer;
+    }
+    .product-name{font-weight:bold}
+    .product-price{color:#22c55e}
+
+    /* الفاتورة */
+    .invoice{
+      background:#fff;
+      border-radius:12px;
+      padding:10px;
+      display:flex;
+      flex-direction:column;
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:14px;
+    }
+    th,td{
+      border-bottom:1px solid #e5e7eb;
+      padding:6px;
+      text-align:center;
+    }
+    tfoot td{
+      font-weight:bold;
+      font-size:16px;
+    }
+
+    .actions{
+      display:flex;
+      gap:8px;
+      margin-top:10px;
+    }
+    button{
+      flex:1;
+      padding:12px;
+      border:0;
+      border-radius:10px;
+      font-size:14px;
+      cursor:pointer;
+    }
+    .btn-save{background:#22c55e;color:#fff}
+    .btn-clear{background:#ef4444;color:#fff}
+
+    /* طباعة */
+    @media print{
+      body *{visibility:hidden}
+      .invoice,.invoice *{
+        visibility:visible
+      }
+      .invoice{
+        position:absolute;
+        left:0;top:0;width:100%;
+      }
+      .actions{display:none}
+    }
+  </style>
 </head>
+
 <body>
 
-  <!-- HEADER -->
-  <header class="header">
-    <h1>نظام الكاشير</h1>
-  </header>
+<header>
+  🧾 نظام كاشير – جاهز للبيع
+</header>
 
-  <!-- MAIN -->
-  <main class="container">
+<div class="container">
 
-    <!-- PRODUCTS -->
-    <section class="products">
-      <h2>الأصناف</h2>
-      <div id="productsGrid" class="products-grid">
-        <!-- الأصناف تتحمل من JS -->
-      </div>
-    </section>
+  <!-- المنتجات -->
+  <div id="products"></div>
 
-    <!-- INVOICE -->
-    <section class="invoice">
-      <h2>الفاتورة</h2>
+  <!-- الفاتورة -->
+  <div class="invoice">
+    <table>
+      <thead>
+        <tr>
+          <th>الصنف</th>
+          <th>ك</th>
+          <th>س</th>
+          <th>الإجمالي</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="invoice-body"></tbody>
+      <tfoot>
+        <tr>
+          <td colspan="3">الإجمالي</td>
+          <td id="total">0 ج</td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
 
-      <table class="invoice-table">
-        <thead>
-          <tr>
-            <th>الصنف</th>
-            <th>الكمية</th>
-            <th>السعر</th>
-            <th>الإجمالي</th>
-            <th>✖</th>
-          </tr>
-        </thead>
-        <tbody id="invoiceBody">
-          <!-- عناصر الفاتورة -->
-        </tbody>
-      </table>
+    <div class="actions">
+      <button class="btn-save" onclick="saveAndPrint()">💾 حفظ + طباعة</button>
+      <button class="btn-clear" onclick="clearInvoice()">🗑 مسح</button>
+    </div>
+  </div>
 
-      <div class="total">
-        الإجمالي: <span id="totalAmount">0</span> ج
-      </div>
+</div>
 
-      <div class="actions">
-        <button class="btn primary" onclick="saveAndPrint()">
-          حفظ + طباعة
-        </button>
-        <button class="btn danger" onclick="clearInvoice()">
-          مسح الفاتورة
-        </button>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- FOOTER -->
-  <footer class="footer">
-    POS System ©
-  </footer>
-
-  <!-- JS -->
-  <script src="core.js"></script>
+<!-- JS -->
+<script src="core.js"></script>
 
 </body>
 </html>
