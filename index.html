@@ -2,125 +2,77 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>نظام كاشير</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>POS | الكاشير</title>
 
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#020617">
+<meta name="theme-color" content="#0f172a">
 
 <style>
 body{margin:0;font-family:Tahoma;background:#f1f5f9}
-header{background:#020617;color:#fff;text-align:center;padding:12px;font-size:18px}
-
-main{
-display:grid;
-grid-template-columns:2fr 1fr;
-gap:10px;
-padding:10px;
+header{
+background:#0f172a;color:#fff;
+padding:12px;text-align:center;
+font-size:18px
 }
-@media(max-width:768px){main{grid-template-columns:1fr}}
-
-.products-grid{
-display:grid;
-grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
-gap:10px;
+.container{padding:10px}
+input,button{
+padding:10px;width:100%;
+margin:5px 0;font-size:15px
 }
-
-.product-box{
-background:#fff;
-border-radius:14px;
-padding:14px;
-text-align:center;
-box-shadow:0 3px 6px rgba(0,0,0,.1);
-cursor:pointer;
+button{
+background:#22c55e;color:#fff;
+border:0;border-radius:8px
 }
-
-.product-box strong{display:block;font-size:16px}
-.product-box span{color:#16a34a;font-weight:bold}
-
-.invoice{
-background:#fff;
-border-radius:14px;
-padding:12px;
+.card{
+background:#fff;padding:10px;
+margin:6px 0;border-radius:10px
 }
-
-.invoice-header{
-text-align:center;
-border-bottom:2px dashed #000;
-padding-bottom:8px;
-margin-bottom:8px;
+.total{
+font-size:20px;text-align:center;
+background:#fff;padding:10px;
+border-radius:10px;margin-top:10px
 }
-
-.invoice-item{
-display:grid;
-grid-template-columns:1fr auto auto;
-gap:6px;
-padding:6px 0;
-border-bottom:1px dashed #ddd;
-font-size:14px;
+.top-actions{
+display:grid;grid-template-columns:1fr 1fr;
+gap:6px;margin-bottom:10px
 }
-
-.invoice-total{
-font-size:18px;
-font-weight:bold;
-text-align:center;
-margin-top:10px;
+.admin-btn{
+background:#0ea5e9
 }
-
-.actions button{
-width:100%;
-margin-top:6px;
-padding:10px;
-border:0;
-border-radius:10px;
-font-size:16px;
-cursor:pointer;
-}
-.pay{background:#16a34a;color:#fff}
-.clear{background:#ef4444;color:#fff}
-.print{background:#2563eb;color:#fff}
-
-/* ===== طباعة ===== */
-@media print{
-body *{visibility:hidden}
-.invoice,.invoice *{visibility:visible}
-.invoice{
-position:absolute;
-top:0;left:0;
-width:58mm;
-font-size:12px;
-}
-button{display:none!important}
+.print-btn{
+background:#6366f1
 }
 </style>
 </head>
 
 <body>
 
-<header>نظام كاشير</header>
+<header>🧾 الكاشير</header>
 
-<main>
+<div class="container">
 
-<div id="productsList" class="products-grid"></div>
-
-<div class="invoice">
-<div id="invoiceHeader" class="invoice-header"></div>
-<div id="invoiceItems"></div>
-<div id="invoiceTotal" class="invoice-total">الإجمالي: 0 جنيه</div>
-
-<div class="actions">
-<button class="pay" onclick="pay()">دفع</button>
-<button class="print" onclick="printInvoice()">طباعة</button>
-<button class="clear" onclick="clearInvoice()">مسح</button>
-</div>
+<div class="top-actions">
+<button class="admin-btn" onclick="openAdmin()">⚙ إدارة الأصناف</button>
+<button class="print-btn" onclick="printInvoice()">🖨 طباعة</button>
 </div>
 
-</main>
+<input id="search" placeholder="اسم الصنف">
+<input id="qty" type="number" value="1">
+<button onclick="addItem()">➕ إضافة</button>
+
+<div id="invoice"></div>
+
+<div class="total" id="total">الإجمالي: 0</div>
+
+<button onclick="saveInvoice()">💾 حفظ الفاتورة</button>
+
+</div>
 
 <script src="core.js"></script>
 <script>
-if("serviceWorker" in navigator){
-navigator.serviceWorker.register("sw.js");
+if('serviceWorker' in navigator){
+navigator.serviceWorker.register('sw.js');
 }
 </script>
 
