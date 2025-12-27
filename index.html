@@ -19,7 +19,6 @@ body{
  background:var(--bg);
 }
 
-/* ===== Header ===== */
 header{
  background:#020617;
  color:#fff;
@@ -28,7 +27,6 @@ header{
  font-size:18px;
 }
 
-/* ===== Buttons ===== */
 button{
  border:0;
  border-radius:10px;
@@ -36,10 +34,10 @@ button{
  font-size:14px;
  cursor:pointer;
 }
+
 .btn{background:var(--accent);color:#fff}
 .btn-danger{background:var(--danger);color:#fff}
 
-/* ===== Inputs ===== */
 input,select{
  width:100%;
  padding:10px;
@@ -48,7 +46,6 @@ input,select{
  border:1px solid #cbd5f5;
 }
 
-/* ===== Layout ===== */
 #cashier{
  padding:10px;
  display:flex;
@@ -56,7 +53,6 @@ input,select{
  gap:10px;
 }
 
-/* ===== Top Controls ===== */
 .top-controls{
  background:#fff;
  padding:10px;
@@ -66,18 +62,12 @@ input,select{
  gap:8px;
 }
 
-.top-controls button{
- font-weight:bold;
-}
-
-/* ===== Items Grid ===== */
 #invoice{
  display:grid;
  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
  gap:8px;
 }
 
-/* ===== Item Card ===== */
 .card{
  background:#fff;
  border-radius:12px;
@@ -86,11 +76,6 @@ input,select{
  box-shadow:0 3px 6px rgba(0,0,0,.1);
 }
 
-.card b{
- font-size:16px;
-}
-
-/* ===== Total ===== */
 #totalBox{
  background:#020617;
  color:#fff;
@@ -100,10 +85,9 @@ input,select{
  font-size:18px;
 }
 
-/* ===== Bottom Buttons ===== */
 .bottom-actions{
  display:grid;
- grid-template-columns:1fr 1fr;
+ grid-template-columns:1fr;
  gap:10px;
 }
 </style>
@@ -115,33 +99,28 @@ input,select{
 
 <div id="cashier">
 
- <!-- Top -->
- <div class="top-controls">
-   <input id="search" placeholder="اسم الصنف">
-   <input id="qty" type="number" value="1" min="1">
+<div class="top-controls">
+ <input id="search" placeholder="اسم الصنف">
+ <input id="qty" type="number" value="1" min="1">
 
-   <select id="payType" onchange="toggleCustomer()">
-     <option value="cash">💵 نقدي</option>
-     <option value="credit">🧾 آجل</option>
-   </select>
+ <select id="payType" onchange="toggleCustomer()">
+  <option value="cash">💵 نقدي</option>
+  <option value="credit">🧾 آجل</option>
+ </select>
 
-   <select id="customer" style="display:none"></select>
+ <select id="customer" style="display:none"></select>
 
-   <button class="btn" onclick="addItem()">➕ إضافة صنف</button>
-   <button class="btn-danger" onclick="clearCart()">🗑 مسح</button>
- </div>
+ <button class="btn" onclick="addItem()">➕ إضافة صنف</button>
+ <button class="btn-danger" onclick="clearCart()">🗑 مسح</button>
+</div>
 
- <!-- Invoice -->
- <div id="invoice"></div>
+<div id="invoice"></div>
 
- <!-- Total -->
- <div id="totalBox">الإجمالي: 0</div>
+<div id="totalBox">الإجمالي: 0</div>
 
- <!-- Bottom -->
- <div class="bottom-actions">
-   <button class="btn" onclick="saveInvoice()">💾 حفظ الفاتورة</button>
-   <button onclick="window.print()">🖨 طباعة</button>
- </div>
+<div class="bottom-actions">
+ <button class="btn" onclick="saveAndPrint()">💾 حفظ وطباعة</button>
+</div>
 
 </div>
 
@@ -151,7 +130,6 @@ let customers = JSON.parse(localStorage.customers || "[]");
 let invoices = JSON.parse(localStorage.invoices || "[]");
 let cart = [];
 
-/* ===== Helpers ===== */
 function saveAll(){
  localStorage.products = JSON.stringify(products);
  localStorage.customers = JSON.stringify(customers);
@@ -159,63 +137,53 @@ function saveAll(){
 }
 
 function toggleCustomer(){
- document.getElementById("customer").style.display =
-  payType.value === "credit" ? "block" : "none";
+ customer.style.display = payType.value === "credit" ? "block" : "none";
  renderCustomers();
 }
 
-/* ===== Customers ===== */
 function renderCustomers(){
- customer.innerHTML = "<option value=''>اختر عميل</option>";
+ customer.innerHTML="<option value=''>اختر عميل</option>";
  customers.forEach((c,i)=>{
-  customer.innerHTML += `<option value="${i}">${c.n}</option>`;
+  customer.innerHTML+=`<option value="${i}">${c.n}</option>`;
  });
 }
 
-/* ===== Add Item ===== */
 function addItem(){
- let p = products.find(x => x.n === search.value);
+ let p = products.find(x=>x.n===search.value);
  if(!p) return alert("الصنف غير موجود");
  if(p.s < qty.value) return alert("المخزون غير كافي");
 
- cart.push({
-  n:p.n,
-  p:p.p,
-  q:+qty.value
- });
-
+ cart.push({n:p.n,p:p.p,q:+qty.value});
  p.s -= qty.value;
+
  renderInvoice();
  saveAll();
 }
 
-/* ===== Render Invoice ===== */
 function renderInvoice(){
  invoice.innerHTML="";
  let total=0;
 
  cart.forEach((i,index)=>{
-  total += i.p * i.q;
-  invoice.innerHTML += `
+  total+=i.p*i.q;
+  invoice.innerHTML+=`
    <div class="card">
     <b>${i.n}</b><br>
     ${i.q} × ${i.p}<br>
-    <b>${i.q * i.p}</b><br>
+    <b>${i.q*i.p}</b><br>
     <button class="btn-danger" onclick="removeItem(${index})">حذف</button>
    </div>
   `;
  });
 
- totalBox.innerText = "الإجمالي: " + total;
+ totalBox.innerText="الإجمالي: "+total;
 }
 
-/* ===== Remove ===== */
 function removeItem(i){
  cart.splice(i,1);
  renderInvoice();
 }
 
-/* ===== Clear ===== */
 function clearCart(){
  if(confirm("مسح الفاتورة؟")){
   cart=[];
@@ -223,8 +191,7 @@ function clearCart(){
  }
 }
 
-/* ===== Save Invoice ===== */
-function saveInvoice(){
+function saveAndPrint(){
  if(cart.length===0) return alert("الفاتورة فارغة");
 
  let total = cart.reduce((a,i)=>a+i.p*i.q,0);
@@ -243,10 +210,13 @@ function saveInvoice(){
  }
 
  invoices.push(inv);
+ saveAll();
+
+ window.print();   // 🖨 طباعة
+
  cart=[];
  renderInvoice();
- saveAll();
- alert("تم حفظ الفاتورة");
+ alert("تم الحفظ والطباعة بنجاح");
 }
 
 renderCustomers();
