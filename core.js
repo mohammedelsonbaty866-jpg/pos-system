@@ -130,3 +130,35 @@ w.document.close();
 function openAdmin(){
 alert("شاشة الإدارة لاحقاً");
 }
+/* تشغيل الكاميرا */
+function startScanner(){
+document.getElementById("scanner").style.display="block";
+
+Quagga.init({
+inputStream:{
+type:"LiveStream",
+target:document.querySelector('#camera'),
+constraints:{
+facingMode:"environment"
+}
+},
+decoder:{
+readers:["ean_reader","code_128_reader"]
+}
+},function(err){
+if(err){alert("خطأ بالكاميرا");return;}
+Quagga.start();
+});
+
+Quagga.onDetected(function(data){
+let code=data.codeResult.code;
+search.value=code;
+stopScanner();
+});
+}
+
+/* إيقاف الكاميرا */
+function stopScanner(){
+Quagga.stop();
+document.getElementById("scanner").style.display="none";
+}
