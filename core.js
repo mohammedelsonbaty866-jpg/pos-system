@@ -1,162 +1,203 @@
 /* ===============================
-   POS SYSTEM - CORE LOGIC
-   =============================== */
+   POS CORE SYSTEM - STABLE VERSION
+   Author: Final Commercial Release
+================================ */
 
-/* ===== التخزين ===== */
-let products = JSON.parse(localStorage.getItem("products")) || [];
-let customers = JSON.parse(localStorage.getItem("customers")) || [];
-let invoices = JSON.parse(localStorage.getItem("invoices")) || [];
+// ===== Storage =====
+let DB = {
+  products: JSON.parse(localStorage.getItem("products") || "[]"),
+  customers: JSON.parse(localStorage.getItem("customers") || "[]"),
+  invoices: JSON.parse(localStorage.getItem("invoices") || "[]"),
+  settings: JSON.parse(localStorage.getItem("settings") || "{}")
+};
 
 let cart = [];
 
-/* ===== عناصر ===== */
-const invoiceBox = document.getElementById("invoice");
-const totalBox = document.getElementById("total");
-const customerSelect = document.getElementById("customer");
-
-/* ===== القائمة ===== */
-function toggleMenu(){
- document.getElementById("menu").style.right =
- document.getElementById("menu").style.right === "0px" ? "-220px" : "0px";
+// ===== Helpers =====
+function saveDB() {
+  localStorage.setItem("products", JSON.stringify(DB.products));
+  localStorage.setItem("customers", JSON.stringify(DB.customers));
+  localStorage.setItem("invoices", JSON.stringify(DB.invoices));
+  localStorage.setItem("settings", JSON.stringify(DB.settings));
 }
 
-function show(id){
- document.querySelectorAll("#screens > div").forEach(d=>d.classList.add("hidden"));
- document.getElementById(id).classList.remove("hidden");
- toggleMenu();
+function $(id) {
+  return document.getElementById(id);
 }
 
-/* ===== الأصناف ===== */
-function saveProducts(){
- localStorage.setItem("products",JSON.stringify(products));
+// ===== Products =====
+function addProduct(name, price, cost, stock, barcode = "") {
+  if (!name || price <= 0) return alert("بيانات الصنف غير صحيحة");
+
+  DB.products.push({
+    id: Date.now(),
+    name,
+    price: Number(price),
+    cost: Number(cost),
+    stock: Number(stock),
+    barcode
+  });
+
+  saveDB();
 }
 
-function addProduct(name,price){
- products.push({id:Date.now(),name,price});
- saveProducts();
+function findProduct(value) {
+  return DB.products.find(
+    p => p.name === value || p.barcode === value
+  );
 }
 
-/* ===== العملاء ===== */
-function saveCustomers(){
- localStorage.setItem("customers",JSON.stringify(customers));
+// ===== Cart =====
+function addToCart(value, qty = 1) {
+  let product = findProduct(value);
+  if (!product) return alert("الصنف غير موجود");
+
+  qty = Number(qty);
+  if (product.stock < qty) return alert("المخزون غير كافي");
+
+  let item = cart.find(i => i.id === product.id);
+  if (item) {
+    item.qty += qty;
+  } else {
+    cart.push({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      cost: product.cost,
+      qty
+    });
+  }
+
+  product.stock -= qty;
+  saveDB();
+  renderCart();
 }
 
-function loadCustomers(){
- customerSelect.innerHTML="";
- customers.forEach(c=>{
-  let o=document.createElement("option");
-  o.value=c.id;
-  o.textContent=c.name;
-  customerSelect.appendChild(o);
- });
+function removeFromCart(id) {
+  let index = cart.findIndex(i => i.id === id);
+  if (index === -1) return;
+
+  let item = cart[index];
+  let product = DB.products.find(p => p.id === id);
+  if (product) product.stock += item.qty;
+
+  cart.splice(index, 1);
+  saveDB();
+  renderCart();
 }
 
-/* ===== إضافة صنف للفاتورة ===== */
-function addItem(){
- const search=document.getElementById("search").value.trim();
- const qty=parseInt(document.getElementById("qty").value)||1;
+// ===== Render =====
+function renderCart() {
+  let box = $("invoice");
+  let totalBox = $("total");
 
- if(!search) return alert("اكتب اسم الصنف");
+  box.innerHTML = "";
+  let total = 0;
 
- const product=products.find(p=>p.name===search);
- if(!product) return alert("الصنف غير موجود");
+  cart.forEach(item => {
+    let line = item.price * item.qty;
+    total += line;
 
- let item=cart.find(i=>i.id===product.id);
- if(item){
-  item.qty+=qty;
- }else{
-  cart.push({...product,qty});
- }
+    box.innerHTML += `
+      <div class="invoice-item">
+        <div>${item.name}</div>
+        <div>${item.qty} × ${item.price}</div>
+        <div>${line}</div>
+        <button onclick="removeFromCart(${item.id})">✖</button>
+      </div>
+    `;
+  });
 
- renderInvoice();
- document.getElementById("search").value="";
+  totalBox.innerText = "الإجمالي: " + total.toFixed(2);
 }
 
-/* ===== عرض الفاتورة ===== */
-function renderInvoice(){
- invoiceBox.innerHTML="";
- let total=0;
+// ===== Customers =====
+function addCustomer(name) {
+  if (!name) return alert("اكتب اسم العميل");
 
- cart.forEach(item=>{
-  total+=item.price*item.qty;
+  DB.customers.push({
+    id: Date.now(),
+    name,
+    balance: 0,
+    locked: false
+  });
 
-  let div=document.createElement("div");
-  div.className="card";
-  div.innerHTML=`
-   <b>${item.name}</b><br>
-   ${item.qty} × ${item.price}<br>
-   <button onclick="removeItem(${item.id})">❌</button>
-  `;
-  invoiceBox.appendChild(div);
- });
-
- totalBox.textContent="الإجمالي: "+total;
+  saveDB();
 }
 
-/* ===== حذف صنف ===== */
-function removeItem(id){
- cart=cart.filter(i=>i.id!==id);
- renderInvoice();
+function getCustomer(id) {
+  return DB.customers.find(c => c.id == id);
 }
 
-/* ===== الدفع ===== */
-function toggleCustomer(){
- if(document.getElementById("payType").value==="credit"){
-  customerSelect.classList.remove("hidden");
-  loadCustomers();
- }else{
-  customerSelect.classList.add("hidden");
- }
+// ===== Invoice =====
+function saveInvoice(type, customerId = null, printAfter = true) {
+  if (cart.length === 0) return alert("الفاتورة فارغة");
+
+  let total = cart.reduce((a, i) => a + i.price * i.qty, 0);
+  let profit = cart.reduce((a, i) => a + (i.price - i.cost) * i.qty, 0);
+
+  let invoice = {
+    number: DB.invoices.length + 1,
+    date: new Date().toLocaleString("ar-EG"),
+    type,
+    total,
+    profit,
+    items: [...cart]
+  };
+
+  if (type === "credit") {
+    if (!customerId) return alert("اختر عميل");
+    let customer = getCustomer(customerId);
+    if (!customer || customer.locked) return alert("العميل غير صالح");
+
+    customer.balance += total;
+    invoice.customer = customer.name;
+  }
+
+  DB.invoices.push(invoice);
+  cart = [];
+  saveDB();
+  renderCart();
+
+  if (printAfter) printInvoice(invoice);
 }
 
-/* ===== حفظ الفاتورة ===== */
-function saveInvoice(){
- if(cart.length===0) return alert("الفاتورة فارغة");
-
- let invoice={
-  id:Date.now(),
-  date:new Date().toLocaleString(),
-  items:cart,
-  total:cart.reduce((s,i)=>s+i.price*i.qty,0),
-  payType:document.getElementById("payType").value,
-  customer:document.getElementById("customer").value||null
- };
-
- invoices.push(invoice);
- localStorage.setItem("invoices",JSON.stringify(invoices));
-
- printInvoice(invoice);
-
- cart=[];
- renderInvoice();
+// ===== Printing =====
+function printInvoice(inv) {
+  let win = window.open("", "", "width=300");
+  win.document.write(`
+    <html>
+    <head>
+      <title>فاتورة</title>
+      <style>
+        body{font-family:Tahoma;font-size:12px}
+        h3{text-align:center}
+        table{width:100%;border-collapse:collapse}
+        td{border-bottom:1px dashed #000;padding:4px}
+      </style>
+    </head>
+    <body>
+      <h3>${DB.settings.shopName || "متجر"}</h3>
+      <p>فاتورة رقم: ${inv.number}</p>
+      <p>${inv.date}</p>
+      <table>
+        ${inv.items.map(i =>
+          `<tr><td>${i.name}</td><td>${i.qty}×${i.price}</td><td>${i.qty * i.price}</td></tr>`
+        ).join("")}
+      </table>
+      <h4>الإجمالي: ${inv.total}</h4>
+      <script>
+        window.print();
+        window.close();
+      </script>
+    </body>
+    </html>
+  `);
+  win.document.close();
 }
 
-/* ===== الطباعة ===== */
-function printInvoice(inv){
- document.getElementById("print-area").style.display="block";
- document.getElementById("p-shop").textContent=
- localStorage.getItem("shopName")||"متجر";
-
- let itemsHTML="";
- inv.items.forEach(i=>{
-  itemsHTML+=`${i.name} (${i.qty}) - ${i.price*i.qty}<br>`;
- });
-
- document.getElementById("p-items").innerHTML=itemsHTML;
- document.getElementById("p-total").textContent=inv.total;
-
- setTimeout(()=>{
-  window.print();
-  document.getElementById("print-area").style.display="none";
- },300);
+// ===== Settings =====
+function saveShopName(name) {
+  DB.settings.shopName = name;
+  saveDB();
 }
-
-/* ===== إعدادات ===== */
-function setShopName(name){
- localStorage.setItem("shopName",name);
- document.getElementById("shopTitle").textContent=name;
-}
-
-/* ===== تحميل أولي ===== */
-document.getElementById("shopTitle").textContent=
- localStorage.getItem("shopName")||"نظام كاشير";
