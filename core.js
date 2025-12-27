@@ -1,156 +1,65 @@
-/* =========================
-   POS SYSTEM - CORE JS
-   ========================= */
+let products = JSON.parse(localStorage.products || "[]");
+let cart = [];
 
-let products = JSON.parse(localStorage.getItem("products")) || [];
-let cart = JSON.parse(localStorage.getItem("cart")) || [];
-
-/* =========================
-   PRODUCTS
-   ========================= */
-
-function saveProducts() {
-  localStorage.setItem("products", JSON.stringify(products));
+if(products.length === 0){
+  products = [
+    {name:"توت", price:50},
+    {name:"عصير", price:20},
+    {name:"مياه", price:10}
+  ];
+  localStorage.products = JSON.stringify(products);
 }
 
-function addProduct(name, price, barcode = "") {
-  if (!name || !price) {
-    alert("ادخل اسم وسعر الصنف");
-    return;
-  }
+const productsList = document.getElementById("productsList");
+const invoiceItems = document.getElementById("invoiceItems");
+const totalEl = document.getElementById("total");
 
-  products.push({
-    id: Date.now(),
-    name,
-    price: parseFloat(price),
-    barcode
-  });
-
-  saveProducts();
-  renderProducts();
-}
-
-function renderProducts() {
-  const container = document.getElementById("productsList");
-  if (!container) return;
-
-  container.innerHTML = "";
-  products.forEach(p => {
-    const div = document.createElement("div");
-    div.className = "product-box";
-    div.innerHTML = `
-      <strong>${p.name}</strong>
-      <span>${p.price} جنيه</span>
+function renderProducts(){
+  productsList.innerHTML = "";
+  products.forEach((p,i)=>{
+    productsList.innerHTML += `
+      <div class="product-box" onclick="addToCart(${i})">
+        <strong>${p.name}</strong>
+        <span>${p.price} جنيه</span>
+      </div>
     `;
-    div.onclick = () => addToCart(p.id);
-    container.appendChild(div);
   });
 }
 
-/* =========================
-   CART
-   ========================= */
-
-function saveCart() {
-  localStorage.setItem("cart", JSON.stringify(cart));
+function addToCart(i){
+  cart.push(products[i]);
+  renderInvoice();
 }
 
-function addToCart(productId) {
-  const product = products.find(p => p.id === productId);
-  if (!product) return;
-
-  const item = cart.find(i => i.id === productId);
-  if (item) {
-    item.qty++;
-  } else {
-    cart.push({ ...product, qty: 1 });
-  }
-
-  saveCart();
-  renderCart();
-}
-
-function removeFromCart(id) {
-  cart = cart.filter(i => i.id !== id);
-  saveCart();
-  renderCart();
-}
-
-function renderCart() {
-  const container = document.getElementById("invoice");
-  const totalBox = document.getElementById("totalAmount");
-
-  if (!container) return;
-
+function renderInvoice(){
+  invoiceItems.innerHTML = "";
   let total = 0;
-  container.innerHTML = "";
 
-  cart.forEach(item => {
-    const row = document.createElement("div");
-    row.className = "invoice-row";
-    row.innerHTML = `
-      <span>${item.name} × ${item.qty}</span>
-      <span>${item.price * item.qty} جنيه</span>
+  cart.forEach(p=>{
+    total += p.price;
+    invoiceItems.innerHTML += `
+      <div class="invoice-row">
+        <span>${p.name}</span>
+        <span>${p.price}</span>
+      </div>
     `;
-    container.appendChild(row);
-    total += item.price * item.qty;
   });
 
-  if (totalBox) totalBox.innerText = total + " جنيه";
+  totalEl.innerText = total;
 }
 
-/* =========================
-   BARCODE SEARCH (OPTIONAL)
-   ========================= */
-
-function searchBarcode(value) {
-  const product = products.find(p => p.barcode === value);
-  if (product) {
-    addToCart(product.id);
-  }
+function clearInvoice(){
+  cart = [];
+  renderInvoice();
 }
 
-/* =========================
-   PAYMENT
-   ========================= */
-
-function completeSale(type) {
-  if (cart.length === 0) {
-    alert("الفاتورة فاضية");
+function pay(){
+  if(cart.length === 0){
+    alert("لا توجد أصناف");
     return;
   }
-
-  const sale = {
-    date: new Date().toLocaleString(),
-    items: cart,
-    total: cart.reduce((s, i) => s + i.price * i.qty, 0),
-    payment: type
-  };
-
-  let sales = JSON.parse(localStorage.getItem("sales")) || [];
-  sales.push(sale);
-  localStorage.setItem("sales", JSON.stringify(sales));
-
-  cart = [];
-  saveCart();
-  renderCart();
-
-  alert("تم البيع (" + type + ")");
+  alert("تم الدفع بنجاح");
+  clearInvoice();
 }
 
-/* =========================
-   PRINT
-   ========================= */
-
-function printInvoice() {
-  window.print();
-}
-
-/* =========================
-   INIT
-   ========================= */
-
-document.addEventListener("DOMContentLoaded", () => {
-  renderProducts();
-  renderCart();
-});
+renderProducts();
