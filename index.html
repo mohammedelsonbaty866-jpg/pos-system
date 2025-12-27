@@ -7,43 +7,18 @@
 
 <style>
 body{margin:0;font-family:Tahoma;background:#f1f5f9}
-header{
- background:#020617;color:#fff;
- padding:12px;text-align:center;font-size:18px
-}
-nav{
- display:flex;gap:5px;
- background:#020617;padding:6px
-}
-nav button{
- flex:1;background:#111827;color:#fff;
- border:0;border-radius:8px;padding:10px
-}
+header{background:#020617;color:#fff;padding:12px;text-align:center;font-size:18px}
+nav{display:flex;gap:5px;background:#020617;padding:6px}
+nav button{flex:1;background:#111827;color:#fff;border:0;border-radius:8px;padding:10px}
 section{padding:10px}
-input,select,button{
- width:100%;padding:10px;
- border-radius:8px;font-size:14px
-}
+input,select,button{width:100%;padding:10px;border-radius:8px;font-size:14px}
 button{border:0;cursor:pointer}
 .btn{background:#16a34a;color:#fff}
 .btn-danger{background:#dc2626;color:#fff}
-.card{
- background:#fff;padding:10px;
- border-radius:10px;margin-bottom:6px
-}
+.card{background:#fff;padding:10px;border-radius:10px;margin-bottom:6px}
 .hidden{display:none}
-
-/* كاشير */
-#invoice{
- display:grid;
- grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
- gap:8px
-}
-#totalBox{
- background:#020617;color:#fff;
- padding:12px;border-radius:12px;
- text-align:center;font-size:18px
-}
+#invoice{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+#totalBox{background:#020617;color:#fff;padding:12px;border-radius:12px;text-align:center;font-size:18px}
 
 /* طباعة */
 @media print{
@@ -56,7 +31,7 @@ button{border:0;cursor:pointer}
 
 <body>
 
-<header>🧾 نظام كاشير</header>
+<header>🧾 نظام كاشير احترافي</header>
 
 <nav>
  <button onclick="show('cashier')">كاشير</button>
@@ -64,15 +39,10 @@ button{border:0;cursor:pointer}
  <button onclick="show('reports')">التقارير</button>
 </nav>
 
-<!-- كاشير -->
+<!-- الكاشير -->
 <section id="cashier">
  <input id="search" placeholder="اسم الصنف">
- <input id="qty" type="number" value="1">
-
- <select id="payType">
-  <option value="cash">نقدي</option>
-  <option value="credit">آجل</option>
- </select>
+ <input id="qty" type="number" value="1" min="1">
 
  <button class="btn" onclick="addItem()">➕ إضافة</button>
 
@@ -86,9 +56,9 @@ button{border:0;cursor:pointer}
 <section id="products" class="hidden">
  <h3>📦 إضافة صنف</h3>
  <input id="pn" placeholder="اسم الصنف">
- <input id="pp" placeholder="سعر البيع">
- <input id="pc" placeholder="سعر الشراء">
- <input id="ps" placeholder="المخزون">
+ <input id="pp" type="number" placeholder="سعر البيع">
+ <input id="pc" type="number" placeholder="سعر الشراء">
+ <input id="ps" type="number" placeholder="المخزون">
  <button class="btn" onclick="addProduct()">حفظ</button>
 
  <h3>📋 قائمة الأصناف</h3>
@@ -99,16 +69,25 @@ button{border:0;cursor:pointer}
 <section id="reports" class="hidden">
  <h3>📊 تقرير اليوم</h3>
  <div id="reportBox"></div>
+ <button class="btn-danger" onclick="closeDay()">🔒 قفل اليوم</button>
 </section>
 
 <script>
-let products=JSON.parse(localStorage.products||"[]");
-let invoices=JSON.parse(localStorage.invoices||"[]");
-let cart=[];
+// ===== تهيئة التخزين =====
+let products = JSON.parse(localStorage.products || "[]");
+let invoices = JSON.parse(localStorage.invoices || "[]");
+let dailyCloses = JSON.parse(localStorage.dailyCloses || "[]");
+let cart = [];
+
+// ===== أدوات =====
+function todayISO(){
+ return new Date().toISOString().slice(0,10);
+}
 
 function saveAll(){
- localStorage.products=JSON.stringify(products);
- localStorage.invoices=JSON.stringify(invoices);
+ localStorage.products = JSON.stringify(products);
+ localStorage.invoices = JSON.stringify(invoices);
+ localStorage.dailyCloses = JSON.stringify(dailyCloses);
 }
 
 function show(id){
@@ -116,22 +95,30 @@ function show(id){
  document.getElementById(id).classList.remove("hidden");
 }
 
+function isDayClosed(date){
+ return dailyCloses.some(d=>d.date === date);
+}
+
+// ===== الأصناف =====
 function addProduct(){
+ if(!pn.value || pp.value<=0 || ps.value<0){
+  return alert("❌ بيانات الصنف غير صحيحة");
+ }
  products.push({
-  n:pn.value,
+  n:pn.value.trim(),
   p:+pp.value,
-  c:+pc.value,
+  c:+pc.value||0,
   s:+ps.value
  });
  saveAll();
- pn.value=pp.value=pc.value=ps.value="";
  renderProducts();
- alert("تم حفظ الصنف");
+ pn.value=pp.value=pc.value=ps.value="";
+ alert("✅ تم حفظ الصنف");
 }
 
 function renderProducts(){
  plist.innerHTML="";
- products.forEach((p,i)=>{
+ products.forEach(p=>{
   plist.innerHTML+=`
    <div class="card">
     ${p.n}<br>
@@ -140,55 +127,86 @@ function renderProducts(){
  });
 }
 
+// ===== الكاشير =====
 function addItem(){
- let p=products.find(x=>x.n===search.value);
- if(!p) return alert("الصنف غير موجود");
- if(p.s<qty.value) return alert("نفاد المخزون");
+ let p = products.find(x=>x.n===search.value.trim());
+ if(!p) return alert("❌ الصنف غير موجود");
+ if(p.s < qty.value) return alert("❌ نفاد المخزون");
 
  cart.push({n:p.n,p:p.p,c:p.c,q:+qty.value});
- p.s-=qty.value;
- renderInvoice();saveAll();
+ p.s -= qty.value;
+ renderInvoice();
+ saveAll();
 }
 
 function renderInvoice(){
- invoice.innerHTML="";let t=0;
+ invoice.innerHTML="";
+ let total=0;
  cart.forEach(i=>{
-  t+=i.p*i.q;
+  total += i.p * i.q;
   invoice.innerHTML+=`
    <div class="card">
-    ${i.n}<br>${i.q} × ${i.p}
+    ${i.n}<br>
+    ${i.q} × ${i.p}
    </div>`;
  });
- totalBox.innerText="الإجمالي: "+t;
+ totalBox.innerText = "الإجمالي: " + total;
 }
 
 function saveAndPrint(){
- if(cart.length===0) return;
- let total=cart.reduce((a,i)=>a+i.p*i.q,0);
- let profit=cart.reduce((a,i)=>a+(i.p-i.c)*i.q,0);
+ if(cart.length===0) return alert("❌ الفاتورة فارغة");
+
+ let date = todayISO();
+ if(isDayClosed(date)) return alert("❌ اليوم مقفول");
+
+ let total = cart.reduce((a,i)=>a+i.p*i.q,0);
+ let profit = cart.reduce((a,i)=>a+(i.p-i.c)*i.q,0);
 
  invoices.push({
-  date:new Date().toLocaleDateString(),
-  total,profit
+  no: invoices.length + 1,
+  date,
+  total,
+  profit
  });
 
  saveAll();
  window.print();
- cart=[];renderInvoice();renderReport();
+ cart=[];
+ renderInvoice();
+ renderReport();
 }
 
+// ===== التقارير =====
 function renderReport(){
- let today=new Date().toLocaleDateString();
- let list=invoices.filter(i=>i.date===today);
- let total=list.reduce((a,i)=>a+i.total,0);
- let profit=list.reduce((a,i)=>a+i.profit,0);
+ let date = todayISO();
+ let list = invoices.filter(i=>i.date===date);
+ let total = list.reduce((a,i)=>a+i.total,0);
+ let profit = list.reduce((a,i)=>a+i.profit,0);
 
- reportBox.innerHTML=`
-  إجمالي المبيعات: ${total}<br>
-  الأرباح: ${profit}
+ reportBox.innerHTML = `
+  إجمالي اليوم: ${total}<br>
+  الأرباح: ${profit}<br>
+  عدد الفواتير: ${list.length}
  `;
 }
 
+function closeDay(){
+ let date = todayISO();
+ if(isDayClosed(date)) return alert("❌ اليوم مقفول بالفعل");
+
+ let list = invoices.filter(i=>i.date===date);
+ dailyCloses.push({
+  date,
+  total:list.reduce((a,i)=>a+i.total,0),
+  profit:list.reduce((a,i)=>a+i.profit,0),
+  count:list.length
+ });
+
+ saveAll();
+ alert("✅ تم قفل اليوم");
+}
+
+// ===== تشغيل أولي =====
 renderProducts();
 renderReport();
 </script>
