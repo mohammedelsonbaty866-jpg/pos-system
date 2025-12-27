@@ -181,3 +181,27 @@ document.addEventListener("DOMContentLoaded", () => {
   renderProducts();
   renderCart();
 });
+function printInvoice(invoice) {
+  document.getElementById("print-area").style.display = "block";
+
+  document.getElementById("p-shop").innerText =
+    settings.shopName || "اسم المحل";
+
+  let itemsHTML = "";
+  invoice.items.forEach(i => {
+    itemsHTML += `
+      <div>
+        ${i.n}<br>
+        ${i.q} × ${i.p} = ${i.q * i.p}
+      </div>
+    `;
+  });
+
+  document.getElementById("p-items").innerHTML = itemsHTML;
+  document.getElementById("p-total").innerText = invoice.total;
+
+  setTimeout(() => {
+    window.print();
+    document.getElementById("print-area").style.display = "none";
+  }, 300);
+}
