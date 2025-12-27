@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>التقارير</title>
+
+<style>
+body{font-family:Tahoma;background:#f1f5f9;margin:0}
+header{background:#0f172a;color:#fff;padding:12px;text-align:center}
+.box{background:#fff;margin:10px;padding:12px;border-radius:12px}
+.total{font-size:18px;font-weight:bold;margin-top:6px}
+</style>
+</head>
+
+<body>
+
+<header>📊 التقارير والأرباح</header>
+
+<div class="box">
+<h3>📅 تقرير اليوم</h3>
+<div id="today"></div>
+</div>
+
+<div class="box">
+<h3>📆 تقرير الشهر</h3>
+<div id="month"></div>
+</div>
+
+<script>
+let invoices = JSON.parse(localStorage.invoices || "[]");
+
+function calc(filterFn){
+let f = invoices.filter(filterFn);
+let total = f.reduce((a,i)=>a+i.total,0);
+let profit = f.reduce((a,i)=>a+i.profit,0);
+return {count:f.length,total,profit};
+}
+
+let todayStr = new Date().toISOString().slice(0,10);
+let monthStr = new Date().toISOString().slice(0,7);
+
+let today = calc(i=>i.date.startsWith(todayStr));
+let month = calc(i=>i.date.startsWith(monthStr));
+
+todayDiv.innerHTML = `
+عدد الفواتير: ${today.count}<br>
+إجمالي المبيعات: ${today.total}<br>
+الربح: ${today.profit}
+`;
+
+monthDiv.innerHTML = `
+عدد الفواتير: ${month.count}<br>
+إجمالي المبيعات: ${month.total}<br>
+الربح: ${month.profit}
+`;
+</script>
+
+</body>
+</html>
