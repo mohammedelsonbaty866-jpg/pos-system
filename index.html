@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>نظام كاشير</title>
+<title>نظام كاشير احترافي</title>
 
 <style>
 :root{
@@ -32,7 +32,7 @@ header{
 }
 .section{
   background:#fff;
-  border-radius:12px;
+  border-radius:14px;
   padding:12px;
   margin-bottom:12px;
   box-shadow:0 4px 10px rgba(0,0,0,.08);
@@ -43,45 +43,52 @@ header{
   gap:8px;
 }
 input,select,button{
-  padding:10px;
+  padding:12px;
   font-size:15px;
-  border-radius:8px;
+  border-radius:10px;
   border:1px solid #cbd5e1;
 }
 button{
   border:none;
   cursor:pointer;
+  font-weight:bold;
 }
-.btn{
-  background:var(--accent);
-  color:#fff;
-}
-.btn-blue{
-  background:var(--blue);
-  color:#fff;
-}
-.btn-danger{
-  background:var(--danger);
-  color:#fff;
-}
+.btn{background:var(--accent);color:#fff}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-danger{background:var(--danger);color:#fff}
+.hidden{display:none}
+
+/* الفاتورة */
 #invoice{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
-  gap:8px;
+  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:10px;
 }
-.card{
+.item{
   background:#f8fafc;
-  border-radius:10px;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
   padding:10px;
   text-align:center;
-  border:1px solid #e5e7eb;
 }
 .total{
-  font-size:20px;
+  font-size:22px;
   text-align:center;
   margin-top:10px;
+  font-weight:bold;
 }
-.hidden{display:none}
+
+/* الطباعة */
+@media print{
+  body *{visibility:hidden}
+  #printArea,#printArea *{visibility:visible}
+  #printArea{
+    position:absolute;
+    top:0;right:0;
+    width:100%;
+    font-size:14px;
+  }
+}
 </style>
 </head>
 
@@ -97,8 +104,8 @@ button{
       <input id="search" placeholder="اسم الصنف">
       <input id="qty" type="number" min="1" value="1">
       <select id="payType" onchange="toggleCustomer()">
-        <option value="cash">نقدي</option>
-        <option value="credit">آجل</option>
+        <option value="cash">💵 نقدي</option>
+        <option value="credit">🕒 آجل</option>
       </select>
       <select id="customer" class="hidden"></select>
       <button class="btn" onclick="addItem()">➕ إضافة</button>
@@ -110,8 +117,10 @@ button{
     <h3 style="text-align:center">🧾 الفاتورة</h3>
     <div id="invoice"></div>
     <div class="total" id="total">الإجمالي: 0</div>
+
     <div class="row" style="margin-top:10px">
-      <button class="btn" onclick="saveInvoice()">💾 حفظ الفاتورة</button>
+      <button class="btn" onclick="saveInvoice()">💾 حفظ</button>
+      <button class="btn-blue" onclick="printInvoice()">🖨️ طباعة</button>
       <button class="btn-blue" onclick="goReports()">📊 التقارير</button>
     </div>
   </div>
@@ -128,41 +137,46 @@ button{
     </div>
   </div>
 
-  <!-- إضافة عميل -->
+  <!-- عملاء -->
   <div class="section">
     <h3>👤 العملاء (آجل)</h3>
     <div class="row">
       <input id="cn" placeholder="اسم العميل">
-      <button class="btn" onclick="addCustomer()">إضافة عميل</button>
+      <button class="btn" onclick="addCustomer()">إضافة</button>
     </div>
     <div id="clist" style="margin-top:10px"></div>
   </div>
 
 </div>
 
-<script>
-/* ====== التخزين ====== */
-let products = JSON.parse(localStorage.getItem("products") || "[]");
-let customers = JSON.parse(localStorage.getItem("customers") || "[]");
-let invoices = JSON.parse(localStorage.getItem("invoices") || "[]");
-let cart = [];
+<!-- منطقة الطباعة -->
+<div id="printArea" class="hidden">
+  <h3 style="text-align:center" id="printShop"></h3>
+  <div id="printItems"></div>
+  <hr>
+  <div style="text-align:center;font-weight:bold" id="printTotal"></div>
+  <p style="text-align:center">شكراً لزيارتكم</p>
+</div>
 
-/* ====== حفظ ====== */
+<script>
+/* ====== تخزين ====== */
+let products = JSON.parse(localStorage.products||"[]");
+let customers = JSON.parse(localStorage.customers||"[]");
+let invoices = JSON.parse(localStorage.invoices||"[]");
+let settings = JSON.parse(localStorage.settings||"{}");
+let cart=[];
+
 function saveAll(){
-  localStorage.setItem("products",JSON.stringify(products));
-  localStorage.setItem("customers",JSON.stringify(customers));
-  localStorage.setItem("invoices",JSON.stringify(invoices));
+  localStorage.products=JSON.stringify(products);
+  localStorage.customers=JSON.stringify(customers);
+  localStorage.invoices=JSON.stringify(invoices);
+  localStorage.settings=JSON.stringify(settings);
 }
 
-/* ====== إضافة صنف ====== */
+/* ====== أصناف ====== */
 function addProduct(){
-  if(!pn.value || !pp.value) return alert("أدخل البيانات");
-  products.push({
-    n:pn.value,
-    p:+pp.value,
-    c:+pc.value || 0,
-    s:+ps.value || 0
-  });
+  if(!pn.value||!pp.value)return alert("أدخل البيانات");
+  products.push({n:pn.value,p:+pp.value,c:+pc.value||0,s:+ps.value||0});
   pn.value=pp.value=pc.value=ps.value="";
   saveAll();
   alert("تم حفظ الصنف");
@@ -170,7 +184,7 @@ function addProduct(){
 
 /* ====== عملاء ====== */
 function addCustomer(){
-  if(!cn.value) return;
+  if(!cn.value)return;
   customers.push({n:cn.value,b:0});
   cn.value="";
   renderCustomers();
@@ -180,23 +194,23 @@ function renderCustomers(){
   clist.innerHTML="";
   customer.innerHTML="<option value=''>اختر عميل</option>";
   customers.forEach((c,i)=>{
-    clist.innerHTML+=`<div class="card">${c.n} | الرصيد: ${c.b}</div>`;
+    clist.innerHTML+=`<div class="item">${c.n} | ${c.b}</div>`;
     customer.innerHTML+=`<option value="${i}">${c.n}</option>`;
   });
 }
 renderCustomers();
 
-/* ====== الكاشير ====== */
+/* ====== كاشير ====== */
 function toggleCustomer(){
   customer.classList.toggle("hidden",payType.value!=="credit");
 }
 
 function addItem(){
-  let p = products.find(x=>x.n===search.value);
-  if(!p) return alert("الصنف غير موجود");
-  if(p.s < qty.value) return alert("المخزون غير كافي");
+  let p=products.find(x=>x.n===search.value);
+  if(!p)return alert("الصنف غير موجود");
+  if(p.s<qty.value)return alert("المخزون غير كافي");
   cart.push({n:p.n,p:p.p,c:p.c,q:+qty.value});
-  p.s -= qty.value;
+  p.s-=qty.value;
   search.value="";
   qty.value=1;
   renderInvoice();
@@ -209,7 +223,7 @@ function renderInvoice(){
   cart.forEach(i=>{
     t+=i.p*i.q;
     invoice.innerHTML+=`
-      <div class="card">
+      <div class="item">
         <b>${i.n}</b><br>
         ${i.q} × ${i.p}<br>
         <b>${i.q*i.p}</b>
@@ -219,21 +233,14 @@ function renderInvoice(){
 }
 
 function saveInvoice(){
-  if(cart.length===0) return;
-  let totalVal = cart.reduce((a,i)=>a+i.p*i.q,0);
-  let profit = cart.reduce((a,i)=>a+(i.p-i.c)*i.q,0);
-  let inv = {
-    no:invoices.length+1,
-    date:new Date().toLocaleString(),
-    type:payType.value,
-    total:totalVal,
-    profit,
-    items:cart
-  };
+  if(cart.length===0)return;
+  let totalVal=cart.reduce((a,i)=>a+i.p*i.q,0);
+  let profit=cart.reduce((a,i)=>a+(i.p-i.c)*i.q,0);
+  let inv={no:invoices.length+1,date:new Date().toLocaleString(),type:payType.value,total:totalVal,profit,items:cart};
   if(inv.type==="credit"){
-    if(customer.value==="") return alert("اختر عميل");
-    customers[customer.value].b += totalVal;
-    inv.customer = customers[customer.value].n;
+    if(customer.value==="")return alert("اختر عميل");
+    customers[customer.value].b+=totalVal;
+    inv.customer=customers[customer.value].n;
   }
   invoices.push(inv);
   cart=[];
@@ -243,10 +250,27 @@ function saveInvoice(){
   alert("تم حفظ الفاتورة");
 }
 
+/* ====== طباعة ====== */
+function printInvoice(){
+  printShop.innerText=settings.shopName||"المحل";
+  printItems.innerHTML="";
+  let t=0;
+  cart.forEach(i=>{
+    t+=i.p*i.q;
+    printItems.innerHTML+=`${i.n} - ${i.q} × ${i.p}<br>`;
+  });
+  printTotal.innerText="الإجمالي: "+t;
+  document.getElementById("printArea").classList.remove("hidden");
+  window.print();
+  document.getElementById("printArea").classList.add("hidden");
+}
+
 /* ====== تقارير ====== */
 function goReports(){
-  window.location.href="reports.html";
+  location.href="reports.html";
 }
+
+shopTitle.innerText=settings.shopName||"نظام كاشير";
 </script>
 
 </body>
