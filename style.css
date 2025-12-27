@@ -1,125 +1,142 @@
-/* ====== إعدادات عامة ====== */
-*{
-  box-sizing:border-box;
-  font-family:Tahoma, Arial;
-}
-body{
-  margin:0;
-  background:#f1f5f9;
-  color:#020617;
+* {
+    box-sizing: border-box;
+    font-family: "Cairo", system-ui, sans-serif;
 }
 
-/* ====== الهيدر ====== */
-header{
-  background:#020617;
-  color:#fff;
-  padding:12px;
-  text-align:center;
-  font-size:18px;
-  font-weight:bold;
+body {
+    margin: 0;
+    background: #f1f5f9;
+    color: #0f172a;
 }
 
-/* ====== تخطيط الكاشير ====== */
-.main{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  padding:10px;
+/* Header */
+.header {
+    background: linear-gradient(135deg, #020617, #0f172a);
+    color: white;
+    text-align: center;
+    padding: 18px;
 }
 
-/* ====== أزرار أعلى ====== */
-.top-buttons{
-  display:flex;
-  gap:8px;
-}
-.top-buttons button{
-  flex:1;
-  padding:12px;
-  border:0;
-  border-radius:10px;
-  font-size:15px;
-  cursor:pointer;
-}
-.btn-cash{background:#22c55e;color:#fff}
-.btn-credit{background:#0ea5e9;color:#fff}
-.btn-settings{background:#475569;color:#fff}
-
-/* ====== الأصناف ====== */
-.products{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-}
-.product{
-  background:#fff;
-  border-radius:12px;
-  padding:10px;
-  text-align:center;
-  box-shadow:0 4px 10px rgba(0,0,0,.08);
-  cursor:pointer;
-}
-.product h4{
-  margin:5px 0;
-  font-size:14px;
-}
-.product span{
-  font-weight:bold;
-  color:#16a34a;
+.header h1 {
+    margin: 0;
+    font-size: 22px;
 }
 
-/* ====== الفاتورة ====== */
-.invoice{
-  background:#fff;
-  border-radius:14px;
-  padding:12px;
-  box-shadow:0 4px 10px rgba(0,0,0,.08);
-}
-.invoice h3{
-  margin:0 0 10px;
-  text-align:center;
-}
-.invoice table{
-  width:100%;
-  border-collapse:collapse;
-}
-.invoice th, .invoice td{
-  padding:6px;
-  border-bottom:1px solid #e5e7eb;
-  text-align:center;
-  font-size:14px;
-}
-.total{
-  font-size:18px;
-  font-weight:bold;
-  text-align:center;
-  margin-top:10px;
+/* Layout */
+.container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 16px;
 }
 
-/* ====== أزرار الفاتورة ====== */
-.invoice-buttons{
-  display:flex;
-  gap:8px;
-  margin-top:10px;
+/* Sections */
+section {
+    background: white;
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,.08);
 }
-.invoice-buttons button{
-  flex:1;
-  padding:12px;
-  border:0;
-  border-radius:10px;
-  font-size:15px;
-  cursor:pointer;
-}
-.btn-save{background:#22c55e;color:#fff}
-.btn-print{background:#f97316;color:#fff}
-.btn-clear{background:#ef4444;color:#fff}
 
-/* ====== responsive ====== */
-@media(min-width:768px){
-  .main{
-    max-width:900px;
-    margin:auto;
-  }
-  .products{
-    grid-template-columns:repeat(5,1fr);
-  }
+h2 {
+    margin-top: 0;
+    font-size: 18px;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 8px;
+}
+
+/* Products */
+.products-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+}
+
+.product-card {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: .2s;
+    border: 1px solid #e5e7eb;
+}
+
+.product-card:hover {
+    background: #e0f2fe;
+    transform: translateY(-2px);
+}
+
+.product-card h3 {
+    margin: 0;
+    font-size: 15px;
+}
+
+.product-card span {
+    color: #16a34a;
+    font-weight: bold;
+}
+
+/* Invoice */
+.invoice table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.invoice th, .invoice td {
+    padding: 8px;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 14px;
+    text-align: center;
+}
+
+.invoice th {
+    background: #f1f5f9;
+}
+
+.remove {
+    color: red;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* Total */
+.total {
+    margin-top: 12px;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* Button */
+.btn-primary {
+    margin-top: 14px;
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #16a34a, #22c55e);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    opacity: .9;
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    font-size: 13px;
+    color: #64748b;
+    padding: 12px;
+}
+
+/* Desktop */
+@media (min-width: 768px) {
+    .container {
+        grid-template-columns: 1.2fr 1fr;
+    }
 }
