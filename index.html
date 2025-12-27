@@ -2,150 +2,147 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>POS كاشير</title>
 
 <style>
-:root{
-  --main:#0f172a;
-  --accent:#22c55e;
-  --danger:#ef4444;
-  --bg:#f1f5f9;
+@media print{
+ body{margin:0}
+ .no-print{display:none}
+ .receipt{
+  width:80mm;
+  font-family:Tahoma;
+  font-size:12px;
+ }
 }
-*{box-sizing:border-box}
 body{
-  margin:0;
-  font-family:Tajawal,Arial;
-  background:var(--bg);
+ margin:0;
+ font-family:Tajawal,Arial;
+ background:#f1f5f9;
 }
 header{
-  background:linear-gradient(90deg,#020617,#0f172a);
-  color:#fff;
-  padding:12px;
-  text-align:center;
-  font-size:18px;
+ background:#020617;
+ color:#fff;
+ padding:10px;
+ text-align:center;
 }
 #cashier{
-  display:grid;
-  grid-template-columns:1.2fr 1fr;
-  gap:10px;
-  padding:10px;
+ display:grid;
+ grid-template-columns:1.2fr 1fr;
+ gap:10px;
+ padding:10px;
 }
 @media(max-width:768px){
-  #cashier{grid-template-columns:1fr}
+ #cashier{grid-template-columns:1fr}
 }
 .box{
-  background:#fff;
-  border-radius:12px;
-  padding:10px;
+ background:#fff;
+ border-radius:12px;
+ padding:10px;
 }
-h3{margin:5px 0 10px}
-input,select{
-  width:100%;
-  padding:10px;
-  margin-bottom:6px;
-  border-radius:8px;
-  border:1px solid #cbd5f5;
-  font-size:14px;
+input,select,button{
+ width:100%;
+ padding:10px;
+ margin-bottom:6px;
+ border-radius:8px;
+ border:1px solid #cbd5f5;
+ font-size:14px;
 }
-#products{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
-  gap:8px;
+button{cursor:pointer;border:0}
+.btn{background:#22c55e;color:#fff}
+.btn-dark{background:#0f172a;color:#fff}
+.products{
+ display:grid;
+ grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+ gap:8px;
 }
 .product{
-  background:#f8fafc;
-  border-radius:10px;
-  padding:10px;
-  text-align:center;
-  cursor:pointer;
-  border:1px solid #e5e7eb;
+ background:#f8fafc;
+ padding:10px;
+ border-radius:10px;
+ text-align:center;
+ border:1px solid #e5e7eb;
+ cursor:pointer;
 }
-.product:hover{background:#e0f2fe}
-#invoice{max-height:260px;overflow:auto}
-.item{
-  display:flex;
-  justify-content:space-between;
-  padding:6px;
-  border-bottom:1px dashed #ddd;
+.invoice-line{
+ display:flex;
+ justify-content:space-between;
+ border-bottom:1px dashed #ccc;
+ padding:4px 0;
 }
-.total{
-  font-size:18px;
-  font-weight:bold;
-  margin-top:6px;
+.total{font-weight:bold;margin-top:6px}
+.receipt{
+ display:none;
 }
-.actions{
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr;
-  gap:8px;
-  margin-top:10px;
-}
-button{
-  padding:12px;
-  font-size:15px;
-  border:0;
-  border-radius:10px;
-  cursor:pointer;
-}
-.btn{background:var(--accent);color:#fff}
-.btn-danger{background:var(--danger);color:#fff}
-.btn-dark{background:var(--main);color:#fff}
 </style>
 </head>
 
 <body>
 
-<header>نقطة بيع – كاشير</header>
+<header class="no-print">نقطة بيع</header>
 
-<div id="cashier">
+<div id="cashier" class="no-print">
 
-  <!-- الأصناف -->
-  <div class="box">
-    <h3>الأصناف</h3>
-    <input id="search" placeholder="بحث" onkeyup="renderProducts()">
-    <div id="products"></div>
-  </div>
+<!-- الأصناف -->
+<div class="box">
+<input id="search" placeholder="بحث" onkeyup="renderProducts()">
+<div class="products" id="products"></div>
+</div>
 
-  <!-- الفاتورة -->
-  <div class="box">
-    <h3>الفاتورة</h3>
-    <div id="invoice"></div>
+<!-- الفاتورة -->
+<div class="box">
+<div id="invoice"></div>
 
-    <input id="discount" type="number" placeholder="خصم">
-    <select id="discountType" onchange="calcTotal()">
-      <option value="value">خصم مبلغ</option>
-      <option value="percent">خصم %</option>
-    </select>
+<input id="discount" placeholder="خصم">
+<select id="discountType" onchange="calc()">
+ <option value="value">مبلغ</option>
+ <option value="percent">%</option>
+</select>
+<input id="tax" placeholder="ضريبة %">
 
-    <input id="tax" type="number" placeholder="ضريبة %">
+<div class="total" id="total"></div>
+<div class="total" id="net"></div>
 
-    <div class="total" id="total">الإجمالي: 0</div>
-    <div class="total" id="net">الصافي: 0</div>
+<button class="btn-dark" onclick="clearInvoice()">مسح</button>
+<button class="btn" onclick="printInvoice()">طباعة</button>
+</div>
 
-    <div class="actions">
-      <button class="btn-dark" onclick="clearInvoice()">مسح</button>
-      <button class="btn" onclick="saveInvoice()">حفظ</button>
-      <button class="btn-danger" onclick="printInvoice()">طباعة</button>
-    </div>
-  </div>
+</div>
 
+<!-- الفاتورة الحرارية -->
+<div class="receipt" id="receipt">
+<center>
+<b id="shopName">اسم المحل</b><br>
+فاتورة بيع<br>
+رقم: <span id="invNo"></span><br>
+<span id="invDate"></span>
+</center>
+<hr>
+<div id="rItems"></div>
+<hr>
+<div>الإجمالي: <span id="rTotal"></span></div>
+<div>الخصم: <span id="rDiscount"></span></div>
+<div>الضريبة: <span id="rTax"></span></div>
+<b>الصافي: <span id="rNet"></span></b>
+<hr>
+<center>شكراً لزيارتكم</center>
 </div>
 
 <script>
 let products=JSON.parse(localStorage.products||"[]");
 let cart=[];
+let invNo=localStorage.invNo||1;
 
-if(products.length===0){
+if(products.length==0){
  products=[
   {n:"سكر",p:10,s:100},
-  {n:"رز",p:20,s:50},
-  {n:"زيت",p:30,s:40}
+  {n:"رز",p:20,s:50}
  ];
  localStorage.products=JSON.stringify(products);
 }
 
 function renderProducts(){
- let q=search.value;
+ let q=search.value||"";
  productsBox.innerHTML="";
  products.filter(p=>p.n.includes(q)).forEach((p,i)=>{
   productsBox.innerHTML+=`
@@ -169,27 +166,47 @@ function renderInvoice(){
  invoice.innerHTML="";
  cart.forEach(i=>{
   invoice.innerHTML+=`
-   <div class="item">
+   <div class="invoice-line">
     <span>${i.n} × ${i.q}</span>
     <span>${i.p*i.q}</span>
    </div>`;
  });
- calcTotal();
+ calc();
 }
 
-function calcTotal(){
+function calc(){
  let total=cart.reduce((a,i)=>a+i.p*i.q,0);
  let d=+discount.value||0;
  if(discountType.value=="percent") d=total*(d/100);
- let afterDiscount=total-d;
- let t=+tax.value||0;
- let taxVal=afterDiscount*(t/100);
- let net=afterDiscount+taxVal;
- totalDiv.innerText="الإجمالي: "+total+" ج";
- netDiv.innerText="الصافي: "+net.toFixed(2)+" ج";
+ let after=total-d;
+ let t=after*(+tax.value||0)/100;
+ let net=after+t;
+ total.innerText="الإجمالي: "+total;
+ netDiv.innerText="الصافي: "+net.toFixed(2);
+ window._calc={total,d,t,net};
 }
-const totalDiv=document.getElementById("total");
 const netDiv=document.getElementById("net");
+
+function printInvoice(){
+ if(cart.length==0)return;
+ receipt.style.display="block";
+ shopName.innerText=localStorage.shopName||"محل";
+ invNoSpan.innerText=invNo;
+ invDate.innerText=new Date().toLocaleString();
+ rItems.innerHTML="";
+ cart.forEach(i=>{
+  rItems.innerHTML+=`
+   <div>${i.n} × ${i.q} = ${i.p*i.q}</div>`;
+ });
+ rTotal.innerText=_calc.total;
+ rDiscount.innerText=_calc.d;
+ rTax.innerText=_calc.t.toFixed(2);
+ rNet.innerText=_calc.net.toFixed(2);
+ window.print();
+ receipt.style.display="none";
+ localStorage.invNo=++invNo;
+ clearInvoice();
+}
 
 function clearInvoice(){
  cart=[];
@@ -197,13 +214,8 @@ function clearInvoice(){
  renderInvoice();
 }
 
-function saveInvoice(){
- if(cart.length==0)return alert("فاتورة فارغة");
- alert("تم حفظ الفاتورة");
- clearInvoice();
-}
-
-function printInvoice(){window.print()}
+const productsBox=document.getElementById("products");
+const invNoSpan=document.getElementById("invNo");
 
 renderProducts();
 </script>
