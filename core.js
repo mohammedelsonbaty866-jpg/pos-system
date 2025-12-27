@@ -1,189 +1,150 @@
-/* =========================
-   CORE.JS – Commercial POS
-   ========================= */
+/************** البيانات **************/
+let products = JSON.parse(localStorage.getItem("products") || "[]");
+let invoices = JSON.parse(localStorage.getItem("invoices") || "[]");
+let cart = [];
 
-// ====== Storage ======
-const DB = {
-  products: JSON.parse(localStorage.getItem("products") || "[]"),
-  customers: JSON.parse(localStorage.getItem("customers") || "[]"),
-  invoices: JSON.parse(localStorage.getItem("invoices") || "[]"),
-  settings: JSON.parse(localStorage.getItem("settings") || "{}"),
-};
+/************** عناصر **************/
+const productsBox = document.getElementById("productsBox");
+const invoiceBody = document.getElementById("invoiceBody");
+const totalBox = document.getElementById("totalBox");
 
-function saveDB() {
-  localStorage.setItem("products", JSON.stringify(DB.products));
-  localStorage.setItem("customers", JSON.stringify(DB.customers));
-  localStorage.setItem("invoices", JSON.stringify(DB.invoices));
-  localStorage.setItem("settings", JSON.stringify(DB.settings));
-}
+/************** تحميل **************/
+renderProducts();
+renderInvoice();
 
-// ====== Helpers ======
-function uid() {
-  return Date.now();
-}
-function today() {
-  return new Date().toLocaleDateString("ar-EG");
-}
-function now() {
-  return new Date().toLocaleString("ar-EG");
-}
-
-// =====================
-// PRODUCTS
-// =====================
-function addProduct(data) {
-  DB.products.push({
-    id: uid(),
-    name: data.name,
-    price: +data.price,
-    cost: +data.cost,
-    stock: +data.stock,
-    barcode: data.barcode || "",
+/************** الأصناف **************/
+function renderProducts(){
+  if(!productsBox) return;
+  productsBox.innerHTML = "";
+  products.forEach((p,i)=>{
+    const div = document.createElement("div");
+    div.className = "product";
+    div.onclick = ()=> addToCart(i);
+    div.innerHTML = `
+      <h4>${p.name}</h4>
+      <span>${p.price} ج</span>
+    `;
+    productsBox.appendChild(div);
   });
-  saveDB();
 }
 
-function updateProduct(id, data) {
-  const p = DB.products.find(x => x.id === id);
-  if (!p) return;
-  Object.assign(p, data);
-  saveDB();
+function addToCart(index){
+  let p = products[index];
+  let item = cart.find(i=>i.name===p.name);
+  if(item){
+    item.qty++;
+  }else{
+    cart.push({
+      name:p.name,
+      price:p.price,
+      qty:1
+    });
+  }
+  renderInvoice();
 }
 
-function getProductByName(name) {
-  return DB.products.find(p => p.name === name);
-}
+/************** الفاتورة **************/
+function renderInvoice(){
+  if(!invoiceBody) return;
+  invoiceBody.innerHTML = "";
+  let total = 0;
 
-function getProductByBarcode(code) {
-  return DB.products.find(p => p.barcode === code);
-}
-
-// =====================
-// CUSTOMERS
-// =====================
-function addCustomer(name) {
-  DB.customers.push({
-    id: uid(),
-    name,
-    balance: 0,
-    locked: false
+  cart.forEach((i,idx)=>{
+    total += i.price * i.qty;
+    invoiceBody.innerHTML += `
+      <tr>
+        <td>${i.name}</td>
+        <td>${i.qty}</td>
+        <td>${i.price}</td>
+        <td>${i.qty * i.price}</td>
+        <td><button onclick="removeItem(${idx})">✖</button></td>
+      </tr>
+    `;
   });
-  saveDB();
+
+  totalBox.innerText = total + " ج";
 }
 
-function payCustomer(id, amount) {
-  const c = DB.customers.find(x => x.id === id);
-  if (!c) return;
-  c.balance -= amount;
-  if (c.balance < 0) c.balance = 0;
-  saveDB();
+/************** حذف عنصر **************/
+function removeItem(index){
+  cart.splice(index,1);
+  renderInvoice();
 }
 
-// =====================
-// INVOICE / CASHIER
-// =====================
-let CART = [];
-
-function addToCart(product, qty) {
-  if (product.stock < qty) {
-    alert("❌ المخزون غير كافي");
+/************** حفظ الفاتورة **************/
+function saveInvoice(){
+  if(cart.length === 0){
+    alert("الفاتورة فارغة");
     return;
   }
-  CART.push({
-    id: product.id,
-    name: product.name,
-    price: product.price,
-    cost: product.cost,
-    qty
-  });
-  product.stock -= qty;
-  saveDB();
-}
 
-function cartTotal() {
-  return CART.reduce((t, i) => t + i.price * i.qty, 0);
-}
-
-function cartProfit() {
-  return CART.reduce((t, i) => t + (i.price - i.cost) * i.qty, 0);
-}
-
-function saveInvoice(type, customerId = null) {
-  if (CART.length === 0) return;
-
-  const invoice = {
-    id: DB.invoices.length + 1,
-    date: now(),
-    day: today(),
-    type,
-    total: cartTotal(),
-    profit: cartProfit(),
-    items: CART
+  let total = cart.reduce((a,i)=>a+i.price*i.qty,0);
+  let invoice = {
+    id: invoices.length + 1,
+    date: new Date().toLocaleString(),
+    items: cart,
+    total: total
   };
 
-  if (type === "credit") {
-    const c = DB.customers.find(x => x.id === customerId);
-    if (!c || c.locked) {
-      alert("❌ العميل غير متاح");
-      return;
-    }
-    c.balance += invoice.total;
-    invoice.customer = c.name;
-  }
+  invoices.push(invoice);
+  localStorage.setItem("invoices", JSON.stringify(invoices));
 
-  DB.invoices.push(invoice);
-  CART = [];
-  saveDB();
-
-  return invoice;
+  printInvoice(invoice);
+  clearInvoice();
 }
 
-// =====================
-// REPORTS (TABLE BASED)
-// =====================
-function dailyReport(day = today()) {
-  const list = DB.invoices.filter(i => i.day === day);
-
-  let cash = 0, credit = 0, profit = 0;
-  list.forEach(i => {
-    profit += i.profit;
-    if (i.type === "cash") cash += i.total;
-    else credit += i.total;
-  });
-
-  return {
-    count: list.length,
-    cash,
-    credit,
-    total: cash + credit,
-    profit,
-    list
-  };
+/************** مسح **************/
+function clearInvoice(){
+  cart = [];
+  renderInvoice();
 }
 
-function monthlyReport(month, year) {
-  const list = DB.invoices.filter(i => {
-    const d = new Date(i.date);
-    return d.getMonth() + 1 === month && d.getFullYear() === year;
-  });
-
-  let total = 0, profit = 0;
-  list.forEach(i => {
-    total += i.total;
-    profit += i.profit;
-  });
-
-  return { total, profit, list };
+/************** طباعة **************/
+function printInvoice(inv){
+  let win = window.open("", "", "width=300");
+  win.document.write(`
+    <html>
+    <head>
+      <title>فاتورة</title>
+      <style>
+        body{font-family:Tahoma;font-size:12px}
+        h3{text-align:center}
+        table{width:100%;border-collapse:collapse}
+        td,th{border-bottom:1px dashed #000;padding:4px;text-align:center}
+      </style>
+    </head>
+    <body>
+      <h3>فاتورة بيع</h3>
+      <p>رقم: ${inv.id}</p>
+      <p>${inv.date}</p>
+      <table>
+        <tr><th>الصنف</th><th>ك</th><th>س</th><th>ج</th></tr>
+        ${inv.items.map(i=>`
+          <tr>
+            <td>${i.name}</td>
+            <td>${i.qty}</td>
+            <td>${i.price}</td>
+            <td>${i.qty*i.price}</td>
+          </tr>
+        `).join("")}
+      </table>
+      <h3>الإجمالي: ${inv.total} ج</h3>
+      <script>window.print();</script>
+    </body>
+    </html>
+  `);
+  win.document.close();
 }
 
-// =====================
-// SETTINGS
-// =====================
-function saveSettings(data) {
-  DB.settings = data;
-  saveDB();
-}
-
-function getSettings() {
-  return DB.settings;
+/************** إضافة أصناف افتراضية **************/
+if(products.length === 0){
+  products = [
+    {name:"سكر",price:10},
+    {name:"زيت",price:25},
+    {name:"رز",price:15},
+    {name:"مكرونة",price:7},
+    {name:"شاي",price:30}
+  ];
+  localStorage.setItem("products", JSON.stringify(products));
+  renderProducts();
 }
