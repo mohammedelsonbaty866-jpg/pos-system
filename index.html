@@ -57,9 +57,14 @@ button{border:none;font-weight:bold;cursor:pointer}
   background:#000;z-index:999
 }
 #scanner video{width:100%;height:100%;object-fit:cover}
-</style>
+</style><link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f172a">
 </head>
-
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js");
+}
+</script>
 <body>
 
 <header id="shopTitle">نظام كاشير</header>
