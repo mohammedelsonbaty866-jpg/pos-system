@@ -15,17 +15,21 @@
 --blue:#0ea5e9;
 --purple:#6366f1;
 --bg:#f1f5f9;
+--red:#ef4444;
 }
 
 body{
-margin:0;font-family:Tahoma;
+margin:0;
+font-family:Tahoma;
 background:var(--bg)
 }
 
 header{
 background:linear-gradient(90deg,#020617,#0f172a);
-color:#fff;padding:12px;
-text-align:center;font-size:18px
+color:#fff;
+padding:12px;
+text-align:center;
+font-size:18px
 }
 
 .container{padding:10px}
@@ -34,32 +38,50 @@ text-align:center;font-size:18px
 .top-buttons{
 display:grid;
 grid-template-columns:1fr 1fr;
-gap:8px;margin-bottom:10px
+gap:8px;
+margin-bottom:10px
 }
 
 .top-buttons button{
-padding:12px;font-size:15px;
-border:0;border-radius:12px;
-color:#fff
+padding:12px;
+font-size:15px;
+border:0;
+border-radius:12px;
+color:#fff;
+cursor:pointer
 }
 .admin{background:var(--blue)}
 .print{background:var(--purple)}
 
 /* إدخال */
 .inputs{
-background:#fff;padding:10px;
+background:#fff;
+padding:10px;
 border-radius:14px;
 display:grid;
-grid-template-columns:2fr 1fr 1fr;
-gap:6px;margin-bottom:10px
+grid-template-columns:2fr 1fr 1fr 1fr;
+gap:6px;
+margin-bottom:10px
 }
-.inputs input, .inputs button{
-padding:12px;font-size:15px;
-border-radius:10px;border:1px solid #cbd5f5
+
+.inputs input,
+.inputs button{
+padding:12px;
+font-size:15px;
+border-radius:10px;
+border:1px solid #cbd5f5
 }
+
 .inputs button{
 background:var(--green);
-color:#fff;border:0
+color:#fff;
+border:0
+}
+
+.scan-btn{
+background:#000;
+color:#fff;
+font-size:18px
 }
 
 /* الفاتورة */
@@ -76,7 +98,11 @@ padding:10px;
 text-align:center;
 box-shadow:0 4px 10px rgba(0,0,0,.08)
 }
-.item b{display:block;margin-bottom:6px}
+
+.item b{
+display:block;
+margin-bottom:6px
+}
 
 /* الإجمالي */
 .total{
@@ -97,7 +123,38 @@ padding:14px;
 font-size:18px;
 background:var(--green);
 color:#fff;
-border:0;border-radius:14px
+border:0;
+border-radius:14px;
+cursor:pointer
+}
+
+/* الكاميرا */
+#scanner{
+display:none;
+position:fixed;
+top:0;left:0;
+width:100%;
+height:100%;
+background:#000;
+z-index:9999
+}
+
+#scanner button{
+position:absolute;
+top:10px;
+right:10px;
+padding:10px 14px;
+background:var(--red);
+color:#fff;
+border:0;
+border-radius:10px;
+font-size:16px;
+z-index:10
+}
+
+#camera{
+width:100%;
+height:100%
 }
 </style>
 </head>
@@ -116,9 +173,10 @@ border:0;border-radius:14px
 
 <!-- إدخال -->
 <div class="inputs">
-<input id="search" placeholder="اسم الصنف">
+<input id="search" placeholder="اسم الصنف أو باركود">
 <input id="qty" type="number" value="1">
 <button onclick="addItem()">➕</button>
+<button class="scan-btn" onclick="startScanner()">📷</button>
 </div>
 
 <!-- الفاتورة -->
@@ -131,22 +189,54 @@ border:0;border-radius:14px
 
 </div>
 
+<!-- الكاميرا -->
+<div id="scanner">
+<button onclick="stopScanner()">إغلاق</button>
+<div id="camera"></div>
+</div>
+
+<!-- مكتبة الباركود -->
+<script src="https://unpkg.com/quagga/dist/quagga.min.js"></script>
+
+<!-- كود النظام -->
 <script src="core.js"></script>
+
 <script>
-function renderInvoice(){
-invoice.innerHTML="";
-let t=0;
-cart.forEach(i=>{
-t+=i.price*i.qty;
-invoice.innerHTML+=`
-<div class="item">
-<b>${i.name}</b>
-${i.qty} × ${i.price}
-<br><b>${i.qty*i.price}</b>
-</div>`;
-});
-total.innerText="الإجمالي: "+t;
+/* تشغيل الكاميرا */
+function startScanner(){
+document.getElementById("scanner").style.display="block";
+
+Quagga.init({
+inputStream:{
+type:"LiveStream",
+target:document.querySelector('#camera'),
+constraints:{ facingMode:"environment" }
+},
+decoder:{
+readers:["ean_reader","code_128_reader"]
 }
+},function(err){
+if(err){
+alert("تعذر فتح الكاميرا");
+return;
+}
+Quagga.start();
+});
+
+Quagga.onDetected(function(data){
+let code = data.codeResult.code;
+document.getElementById("search").value = code;
+stopScanner();
+});
+}
+
+/* إيقاف الكاميرا */
+function stopScanner(){
+Quagga.stop();
+document.getElementById("scanner").style.display="none";
+}
+
+/* Service Worker */
 if('serviceWorker' in navigator){
 navigator.serviceWorker.register('sw.js');
 }
