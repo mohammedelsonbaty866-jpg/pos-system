@@ -1,0 +1,125 @@
+/* ====== إعدادات عامة ====== */
+*{
+  box-sizing:border-box;
+  font-family:Tahoma, Arial;
+}
+body{
+  margin:0;
+  background:#f1f5f9;
+  color:#020617;
+}
+
+/* ====== الهيدر ====== */
+header{
+  background:#020617;
+  color:#fff;
+  padding:12px;
+  text-align:center;
+  font-size:18px;
+  font-weight:bold;
+}
+
+/* ====== تخطيط الكاشير ====== */
+.main{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding:10px;
+}
+
+/* ====== أزرار أعلى ====== */
+.top-buttons{
+  display:flex;
+  gap:8px;
+}
+.top-buttons button{
+  flex:1;
+  padding:12px;
+  border:0;
+  border-radius:10px;
+  font-size:15px;
+  cursor:pointer;
+}
+.btn-cash{background:#22c55e;color:#fff}
+.btn-credit{background:#0ea5e9;color:#fff}
+.btn-settings{background:#475569;color:#fff}
+
+/* ====== الأصناف ====== */
+.products{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+.product{
+  background:#fff;
+  border-radius:12px;
+  padding:10px;
+  text-align:center;
+  box-shadow:0 4px 10px rgba(0,0,0,.08);
+  cursor:pointer;
+}
+.product h4{
+  margin:5px 0;
+  font-size:14px;
+}
+.product span{
+  font-weight:bold;
+  color:#16a34a;
+}
+
+/* ====== الفاتورة ====== */
+.invoice{
+  background:#fff;
+  border-radius:14px;
+  padding:12px;
+  box-shadow:0 4px 10px rgba(0,0,0,.08);
+}
+.invoice h3{
+  margin:0 0 10px;
+  text-align:center;
+}
+.invoice table{
+  width:100%;
+  border-collapse:collapse;
+}
+.invoice th, .invoice td{
+  padding:6px;
+  border-bottom:1px solid #e5e7eb;
+  text-align:center;
+  font-size:14px;
+}
+.total{
+  font-size:18px;
+  font-weight:bold;
+  text-align:center;
+  margin-top:10px;
+}
+
+/* ====== أزرار الفاتورة ====== */
+.invoice-buttons{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+}
+.invoice-buttons button{
+  flex:1;
+  padding:12px;
+  border:0;
+  border-radius:10px;
+  font-size:15px;
+  cursor:pointer;
+}
+.btn-save{background:#22c55e;color:#fff}
+.btn-print{background:#f97316;color:#fff}
+.btn-clear{background:#ef4444;color:#fff}
+
+/* ====== responsive ====== */
+@media(min-width:768px){
+  .main{
+    max-width:900px;
+    margin:auto;
+  }
+  .products{
+    grid-template-columns:repeat(5,1fr);
+  }
+}
