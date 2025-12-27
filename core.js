@@ -10,13 +10,13 @@ localStorage.invoices = JSON.stringify(invoices);
 localStorage.settings = JSON.stringify(settings);
 }
 
-/* إضافة صنف */
+/* إضافة صنف (اسم أو باركود) */
 function addItem(){
-let name = search.value.trim();
+let key = search.value.trim();
 let qtyVal = parseInt(qty.value);
-if(!name || qtyVal<=0) return alert("بيانات غير صحيحة");
+if(!key || qtyVal<=0) return alert("بيانات غير صحيحة");
 
-let p = products.find(x=>x.name===name);
+let p = products.find(x=>x.name===key || x.barcode===key);
 if(!p) return alert("الصنف غير موجود");
 if(p.stock < qtyVal) return alert("المخزون غير كافي");
 
@@ -56,14 +56,9 @@ box.innerHTML+=`
 ${i.qty} × ${i.price}
 <br><b>${i.qty*i.price}</b>
 <br>
-<button onclick="removeItem(${idx})" 
-style="margin-top:6px;
-background:#ef4444;
-color:#fff;
-border:0;
-border-radius:8px;
-padding:6px 10px;
-font-size:13px">
+<button onclick="removeItem(${idx})"
+style="margin-top:6px;background:#ef4444;color:#fff;
+border:0;border-radius:8px;padding:6px 10px">
 🗑 حذف
 </button>
 </div>`;
@@ -81,7 +76,7 @@ let profit=cart.reduce((a,i)=>a+(i.price-i.cost)*i.qty,0);
 
 invoices.push({
 no:invoices.length+1,
-date:new Date().toLocaleString(),
+date:new Date().toISOString(),
 items:cart,
 total,
 profit
@@ -99,11 +94,11 @@ if(cart.length===0) return alert("الفاتورة فارغة");
 
 let w = window.open("", "", "width=380");
 let shop = settings.shopName || "اسم المحل";
-let html = `
+let total = cart.reduce((a,i)=>a+i.price*i.qty,0);
+
+w.document.write(`
 <html dir="rtl">
-<head>
-<link rel="stylesheet" href="print.css">
-</head>
+<head><link rel="stylesheet" href="print.css"></head>
 <body>
 <div class="receipt">
 <h2>${shop}</h2>
@@ -117,48 +112,21 @@ ${cart.map(i=>`
 <span>${i.qty*i.price}</span>
 </div>`).join("")}
 <hr>
-<h3>الإجمالي: ${cart.reduce((a,i)=>a+i.price*i.qty,0)}</h3>
+<h3>الإجمالي: ${total}</h3>
 <p class="thanks">شكراً لتعاملكم معنا</p>
 </div>
-<script>window.print();</script>
-</body></html>`;
-w.document.write(html);
+<script>window.print()</script>
+</body></html>
+`);
 w.document.close();
+}
+
+/* فتح التقارير */
+function openReports(){
+location.href="reports.html";
 }
 
 /* فتح الإدارة */
 function openAdmin(){
 alert("شاشة الإدارة لاحقاً");
-}
-/* تشغيل الكاميرا */
-function startScanner(){
-document.getElementById("scanner").style.display="block";
-
-Quagga.init({
-inputStream:{
-type:"LiveStream",
-target:document.querySelector('#camera'),
-constraints:{
-facingMode:"environment"
-}
-},
-decoder:{
-readers:["ean_reader","code_128_reader"]
-}
-},function(err){
-if(err){alert("خطأ بالكاميرا");return;}
-Quagga.start();
-});
-
-Quagga.onDetected(function(data){
-let code=data.codeResult.code;
-search.value=code;
-stopScanner();
-});
-}
-
-/* إيقاف الكاميرا */
-function stopScanner(){
-Quagga.stop();
-document.getElementById("scanner").style.display="none";
 }
