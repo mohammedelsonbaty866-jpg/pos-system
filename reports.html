@@ -2,159 +2,153 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>التقارير والأرباح</title>
+<title>التقارير</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 body{
   margin:0;
-  font-family:Tahoma, Arial;
-  background:#f2f4f8;
+  font-family:Tahoma,Arial;
+  background:#f8fafc;
 }
 header{
-  background:#198754;
+  background:#1e293b;
   color:#fff;
-  padding:12px;
+  padding:14px;
   text-align:center;
   font-size:20px;
 }
 .container{
-  padding:15px;
-  max-width:700px;
-  margin:auto;
+  padding:12px;
 }
 .card{
   background:#fff;
   border-radius:10px;
-  padding:15px;
-  margin-bottom:15px;
-  box-shadow:0 0 10px rgba(0,0,0,.1);
+  padding:12px;
+  margin-bottom:10px;
+  box-shadow:0 2px 6px rgba(0,0,0,.1);
 }
-.stat{
-  display:flex;
-  justify-content:space-between;
+h3{
+  margin-top:0;
+}
+button{
+  width:100%;
   padding:10px;
-  border-bottom:1px solid #eee;
-  font-size:16px;
+  margin-top:6px;
+  border-radius:8px;
+  border:none;
+  background:#0f172a;
+  color:#fff;
+  font-size:14px;
+  cursor:pointer;
 }
-.stat:last-child{border-bottom:none}
+button.green{
+  background:#15803d;
+}
+button.blue{
+  background:#1d4ed8;
+}
 table{
   width:100%;
   border-collapse:collapse;
-  font-size:14px;
+  margin-top:10px;
 }
 th,td{
   border-bottom:1px solid #ddd;
   padding:8px;
   text-align:center;
+  font-size:14px;
 }
 th{
-  background:#f0f0f0;
+  background:#e5e7eb;
 }
-button{
-  width:100%;
-  padding:12px;
-  border:none;
-  border-radius:8px;
-  background:#0d6efd;
-  color:#fff;
-  font-size:18px;
-  cursor:pointer;
-  margin-top:10px;
+.total{
+  font-weight:bold;
+  font-size:16px;
 }
 .back{
-  display:block;
-  text-align:center;
-  background:#6c757d;
-  color:#fff;
-  padding:10px;
-  border-radius:8px;
-  text-decoration:none;
-  margin-top:10px;
+  background:#334155;
 }
 @media print{
-  button,.back{display:none}
+  button,header{display:none;}
+  body{background:#fff;}
 }
 </style>
 </head>
 
 <body>
 
-<header>📊 التقارير والأرباح</header>
+<header>التقارير والمحاسبة</header>
 
 <div class="container">
 
-  <!-- ملخص اليوم -->
+  <!-- ملخص -->
   <div class="card">
-    <h3>📌 ملخص اليوم</h3>
-    <div class="stat">
-      <span>عدد الفواتير</span>
-      <b id="invCount">0</b>
-    </div>
-    <div class="stat">
-      <span>إجمالي المبيعات</span>
-      <b id="totalSales">0</b>
-    </div>
-    <div class="stat">
-      <span>إجمالي الأرباح</span>
-      <b id="totalProfit">0</b>
-    </div>
+    <h3>ملخص عام</h3>
+    <p id="summary"></p>
   </div>
 
-  <!-- جدول الفواتير -->
+  <!-- تقرير المبيعات -->
   <div class="card">
-    <h3 style="text-align:center">🧾 الفواتير</h3>
+    <h3>تفاصيل المبيعات</h3>
     <table>
       <thead>
         <tr>
-          <th>#</th>
+          <th>رقم</th>
           <th>التاريخ</th>
-          <th>النوع</th>
           <th>الإجمالي</th>
-          <th>الربح</th>
+          <th>الدفع</th>
         </tr>
       </thead>
-      <tbody id="invoiceTable"></tbody>
+      <tbody id="salesTable"></tbody>
     </table>
-
-    <button onclick="printReport()">🖨️ طباعة التقرير</button>
   </div>
 
-  <a href="index.html" class="back">⬅️ الرجوع للكاشير</a>
+  <!-- أزرار -->
+  <div class="card">
+    <button class="green" onclick="print()">🖨️ طباعة التقرير</button>
+    <button class="back" onclick="location.href='index.html'">
+      ← الرجوع للكاشير
+    </button>
+  </div>
 
 </div>
 
+<script src="core.js"></script>
+
 <script>
-let invoices = JSON.parse(localStorage.getItem("invoices")) || [];
+function loadReports(){
+  let totalSales = 0;
+  let cash = 0;
+  let credit = 0;
 
-let invCount = invoices.length;
-let totalSales = 0;
-let totalProfit = 0;
+  let table = document.getElementById("salesTable");
+  table.innerHTML = "";
 
-const table = document.getElementById("invoiceTable");
+  DB.sales.forEach((s,i)=>{
+    totalSales += s.total;
+    if(s.type==="cash") cash += s.total;
+    else credit += s.total;
 
-invoices.forEach((inv,i)=>{
-  totalSales += inv.total;
-  totalProfit += inv.profit;
+    table.innerHTML += `
+      <tr>
+        <td>${i+1}</td>
+        <td>${new Date(s.date).toLocaleString()}</td>
+        <td>${s.total.toFixed(2)}</td>
+        <td>${s.type==="cash"?"نقدي":"آجل"}</td>
+      </tr>
+    `;
+  });
 
-  table.innerHTML += `
-    <tr>
-      <td>${i+1}</td>
-      <td>${inv.date}</td>
-      <td>${inv.type === "cash" ? "نقدي" : "آجل"}</td>
-      <td>${inv.total}</td>
-      <td>${inv.profit}</td>
-    </tr>
+  document.getElementById("summary").innerHTML = `
+    إجمالي المبيعات: <b>${totalSales.toFixed(2)}</b><br>
+    نقدي: <b>${cash.toFixed(2)}</b><br>
+    آجل: <b>${credit.toFixed(2)}</b><br>
+    عدد الفواتير: <b>${DB.sales.length}</b>
   `;
-});
-
-document.getElementById("invCount").innerText = invCount;
-document.getElementById("totalSales").innerText = totalSales;
-document.getElementById("totalProfit").innerText = totalProfit;
-
-function printReport(){
-  window.print();
 }
+
+loadReports();
 </script>
 
 </body>
