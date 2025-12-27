@@ -2,90 +2,193 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<title>إدارة العملاء</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>العملاء</title>
 
 <style>
-body{font-family:Tahoma;background:#f1f5f9;margin:0}
-header{background:#0f172a;color:#fff;padding:12px;text-align:center}
-.box{background:#fff;margin:10px;padding:12px;border-radius:12px}
-input,button{
-width:100%;padding:10px;
-margin-top:6px;font-size:15px
+body{
+  margin:0;
+  font-family:Tahoma,Arial;
+  background:#f0fdf4;
 }
-button{background:#22c55e;color:#fff;border:0;border-radius:10px}
-.lock{background:#ef4444}
+header{
+  background:#166534;
+  color:#fff;
+  padding:14px;
+  text-align:center;
+  font-size:20px;
+}
+.container{
+  padding:12px;
+}
 .card{
-background:#f8fafc;
-padding:10px;margin-top:6px;border-radius:10px
+  background:#fff;
+  border-radius:10px;
+  padding:12px;
+  margin-bottom:10px;
+  box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
+input,button{
+  width:100%;
+  padding:10px;
+  margin-top:6px;
+  border-radius:8px;
+  border:1px solid #bbf7d0;
+  font-size:14px;
+}
+button{
+  background:#15803d;
+  color:#fff;
+  border:none;
+  cursor:pointer;
+}
+button.red{
+  background:#dc2626;
+}
+button.gray{
+  background:#374151;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
+}
+th,td{
+  border-bottom:1px solid #ddd;
+  padding:8px;
+  text-align:center;
+  font-size:14px;
+}
+th{
+  background:#dcfce7;
+}
+.actions button{
+  width:auto;
+  padding:6px 10px;
+  margin:2px;
+}
+.back{
+  background:#14532d;
+  margin-top:10px;
+}
+.balance{
+  font-weight:bold;
+}
+.negative{
+  color:#dc2626;
+}
+.locked{
+  opacity:0.6;
 }
 </style>
 </head>
 
 <body>
 
-<header>👤 إدارة العملاء</header>
+<header>إدارة العملاء (الآجل)</header>
 
-<div class="box">
-<h3>➕ إضافة عميل</h3>
-<input id="cname" placeholder="اسم العميل">
-<button onclick="addCustomer()">حفظ</button>
+<div class="container">
+
+  <!-- إضافة عميل -->
+  <div class="card">
+    <h3>إضافة عميل جديد</h3>
+    <input id="cname" placeholder="اسم العميل">
+    <button onclick="addNewCustomer()">حفظ العميل</button>
+  </div>
+
+  <!-- قائمة العملاء -->
+  <div class="card">
+    <h3>قائمة العملاء</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>الاسم</th>
+          <th>المديونية</th>
+          <th>الحالة</th>
+          <th>إجراء</th>
+        </tr>
+      </thead>
+      <tbody id="clist"></tbody>
+    </table>
+  </div>
+
+  <button class="back" onclick="location.href='index.html'">
+    ← الرجوع للكاشير
+  </button>
+
 </div>
 
-<div class="box">
-<h3>📋 العملاء</h3>
-<div id="list"></div>
-</div>
+<script src="core.js"></script>
 
 <script>
-let customers = JSON.parse(localStorage.customers || "[]");
+function addNewCustomer(){
+  let name = cname.value.trim();
+  if(!name) return alert("اكتب اسم العميل");
 
-function save(){
-localStorage.customers = JSON.stringify(customers);
-render();
+  addCustomer(name);
+  cname.value="";
+  renderCustomers();
 }
 
-function addCustomer(){
-if(!cname.value.trim()) return;
-customers.push({
-name:cname.value.trim(),
-balance:0,
-locked:false
-});
-cname.value="";
-save();
+function renderCustomers(){
+  let box = document.getElementById("clist");
+  box.innerHTML = "";
+
+  DB.customers.forEach(c=>{
+    let balanceClass = c.balance > 0 ? "negative" : "";
+    let lockText = c.locked ? "مقفول" : "مفتوح";
+
+    box.innerHTML += `
+      <tr class="${c.locked?'locked':''}">
+        <td>${c.name}</td>
+        <td class="balance ${balanceClass}">
+          ${c.balance.toFixed(2)}
+        </td>
+        <td>${lockText}</td>
+        <td class="actions">
+          <button onclick="pay(${c.id})">تسديد</button>
+          <button class="gray" onclick="toggleLock(${c.id})">
+            ${c.locked?'فتح':'قفل'}
+          </button>
+          <button class="red" onclick="removeCustomer(${c.id})">
+            حذف
+          </button>
+        </td>
+      </tr>
+    `;
+  });
 }
 
-function pay(i){
-let v = prompt("قيمة السداد:");
-v = parseFloat(v);
-if(isNaN(v) || v<=0) return;
-customers[i].balance -= v;
-if(customers[i].balance < 0) customers[i].balance = 0;
-save();
+function pay(id){
+  let c = DB.customers.find(x=>x.id===id);
+  if(!c) return;
+
+  let amount = Number(prompt("قيمة التسديد"));
+  if(amount<=0) return;
+
+  c.balance -= amount;
+  if(c.balance < 0) c.balance = 0;
+
+  saveDB();
+  renderCustomers();
 }
 
-function toggleLock(i){
-customers[i].locked = !customers[i].locked;
-save();
+function toggleLock(id){
+  let c = DB.customers.find(x=>x.id===id);
+  if(!c) return;
+  c.locked = !c.locked;
+  saveDB();
+  renderCustomers();
 }
 
-function render(){
-list.innerHTML="";
-customers.forEach((c,i)=>{
-list.innerHTML+=`
-<div class="card">
-<b>${c.name}</b><br>
-الرصيد: ${c.balance}<br>
-الحالة: ${c.locked?"مقفول":"نشط"}<br>
-<button onclick="pay(${i})">سداد</button>
-<button class="lock" onclick="toggleLock(${i})">
-${c.locked?"فتح الحساب":"قفل الحساب"}
-</button>
-</div>`;
-});
+function removeCustomer(id){
+  if(!confirm("حذف العميل؟")) return;
+  DB.customers = DB.customers.filter(c=>c.id!==id);
+  saveDB();
+  renderCustomers();
 }
-render();
+
+renderCustomers();
 </script>
 
 </body>
