@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>POS System</title>
+
+<link rel="manifest" href="manifest.json">
+
+<style>
+:root{
+ --main:#020617;
+ --accent:#22c55e;
+ --danger:#ef4444;
+ --bg:#f1f5f9;
+}
+
+body{
+ margin:0;
+ font-family:Tahoma;
+ background:var(--bg)
+}
+
+header{
+ background:linear-gradient(90deg,#020617,#0f172a);
+ color:#fff;
+ padding:14px;
+ text-align:center;
+ font-size:18px
+}
+
+button{
+ padding:12px;
+ border:0;
+ border-radius:14px;
+ font-size:15px;
+ cursor:pointer
+}
+
+.btn{background:var(--accent);color:#fff}
+.btn-danger{background:var(--danger);color:#fff}
+
+input,select{
+ padding:12px;
+ width:100%;
+ border-radius:12px;
+ border:1px solid #cbd5f5;
+ font-size:15px
+}
+
+.hidden{display:none}
+
+/* ===== القائمة الجانبية ===== */
+#menu{
+ position:fixed;
+ right:-220px;
+ top:0;
+ width:200px;
+ height:100%;
+ background:#020617;
+ color:#fff;
+ padding:10px;
+ transition:.3s;
+ z-index:9
+}
+
+#menu button{
+ width:100%;
+ background:none;
+ color:#fff;
+ text-align:right;
+ padding:14px
+}
+
+/* ===== الكاشير ===== */
+#cashier{
+ padding:10px;
+ display:grid;
+ grid-template-rows:auto 1fr auto;
+ gap:12px
+}
+
+.cashier-bar{
+ background:#fff;
+ border-radius:16px;
+ padding:10px;
+ display:grid;
+ grid-template-columns:2fr 1fr 1fr;
+ gap:8px;
+ box-shadow:0 3px 8px rgba(0,0,0,.08)
+}
+
+.cashier-actions{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:8px
+}
+
+#invoice{
+ display:grid;
+ grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+ gap:10px
+}
+
+.card{
+ background:#fff;
+ border-radius:14px;
+ padding:12px;
+ text-align:center;
+ box-shadow:0 3px 8px rgba(0,0,0,.08)
+}
+
+#total{
+ background:#020617;
+ color:#fff;
+ padding:14px;
+ border-radius:16px;
+ font-size:20px;
+ text-align:center
+}
+
+/* ===== الطباعة ===== */
+@media print {
+ body * { visibility:hidden }
+ #print-area, #print-area * { visibility:visible }
+ #print-area{
+  position:absolute;
+  top:0;right:0;
+  width:58mm;
+  font-size:12px;
+  direction:rtl
+ }
+ .p-center{text-align:center}
+ .p-line{border-top:1px dashed #000;margin:6px 0}
+}
+
+@media(max-width:768px){
+ .cashier-bar{grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body>
+
+<header id="shopTitle">نظام كاشير</header>
+<button onclick="toggleMenu()" style="position:fixed;top:10px;right:10px;font-size:22px">☰</button>
+
+<div id="menu">
+ <button onclick="show('cashier')">🧾 الكاشير</button>
+ <button onclick="show('products')">📦 الأصناف</button>
+ <button onclick="show('customers')">👤 العملاء</button>
+ <button onclick="show('reports')">📊 التقارير</button>
+ <button onclick="show('settings')">⚙️ الإعدادات</button>
+</div>
+
+<div id="screens">
+
+<!-- ===== الكاشير ===== -->
+<div id="cashier">
+ <div class="cashier-bar">
+  <input id="search" placeholder="اسم الصنف / باركود">
+  <input id="qty" type="number" value="1">
+  <select id="payType" onchange="toggleCustomer()">
+   <option value="cash">💵 نقدي</option>
+   <option value="credit">🧾 آجل</option>
+  </select>
+  <select id="customer" class="hidden"></select>
+  <div class="cashier-actions">
+   <button class="btn" onclick="addItem()">➕ إضافة</button>
+   <button class="btn-danger" onclick="saveInvoice()">💾 حفظ</button>
+  </div>
+ </div>
+
+ <div id="invoice"></div>
+ <div id="total">الإجمالي: 0</div>
+</div>
+
+<!-- ===== باقي الشاشات ===== -->
+<div id="products" class="hidden"></div>
+<div id="customers" class="hidden"></div>
+<div id="reports" class="hidden"></div>
+<div id="settings" class="hidden"></div>
+
+</div>
+
+<!-- ===== فاتورة الطباعة ===== -->
+<div id="print-area" style="display:none">
+ <div class="p-center">
+  <b id="p-shop"></b><br>
+  <small>فاتورة بيع</small>
+ </div>
+ <div class="p-line"></div>
+ <div id="p-items"></div>
+ <div class="p-line"></div>
+ <b>الإجمالي: <span id="p-total"></span></b>
+ <div class="p-line"></div>
+ <div class="p-center">
+  <small>شكراً لزيارتكم</small>
+ </div>
+</div>
+
+<script src="core.js"></script>
+
+<script>
+if("serviceWorker" in navigator){
+ navigator.serviceWorker.register("sw.js");
+}
+</script>
+
+</body>
+</html>
