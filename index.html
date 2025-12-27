@@ -3,153 +3,196 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>POS كاشير</title>
-
-<link rel="manifest" href="manifest.json">
+<title>نظام كاشير POS</title>
 
 <style>
-body{
-margin:0;
-font-family:Tahoma;
-background:#f1f5f9;
-}
-
-/* الهيدر */
+body{margin:0;font-family:Tahoma;background:#f1f5f9}
 header{
-background:#0f172a;
-color:#fff;
-padding:12px;
-text-align:center;
-font-size:18px;
+background:#0f172a;color:#fff;
+padding:12px;text-align:center;font-size:18px
 }
-
-/* التخطيط */
-.container{
+nav{
 display:flex;
-flex-direction:column;
-padding:10px;
-gap:10px;
+justify-content:space-around;
+background:#020617;
+padding:8px
 }
-
-/* صندوق */
+nav button{
+background:none;border:0;color:#fff;
+font-size:14px;cursor:pointer
+}
+.screen{display:none;padding:10px}
+.active{display:block}
 .box{
-background:#fff;
-border-radius:14px;
-padding:12px;
-box-shadow:0 2px 6px rgba(0,0,0,.08);
+background:#fff;border-radius:12px;
+padding:12px;margin-bottom:10px;
+box-shadow:0 2px 6px rgba(0,0,0,.08)
 }
-
-/* الإدخال */
 input,select{
-width:100%;
-padding:10px;
-font-size:16px;
-margin-top:6px;
-border-radius:10px;
-border:1px solid #ccc;
+width:100%;padding:10px;
+margin-top:6px;font-size:15px;
+border-radius:10px;border:1px solid #ccc
 }
-
-/* الأزرار */
 .btn{
-width:100%;
-padding:12px;
-font-size:16px;
-border-radius:12px;
-border:0;
-margin-top:8px;
-cursor:pointer;
+width:100%;padding:12px;
+border-radius:12px;border:0;
+font-size:16px;margin-top:8px
 }
-
 .green{background:#22c55e;color:#fff}
 .blue{background:#3b82f6;color:#fff}
-.orange{background:#f97316;color:#fff}
 .red{background:#ef4444;color:#fff}
-.gray{background:#64748b;color:#fff}
-
-/* شبكة الأزرار */
-.grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:8px;
-}
-
-/* الفاتورة */
-#invoice .item{
-border-bottom:1px dashed #ccc;
-padding:6px 0;
-}
-
-#total{
-font-size:18px;
-font-weight:bold;
-margin-top:8px;
-text-align:center;
-}
-
-/* العملاء */
-#customerBox{
-display:none;
-margin-top:6px;
-}
-
+.item{border-bottom:1px dashed #ccc;padding:6px 0}
+#total{font-size:18px;font-weight:bold;text-align:center}
 </style>
 </head>
 
 <body>
 
-<header>🧾 شاشة الكاشير</header>
+<header>🧾 نظام محاسبي POS</header>
 
-<div class="container">
+<nav>
+<button onclick="show('cashier')">الكاشير</button>
+<button onclick="show('products')">الأصناف</button>
+<button onclick="show('reports')">التقارير</button>
+</nav>
 
-<!-- إدخال الصنف -->
+<!-- الكاشير -->
+<div id="cashier" class="screen active">
+
 <div class="box">
-<input id="search" placeholder="اسم الصنف أو الباركود">
-<input id="qty" type="number" value="1" min="1">
-<button class="btn blue" onclick="addItem()">➕ إضافة</button>
+<input id="search" placeholder="اسم الصنف">
+<input id="qty" type="number" value="1">
+<button class="btn blue" onclick="addItem()">إضافة</button>
 </div>
 
-<!-- الفاتورة -->
 <div class="box">
-<h3>🧾 الفاتورة</h3>
+<h3>الفاتورة</h3>
 <div id="invoice"></div>
 <div id="total">الإجمالي: 0</div>
+<button class="btn green" onclick="saveInvoice()">حفظ الفاتورة</button>
 </div>
 
-<!-- الدفع -->
+</div>
+
+<!-- الأصناف -->
+<div id="products" class="screen">
+
 <div class="box">
-<h3>💳 طريقة الدفع</h3>
-
-<div class="grid">
-<button class="btn green" onclick="setPay('cash')">💵 كاش</button>
-<button class="btn orange" onclick="setPay('credit')">📒 آجل</button>
+<h3>➕ إضافة صنف</h3>
+<input id="pn" placeholder="اسم الصنف">
+<input id="pp" type="number" placeholder="سعر البيع">
+<input id="pc" type="number" placeholder="سعر الشراء">
+<input id="ps" type="number" placeholder="المخزون">
+<button class="btn green" onclick="addProduct()">حفظ الصنف</button>
 </div>
 
-<div id="customerBox">
-<select onchange="selectCustomer(this.selectedIndex-1)">
-<option>اختر العميل</option>
+<div class="box">
+<h3>📦 قائمة الأصناف</h3>
+<div id="plist"></div>
+</div>
+
+</div>
+
+<!-- التقارير -->
+<div id="reports" class="screen">
+
+<div class="box">
+<h3>📊 تقرير اليوم</h3>
+<div id="report"></div>
+</div>
+
+</div>
+
 <script>
-let customers = JSON.parse(localStorage.customers||"[]");
-customers.forEach(c=>{
-document.write(`<option>${c.name}</option>`);
+let products=JSON.parse(localStorage.products||"[]");
+let invoices=JSON.parse(localStorage.invoices||"[]");
+let cart=[];
+
+/* تنقل */
+function show(id){
+document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+if(id=="products")renderProducts();
+if(id=="reports")renderReports();
+}
+
+/* الأصناف */
+function addProduct(){
+products.push({
+n:pn.value,
+p:+pp.value,
+c:+pc.value,
+s:+ps.value
 });
+localStorage.products=JSON.stringify(products);
+pn.value=pp.value=pc.value=ps.value="";
+renderProducts();
+alert("تم حفظ الصنف");
+}
+
+function renderProducts(){
+plist.innerHTML="";
+products.forEach(p=>{
+plist.innerHTML+=`
+<div class="item">
+<b>${p.n}</b><br>
+بيع: ${p.p} | مخزون: ${p.s}
+</div>`;
+});
+}
+
+/* الكاشير */
+function addItem(){
+let p=products.find(x=>x.n==search.value);
+if(!p)return alert("الصنف غير موجود");
+if(p.s<qty.value)return alert("المخزون غير كافي");
+cart.push({n:p.n,p:p.p,c:p.c,q:+qty.value});
+p.s-=qty.value;
+localStorage.products=JSON.stringify(products);
+renderInvoice();
+}
+
+function renderInvoice(){
+invoice.innerHTML="";
+let t=0;
+cart.forEach(i=>{
+t+=i.p*i.q;
+invoice.innerHTML+=`
+<div class="item">
+${i.n} | ${i.q} × ${i.p}
+</div>`;
+});
+total.innerText="الإجمالي: "+t;
+}
+
+function saveInvoice(){
+if(cart.length==0)return;
+let totalVal=cart.reduce((a,i)=>a+i.p*i.q,0);
+invoices.push({
+date:new Date().toLocaleString(),
+total:totalVal,
+items:cart
+});
+localStorage.invoices=JSON.stringify(invoices);
+cart=[];
+renderInvoice();
+alert("تم حفظ الفاتورة");
+}
+
+/* التقارير */
+function renderReports(){
+let sum=0;
+report.innerHTML="";
+invoices.forEach(i=>{
+sum+=i.total;
+report.innerHTML+=`
+<div class="item">
+${i.date} | ${i.total}
+</div>`;
+});
+report.innerHTML+=`<hr><b>إجمالي المبيعات: ${sum}</b>`;
+}
 </script>
-</select>
-</div>
-</div>
-
-<!-- أزرار التحكم -->
-<div class="box">
-<div class="grid">
-<button class="btn green" onclick="saveInvoice()">💾 حفظ</button>
-<button class="btn blue" onclick="printInvoice()">🖨 طباعة</button>
-<button class="btn gray" onclick="openCustomers()">👤 العملاء</button>
-<button class="btn red" onclick="cart=[];renderInvoice()">❌ مسح</button>
-</div>
-</div>
-
-</div>
-
-<script src="core.js"></script>
 
 </body>
 </html>
