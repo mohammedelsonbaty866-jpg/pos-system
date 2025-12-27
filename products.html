@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>إدارة الأصناف</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{
+  margin:0;
+  font-family:Tahoma,Arial;
+  background:#f0fdf4;
+}
+header{
+  background:#166534;
+  color:#fff;
+  padding:14px;
+  text-align:center;
+  font-size:20px;
+}
+.container{
+  padding:12px;
+}
+.card{
+  background:#fff;
+  border-radius:10px;
+  padding:12px;
+  margin-bottom:10px;
+  box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
+input,button{
+  width:100%;
+  padding:10px;
+  margin-top:6px;
+  border-radius:8px;
+  border:1px solid #bbf7d0;
+  font-size:14px;
+}
+button{
+  background:#15803d;
+  color:#fff;
+  border:none;
+  cursor:pointer;
+}
+button.red{
+  background:#dc2626;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
+}
+th,td{
+  border-bottom:1px solid #ddd;
+  padding:8px;
+  text-align:center;
+  font-size:14px;
+}
+th{
+  background:#dcfce7;
+}
+.actions button{
+  width:auto;
+  padding:6px 10px;
+  margin:0 2px;
+}
+.back{
+  margin-top:10px;
+  background:#14532d;
+}
+</style>
+</head>
+
+<body>
+
+<header>إدارة الأصناف</header>
+
+<div class="container">
+
+  <!-- إضافة صنف -->
+  <div class="card">
+    <h3>إضافة صنف جديد</h3>
+    <input id="pname" placeholder="اسم الصنف">
+    <input id="pprice" type="number" placeholder="سعر البيع">
+    <input id="pcost" type="number" placeholder="سعر الشراء">
+    <input id="pstock" type="number" placeholder="المخزون">
+    <input id="pbarcode" placeholder="الباركود (اختياري)">
+    <button onclick="addNewProduct()">حفظ الصنف</button>
+  </div>
+
+  <!-- جدول الأصناف -->
+  <div class="card">
+    <h3>قائمة الأصناف</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>الاسم</th>
+          <th>بيع</th>
+          <th>شراء</th>
+          <th>مخزون</th>
+          <th>إجراء</th>
+        </tr>
+      </thead>
+      <tbody id="plist"></tbody>
+    </table>
+  </div>
+
+  <button class="back" onclick="location.href='index.html'">
+    ← الرجوع للكاشير
+  </button>
+
+</div>
+
+<script src="core.js"></script>
+
+<script>
+function addNewProduct(){
+  let name = pname.value.trim();
+  let price = pprice.value;
+  let cost = pcost.value;
+  let stock = pstock.value;
+  let barcode = pbarcode.value.trim();
+
+  if(!name || price<=0) return alert("بيانات غير صحيحة");
+
+  addProduct(name, price, cost, stock, barcode);
+
+  pname.value = pprice.value = pcost.value = pstock.value = pbarcode.value = "";
+  renderList();
+}
+
+function renderList(){
+  let box = document.getElementById("plist");
+  box.innerHTML = "";
+
+  DB.products.forEach(p=>{
+    box.innerHTML += `
+      <tr>
+        <td>${p.name}</td>
+        <td>${p.price}</td>
+        <td>${p.cost}</td>
+        <td>${p.stock}</td>
+        <td class="actions">
+          <button class="red" onclick="deleteProduct(${p.id})">حذف</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+function deleteProduct(id){
+  if(!confirm("حذف الصنف؟")) return;
+  DB.products = DB.products.filter(p=>p.id!==id);
+  saveDB();
+  renderList();
+}
+
+renderList();
+</script>
+
+</body>
+</html>
