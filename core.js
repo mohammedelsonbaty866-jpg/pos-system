@@ -1,6 +1,7 @@
 let products = JSON.parse(localStorage.products || "[]");
 let invoices = JSON.parse(localStorage.invoices || "[]");
 let settings = JSON.parse(localStorage.settings || "{}");
+let dailyCloses = JSON.parse(localStorage.dailyCloses || "[]");
 let cart = [];
 
 /* حفظ */
@@ -8,9 +9,10 @@ function saveAll(){
 localStorage.products = JSON.stringify(products);
 localStorage.invoices = JSON.stringify(invoices);
 localStorage.settings = JSON.stringify(settings);
+localStorage.dailyCloses = JSON.stringify(dailyCloses);
 }
 
-/* إضافة صنف (اسم أو باركود) */
+/* إضافة صنف */
 function addItem(){
 let key = search.value.trim();
 let qtyVal = parseInt(qty.value);
@@ -20,12 +22,7 @@ let p = products.find(x=>x.name===key || x.barcode===key);
 if(!p) return alert("الصنف غير موجود");
 if(p.stock < qtyVal) return alert("المخزون غير كافي");
 
-cart.push({
-name:p.name,
-price:p.price,
-cost:p.cost,
-qty:qtyVal
-});
+cart.push({name:p.name,price:p.price,cost:p.cost,qty:qtyVal});
 p.stock -= qtyVal;
 renderInvoice();
 saveAll();
@@ -88,21 +85,20 @@ saveAll();
 alert("تم حفظ الفاتورة");
 }
 
-/* طباعة */
+/* طباعة فاتورة */
 function printInvoice(){
 if(cart.length===0) return alert("الفاتورة فارغة");
 
-let w = window.open("", "", "width=380");
 let shop = settings.shopName || "اسم المحل";
 let total = cart.reduce((a,i)=>a+i.price*i.qty,0);
 
+let w = window.open("", "", "width=380");
 w.document.write(`
 <html dir="rtl">
 <head><link rel="stylesheet" href="print.css"></head>
 <body>
 <div class="receipt">
 <h2>${shop}</h2>
-<p>فاتورة رقم: ${invoices.length+1}</p>
 <p>${new Date().toLocaleString()}</p>
 <hr>
 ${cart.map(i=>`
@@ -121,12 +117,7 @@ ${cart.map(i=>`
 w.document.close();
 }
 
-/* فتح التقارير */
-function openReports(){
-location.href="reports.html";
-}
-
-/* فتح الإدارة */
-function openAdmin(){
-alert("شاشة الإدارة لاحقاً");
+/* فتح شاشة القفل اليومي */
+function openCloseDay(){
+location.href = "close-day.html";
 }
