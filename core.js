@@ -1,88 +1,189 @@
 /* =========================
-   CORE DATABASE
-========================= */
+   CORE.JS – Commercial POS
+   ========================= */
+
+// ====== Storage ======
 const DB = {
-  products: JSON.parse(localStorage.products || "[]"),
-  customers: JSON.parse(localStorage.customers || "[]"),
-  sales: JSON.parse(localStorage.sales || "[]"),
-  save(){
-    localStorage.products = JSON.stringify(this.products);
-    localStorage.customers = JSON.stringify(this.customers);
-    localStorage.sales = JSON.stringify(this.sales);
-  }
+  products: JSON.parse(localStorage.getItem("products") || "[]"),
+  customers: JSON.parse(localStorage.getItem("customers") || "[]"),
+  invoices: JSON.parse(localStorage.getItem("invoices") || "[]"),
+  settings: JSON.parse(localStorage.getItem("settings") || "{}"),
 };
 
-/* =========================
-   PRODUCTS
-========================= */
-function addProduct(name, price, cost, stock){
-  if(!name || price<=0 || stock<0){
-    alert("بيانات الصنف غير صحيحة");
-    return false;
-  }
+function saveDB() {
+  localStorage.setItem("products", JSON.stringify(DB.products));
+  localStorage.setItem("customers", JSON.stringify(DB.customers));
+  localStorage.setItem("invoices", JSON.stringify(DB.invoices));
+  localStorage.setItem("settings", JSON.stringify(DB.settings));
+}
+
+// ====== Helpers ======
+function uid() {
+  return Date.now();
+}
+function today() {
+  return new Date().toLocaleDateString("ar-EG");
+}
+function now() {
+  return new Date().toLocaleString("ar-EG");
+}
+
+// =====================
+// PRODUCTS
+// =====================
+function addProduct(data) {
   DB.products.push({
-    id: Date.now(),
-    name,
-    price:+price,
-    cost:+cost,
-    stock:+stock
+    id: uid(),
+    name: data.name,
+    price: +data.price,
+    cost: +data.cost,
+    stock: +data.stock,
+    barcode: data.barcode || "",
   });
-  DB.save();
-  return true;
+  saveDB();
 }
 
-/* =========================
-   CUSTOMERS
-========================= */
-function addCustomer(name){
-  if(!name) return alert("اسم العميل مطلوب");
+function updateProduct(id, data) {
+  const p = DB.products.find(x => x.id === id);
+  if (!p) return;
+  Object.assign(p, data);
+  saveDB();
+}
+
+function getProductByName(name) {
+  return DB.products.find(p => p.name === name);
+}
+
+function getProductByBarcode(code) {
+  return DB.products.find(p => p.barcode === code);
+}
+
+// =====================
+// CUSTOMERS
+// =====================
+function addCustomer(name) {
   DB.customers.push({
-    id: Date.now(),
+    id: uid(),
     name,
-    balance:0,
-    locked:false
+    balance: 0,
+    locked: false
   });
-  DB.save();
+  saveDB();
 }
 
-/* =========================
-   SALES
-========================= */
-function saveSale(items, type, customerId=null){
-  if(items.length===0) return alert("لا توجد أصناف");
+function payCustomer(id, amount) {
+  const c = DB.customers.find(x => x.id === id);
+  if (!c) return;
+  c.balance -= amount;
+  if (c.balance < 0) c.balance = 0;
+  saveDB();
+}
 
-  let total = 0;
-  items.forEach(i=>{
-    total += i.price * i.qty;
+// =====================
+// INVOICE / CASHIER
+// =====================
+let CART = [];
+
+function addToCart(product, qty) {
+  if (product.stock < qty) {
+    alert("❌ المخزون غير كافي");
+    return;
+  }
+  CART.push({
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    cost: product.cost,
+    qty
   });
+  product.stock -= qty;
+  saveDB();
+}
 
-  // خصم المخزون بعد التأكد
-  for(let i of items){
-    let p = DB.products.find(x=>x.id===i.id);
-    if(!p || p.stock < i.qty){
-      alert("مشكلة في المخزون");
+function cartTotal() {
+  return CART.reduce((t, i) => t + i.price * i.qty, 0);
+}
+
+function cartProfit() {
+  return CART.reduce((t, i) => t + (i.price - i.cost) * i.qty, 0);
+}
+
+function saveInvoice(type, customerId = null) {
+  if (CART.length === 0) return;
+
+  const invoice = {
+    id: DB.invoices.length + 1,
+    date: now(),
+    day: today(),
+    type,
+    total: cartTotal(),
+    profit: cartProfit(),
+    items: CART
+  };
+
+  if (type === "credit") {
+    const c = DB.customers.find(x => x.id === customerId);
+    if (!c || c.locked) {
+      alert("❌ العميل غير متاح");
       return;
     }
+    c.balance += invoice.total;
+    invoice.customer = c.name;
   }
 
-  items.forEach(i=>{
-    DB.products.find(x=>x.id===i.id).stock -= i.qty;
+  DB.invoices.push(invoice);
+  CART = [];
+  saveDB();
+
+  return invoice;
+}
+
+// =====================
+// REPORTS (TABLE BASED)
+// =====================
+function dailyReport(day = today()) {
+  const list = DB.invoices.filter(i => i.day === day);
+
+  let cash = 0, credit = 0, profit = 0;
+  list.forEach(i => {
+    profit += i.profit;
+    if (i.type === "cash") cash += i.total;
+    else credit += i.total;
   });
 
-  if(type==="credit"){
-    let c = DB.customers.find(x=>x.id==customerId);
-    if(!c || c.locked) return alert("العميل غير صالح");
-    c.balance += total;
-  }
+  return {
+    count: list.length,
+    cash,
+    credit,
+    total: cash + credit,
+    profit,
+    list
+  };
+}
 
-  DB.sales.push({
-    id: Date.now(),
-    date: new Date().toISOString(),
-    items,
-    total,
-    type
+function monthlyReport(month, year) {
+  const list = DB.invoices.filter(i => {
+    const d = new Date(i.date);
+    return d.getMonth() + 1 === month && d.getFullYear() === year;
   });
 
-  DB.save();
-  return true;
+  let total = 0, profit = 0;
+  list.forEach(i => {
+    total += i.total;
+    profit += i.profit;
+  });
+
+  return { total, profit, list };
+}
+
+// =====================
+// SETTINGS
+// =====================
+function saveSettings(data) {
+  DB.settings = data;
+  saveDB();
+}
+
+function getSettings() {
+  return DB.settings;
 }
