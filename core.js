@@ -2,7 +2,10 @@ let products = JSON.parse(localStorage.products || "[]");
 let invoices = JSON.parse(localStorage.invoices || "[]");
 let settings = JSON.parse(localStorage.settings || "{}");
 let dailyCloses = JSON.parse(localStorage.dailyCloses || "[]");
+let customers = JSON.parse(localStorage.customers || "[]");
 let cart = [];
+let payType = "cash";   // cash | credit
+let selectedCustomer = null;
 
 /* حفظ */
 function saveAll(){
@@ -10,6 +13,24 @@ localStorage.products = JSON.stringify(products);
 localStorage.invoices = JSON.stringify(invoices);
 localStorage.settings = JSON.stringify(settings);
 localStorage.dailyCloses = JSON.stringify(dailyCloses);
+localStorage.customers = JSON.stringify(customers);
+}
+
+/* تغيير طريقة الدفع */
+function setPay(type){
+payType = type;
+if(type==="credit"){
+document.getElementById("customerBox").style.display="block";
+}else{
+document.getElementById("customerBox").style.display="none";
+selectedCustomer = null;
+}
+}
+
+/* اختيار عميل */
+function selectCustomer(i){
+if(customers[i].locked) return alert("الحساب مقفول");
+selectedCustomer = i;
 }
 
 /* إضافة صنف */
@@ -55,9 +76,7 @@ ${i.qty} × ${i.price}
 <br>
 <button onclick="removeItem(${idx})"
 style="margin-top:6px;background:#ef4444;color:#fff;
-border:0;border-radius:8px;padding:6px 10px">
-🗑 حذف
-</button>
+border:0;border-radius:8px;padding:6px 10px">🗑 حذف</button>
 </div>`;
 });
 
@@ -71,24 +90,31 @@ if(cart.length===0) return alert("الفاتورة فارغة");
 let total=cart.reduce((a,i)=>a+i.price*i.qty,0);
 let profit=cart.reduce((a,i)=>a+(i.price-i.cost)*i.qty,0);
 
-invoices.push({
+let inv={
 no:invoices.length+1,
 date:new Date().toISOString(),
 items:cart,
 total,
-profit
-});
+profit,
+payType
+};
 
+if(payType==="credit"){
+if(selectedCustomer===null) return alert("اختر عميل");
+customers[selectedCustomer].balance += total;
+inv.customer = customers[selectedCustomer].name;
+}
+
+invoices.push(inv);
 cart=[];
 renderInvoice();
 saveAll();
 alert("تم حفظ الفاتورة");
 }
 
-/* طباعة فاتورة */
+/* طباعة */
 function printInvoice(){
 if(cart.length===0) return alert("الفاتورة فارغة");
-
 let shop = settings.shopName || "اسم المحل";
 let total = cart.reduce((a,i)=>a+i.price*i.qty,0);
 
@@ -117,7 +143,7 @@ ${cart.map(i=>`
 w.document.close();
 }
 
-/* فتح شاشة القفل اليومي */
-function openCloseDay(){
-location.href = "close-day.html";
+/* فتح العملاء */
+function openCustomers(){
+location.href="customers.html";
 }
