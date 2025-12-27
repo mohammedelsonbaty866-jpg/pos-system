@@ -1,220 +1,138 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>POS System</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>نظام كاشير</title>
 
-  <!-- Manifest -->
-  <link rel="manifest" href="manifest.json">
+<link rel="manifest" href="manifest.json">
 
-  <!-- Theme -->
-  <meta name="theme-color" content="#0d6efd">
+<style>
+body{
+  margin:0;
+  font-family:Tahoma;
+  background:#f1f5f9;
+}
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f6f9;
-    }
+header{
+  background:#020617;
+  color:#fff;
+  text-align:center;
+  padding:12px;
+  font-size:18px;
+}
 
-    header {
-      background: #0d6efd;
-      color: white;
-      padding: 12px;
-      text-align: center;
-      font-size: 20px;
-    }
+main{
+  display:grid;
+  grid-template-columns:2fr 1fr;
+  gap:10px;
+  padding:10px;
+}
 
-    .container {
-      display: flex;
-      height: calc(100vh - 60px);
-    }
+@media(max-width:768px){
+  main{grid-template-columns:1fr;}
+}
 
-    /* الأصناف */
-    .products {
-      flex: 2;
-      padding: 10px;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-      gap: 10px;
-      overflow-y: auto;
-    }
+.products-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+  gap:10px;
+}
 
-    .product {
-      background: white;
-      border-radius: 8px;
-      padding: 10px;
-      text-align: center;
-      cursor: pointer;
-      border: 1px solid #ddd;
-    }
+.product-box{
+  background:#fff;
+  border-radius:14px;
+  padding:14px;
+  text-align:center;
+  box-shadow:0 3px 6px rgba(0,0,0,.1);
+  cursor:pointer;
+}
 
-    .product:hover {
-      background: #e9f1ff;
-    }
+.product-box strong{
+  display:block;
+  font-size:16px;
+}
 
-    /* الكاشير */
-    .cashier {
-      flex: 1;
-      background: #ffffff;
-      border-left: 2px solid #ddd;
-      display: flex;
-      flex-direction: column;
-    }
+.product-box span{
+  color:#16a34a;
+  font-weight:bold;
+}
 
-    .invoice {
-      flex: 1;
-      padding: 10px;
-      overflow-y: auto;
-    }
+.invoice{
+  background:#fff;
+  border-radius:14px;
+  padding:10px;
+}
 
-    .item {
-      display: flex;
-      justify-content: space-between;
-      border-bottom: 1px dashed #ccc;
-      padding: 5px 0;
-    }
+.invoice-row{
+  display:flex;
+  justify-content:space-between;
+  border-bottom:1px dashed #ddd;
+  padding:6px 0;
+  font-size:14px;
+}
 
-    .total {
-      font-size: 18px;
-      font-weight: bold;
-      padding: 10px;
-      border-top: 2px solid #000;
-    }
+.total{
+  font-size:18px;
+  text-align:center;
+  margin:10px 0;
+}
 
-    .buttons {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 5px;
-      padding: 10px;
-    }
+.actions button{
+  width:100%;
+  margin:5px 0;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  font-size:16px;
+  cursor:pointer;
+}
 
-    button {
-      padding: 12px;
-      font-size: 16px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
+.pay{background:#16a34a;color:#fff}
+.clear{background:#ef4444;color:#fff}
+.print{background:#2563eb;color:#fff}
 
-    .pay {
-      background: #28a745;
-      color: white;
-    }
-
-    .clear {
-      background: #dc3545;
-      color: white;
-    }
-
-    .add {
-      background: #0d6efd;
-      color: white;
-      grid-column: span 2;
-    }
-  </style>
+@media print{
+  body *{visibility:hidden}
+  .invoice,.invoice *{
+    visibility:visible;
+  }
+  .invoice{
+    position:absolute;
+    top:0;left:0;
+    width:100%;
+  }
+}
+</style>
 </head>
+
 <body>
 
-<header>نقطة بيع – POS System</header>
+<header>نظام كاشير</header>
 
-<div class="container">
+<main>
 
-  <!-- الأصناف -->
-  <div class="products" id="products"></div>
+  <div id="productsList" class="products-grid"></div>
 
-  <!-- الكاشير -->
-  <div class="cashier">
-    <div class="invoice" id="invoice"></div>
-    <div class="total" id="total">الإجمالي: 0 جنيه</div>
+  <div class="invoice" id="invoiceBox">
+    <h3 style="text-align:center">فاتورة</h3>
+    <div id="invoiceItems"></div>
+    <div class="total">الإجمالي: <span id="total">0</span> جنيه</div>
 
-    <div class="buttons">
+    <div class="actions">
       <button class="pay" onclick="pay()">دفع</button>
       <button class="clear" onclick="clearInvoice()">مسح</button>
-      <button class="add" onclick="addProduct()">➕ إضافة صنف</button>
+      <button class="print" onclick="window.print()">طباعة</button>
     </div>
   </div>
 
-</div>
+</main>
 
+<script src="core.js"></script>
 <script>
-  const productsDiv = document.getElementById("products");
-  const invoiceDiv = document.getElementById("invoice");
-  const totalDiv = document.getElementById("total");
-
-  let products = JSON.parse(localStorage.getItem("products")) || [
-    { name: "مياه", price: 5 },
-    { name: "عصير", price: 10 },
-    { name: "شيبسي", price: 7 }
-  ];
-
-  let cart = [];
-
-  function saveProducts() {
-    localStorage.setItem("products", JSON.stringify(products));
-  }
-
-  function renderProducts() {
-    productsDiv.innerHTML = "";
-    products.forEach((p, index) => {
-      const div = document.createElement("div");
-      div.className = "product";
-      div.innerHTML = `<strong>${p.name}</strong><br>${p.price} جنيه`;
-      div.onclick = () => addToCart(index);
-      productsDiv.appendChild(div);
-    });
-  }
-
-  function addToCart(index) {
-    cart.push(products[index]);
-    renderInvoice();
-  }
-
-  function renderInvoice() {
-    invoiceDiv.innerHTML = "";
-    let total = 0;
-    cart.forEach(item => {
-      total += item.price;
-      invoiceDiv.innerHTML += `
-        <div class="item">
-          <span>${item.name}</span>
-          <span>${item.price}</span>
-        </div>
-      `;
-    });
-    totalDiv.innerText = "الإجمالي: " + total + " جنيه";
-  }
-
-  function clearInvoice() {
-    cart = [];
-    renderInvoice();
-  }
-
-  function pay() {
-    if (cart.length === 0) {
-      alert("لا توجد أصناف");
-      return;
-    }
-    window.print();
-    clearInvoice();
-  }
-
-  function addProduct() {
-    const name = prompt("اسم الصنف:");
-    const price = Number(prompt("السعر:"));
-    if (!name || !price) return;
-    products.push({ name, price });
-    saveProducts();
-    renderProducts();
-  }
-
-  renderProducts();
-
-  // PWA
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js');
-  }
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js");
+}
 </script>
 
 </body>
