@@ -1,173 +1,82 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>نقطة بيع | الكاشير</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام كاشير POS</title>
 
-<link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="style.css">
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f172a">
 
-<style>
-body{
-  margin:0;
-  font-family:Tahoma;
-  background:#f1f5f9;
-}
-header{
-  background:#020617;
-  color:#fff;
-  padding:12px;
-  text-align:center;
-  font-size:18px;
-}
-.top-bar{
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr;
-  gap:8px;
-  padding:10px;
-  background:#fff;
-}
-button{
-  padding:12px;
-  border:0;
-  border-radius:10px;
-  font-size:14px;
-  cursor:pointer;
-}
-.btn-main{background:#22c55e;color:#fff}
-.btn-print{background:#0ea5e9;color:#fff}
-.btn-danger{background:#ef4444;color:#fff}
+  <!-- Icons -->
+  <link rel="icon" href="icon-192.png">
 
-input,select{
-  padding:10px;
-  border-radius:8px;
-  border:1px solid #cbd5f5;
-  font-size:14px;
-  width:100%;
-}
-
-#invoice{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
-  gap:8px;
-  padding:10px;
-}
-.card{
-  background:#fff;
-  border-radius:12px;
-  padding:10px;
-  text-align:center;
-  box-shadow:0 3px 8px rgba(0,0,0,.08)
-}
-
-.total-box{
-  background:#fff;
-  padding:15px;
-  font-size:20px;
-  text-align:center;
-  margin:10px;
-  border-radius:12px;
-}
-.hidden{display:none}
-
-/* طباعة */
-@media print{
-  body{background:#fff}
-  .top-bar,.actions{display:none}
-}
-</style>
+  <!-- Style -->
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<header id="shopName">نظام كاشير</header>
+<!-- Header -->
+<header class="header">
+  <h2>نظام الكاشير</h2>
+</header>
 
-<div class="top-bar">
-  <input id="search" placeholder="اسم الصنف أو باركود">
-  <input id="qty" type="number" value="1">
-  <select id="payType" onchange="toggleCustomer()">
-    <option value="cash">نقدي</option>
-    <option value="credit">آجل</option>
-  </select>
+<!-- Main -->
+<div class="container">
+
+  <!-- المنتجات -->
+  <section class="products-section">
+    <h3>الأصناف</h3>
+    <div id="productsBox" class="products-grid">
+      <!-- الأصناف تظهر هنا -->
+    </div>
+  </section>
+
+  <!-- الفاتورة -->
+  <section class="invoice-section">
+    <h3>الفاتورة</h3>
+
+    <table class="invoice-table">
+      <thead>
+        <tr>
+          <th>الصنف</th>
+          <th>كمية</th>
+          <th>سعر</th>
+          <th>إجمالي</th>
+          <th>✖</th>
+        </tr>
+      </thead>
+      <tbody id="invoiceBody">
+        <!-- عناصر الفاتورة -->
+      </tbody>
+    </table>
+
+    <div class="total">
+      الإجمالي:
+      <span id="totalBox">0 ج</span>
+    </div>
+
+    <button class="btn-save" onclick="saveInvoice()">
+      حفظ + طباعة
+    </button>
+  </section>
+
 </div>
 
-<div class="top-bar hidden" id="customerBox">
-  <select id="customer"></select>
-</div>
+<!-- Footer -->
+<footer class="footer">
+  <span>POS System ©</span>
+</footer>
 
-<div class="top-bar actions">
-  <button class="btn-main" onclick="addItem()">➕ إضافة</button>
-  <button class="btn-print" onclick="saveAndPrint()">💾 حفظ + 🖨️ طباعة</button>
-  <button class="btn-danger" onclick="clearCart()">🗑️ مسح</button>
-</div>
-
-<div id="invoice"></div>
-
-<div class="total-box" id="total">الإجمالي: 0</div>
-
+<!-- Core -->
 <script src="core.js"></script>
 
+<!-- Service Worker -->
 <script>
-/* ====== INIT ====== */
-const settings = getSettings();
-document.getElementById("shopName").innerText = settings.shopName || "نظام كاشير";
-
-/* ====== Customers ====== */
-function loadCustomers(){
-  customer.innerHTML="";
-  DB.customers.forEach(c=>{
-    if(!c.locked){
-      customer.innerHTML+=`<option value="${c.id}">${c.name}</option>`;
-    }
-  });
-}
-loadCustomers();
-
-function toggleCustomer(){
-  customerBox.classList.toggle("hidden",payType.value!=="credit");
-}
-
-/* ====== CART ====== */
-function addItem(){
-  const q = +qty.value;
-  if(q<=0) return;
-
-  let p = getProductByName(search.value) || getProductByBarcode(search.value);
-  if(!p){ alert("الصنف غير موجود"); return; }
-
-  addToCart(p,q);
-  renderInvoice();
-  search.value="";
-}
-
-function renderInvoice(){
-  invoice.innerHTML="";
-  CART.forEach(i=>{
-    invoice.innerHTML+=`
-      <div class="card">
-        <b>${i.name}</b><br>
-        ${i.qty} × ${i.price}<br>
-        <b>${i.qty*i.price}</b>
-      </div>`;
-  });
-  total.innerText="الإجمالي: "+cartTotal();
-}
-
-function clearCart(){
-  CART=[];
-  renderInvoice();
-}
-
-/* ====== SAVE + PRINT ====== */
-function saveAndPrint(){
-  const type = payType.value;
-  const cust = customer.value || null;
-  const inv = saveInvoice(type,cust);
-  if(!inv) return;
-
-  renderInvoice();
-  window.print();
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js");
 }
 </script>
 
