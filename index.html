@@ -56,7 +56,26 @@ button{cursor:pointer;border:0}
 .receipt{display:none}
 </style>
 </head>
+<div id="print-area" style="display:none">
+  <div class="p-center">
+    <b id="p-shop">اسم المحل</b><br>
+    <small>فاتورة بيع</small>
+  </div>
 
+  <div class="p-line"></div>
+
+  <div id="p-items"></div>
+
+  <div class="p-line"></div>
+
+  <b>الإجمالي: <span id="p-total"></span></b>
+
+  <div class="p-line"></div>
+
+  <div class="p-center">
+    <small>شكراً لزيارتكم</small>
+  </div>
+</div>
 <body>
 
 <header>نقطة بيع</header>
