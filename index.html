@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>نظام كاشير تجاري</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f172a">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header id="shopTitle">نظام كاشير تجاري</header>
+
+<div class="app">
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <h3>القائمة</h3>
+    <button onclick="showScreen('cashier')">🧾 الكاشير</button>
+    <button onclick="showScreen('inventory')">📦 الأصناف</button>
+    <button onclick="showScreen('customers')">👤 العملاء</button>
+    <button onclick="showScreen('reports')">📊 التقارير</button>
+    <button onclick="showScreen('settings')">⚙️ الإعدادات</button>
+  </aside>
+
+  <!-- ===== CONTENT ===== -->
+  <main class="content">
+
+    <!-- ===== CASHIER ===== -->
+    <section id="cashier" class="cashier">
+      <!-- PRODUCTS -->
+      <div class="products" id="products">
+        <!-- products injected by JS -->
+      </div>
+
+      <!-- INVOICE -->
+      <div class="invoice">
+        <h4>فاتورة بيع</h4>
+
+        <table>
+          <thead>
+            <tr>
+              <th>الصنف</th>
+              <th>ك</th>
+              <th>س</th>
+              <th>الإجمالي</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="invoiceBody"></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3">الإجمالي</td>
+              <td id="invoiceTotal">0</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+
+        <div class="actions">
+          <button class="btn-primary" onclick="saveInvoice()">💾 حفظ</button>
+          <button class="btn-warning" onclick="printInvoice()">🖨️ طباعة</button>
+          <button class="btn-danger" onclick="clearInvoice()">🗑 مسح</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== INVENTORY ===== -->
+    <section id="inventory" class="hidden">
+      <h3>إدارة الأصناف</h3>
+
+      <input id="pName" placeholder="اسم الصنف">
+      <input id="pPriceBuy" type="number" placeholder="سعر الشراء">
+      <input id="pPriceSell" type="number" placeholder="سعر البيع">
+      <input id="pStock" type="number" placeholder="المخزون">
+
+      <button class="btn-primary" onclick="addProduct()">➕ إضافة صنف</button>
+
+      <div class="products" id="inventoryList"></div>
+    </section>
+
+    <!-- ===== CUSTOMERS ===== -->
+    <section id="customers" class="hidden">
+      <h3>العملاء</h3>
+
+      <input id="cName" placeholder="اسم العميل">
+      <button class="btn-primary" onclick="addCustomer()">➕ إضافة عميل</button>
+
+      <div id="customersList"></div>
+    </section>
+
+    <!-- ===== REPORTS ===== -->
+    <section id="reports" class="hidden">
+      <h3>التقارير</h3>
+      <div id="reportsBox">سيتم إضافة التقارير هنا</div>
+    </section>
+
+    <!-- ===== SETTINGS ===== -->
+    <section id="settings" class="hidden">
+      <h3>الإعدادات</h3>
+      <input id="shopNameInput" placeholder="اسم المحل">
+      <button class="btn-primary" onclick="saveSettings()">💾 حفظ الإعدادات</button>
+    </section>
+
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="core.js"></script>
+<script src="inventory.js"></script>
+<script src="customers.js"></script>
+<script src="reports.js"></script>
+<script src="auth.js"></script>
+
+<script>
+  function showScreen(id){
+    document.querySelectorAll("main section").forEach(s=>s.classList.add("hidden"));
+    document.getElementById(id).classList.remove("hidden");
+  }
+</script>
+
+</body>
+</html>
