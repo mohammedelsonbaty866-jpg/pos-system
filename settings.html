@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>الإعدادات</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Tahoma;
+  background:#f1f5f9;
+}
+header{
+  background:#020617;
+  color:#fff;
+  padding:12px;
+  text-align:center;
+  font-size:18px;
+}
+.container{padding:12px}
+.card{
+  background:#fff;
+  padding:15px;
+  border-radius:12px;
+  margin-bottom:12px;
+  box-shadow:0 4px 10px rgba(0,0,0,.08)
+}
+label{font-weight:bold;display:block;margin-top:10px}
+input,select{
+  width:100%;
+  padding:10px;
+  margin-top:5px;
+  border-radius:8px;
+  border:1px solid #cbd5f5;
+}
+button{
+  margin-top:15px;
+  width:100%;
+  padding:12px;
+  border:0;
+  border-radius:10px;
+  font-size:16px;
+  background:#22c55e;
+  color:#fff;
+  cursor:pointer;
+}
+.success{
+  background:#dcfce7;
+  color:#166534;
+  padding:10px;
+  border-radius:8px;
+  margin-top:10px;
+  display:none;
+  text-align:center;
+}
+</style>
+</head>
+
+<body>
+
+<header>⚙️ إعدادات البرنامج</header>
+
+<div class="container">
+
+<div class="card">
+  <label>اسم المحل</label>
+  <input id="shopName">
+
+  <label>العملة</label>
+  <select id="currency">
+    <option value="جنيه">جنيه</option>
+    <option value="$">$</option>
+    <option value="ريال">ريال</option>
+  </select>
+
+  <label>نسبة الضريبة %</label>
+  <input id="tax" type="number">
+
+  <label>حفظ تلقائي</label>
+  <select id="autosave">
+    <option value="on">تشغيل</option>
+    <option value="off">إيقاف</option>
+  </select>
+
+  <label>الطباعة</label>
+  <select id="printMode">
+    <option value="thermal">حرارية</option>
+    <option value="a4">A4</option>
+  </select>
+
+  <button onclick="save()">💾 حفظ الإعدادات</button>
+
+  <div class="success" id="msg">تم حفظ الإعدادات بنجاح</div>
+</div>
+
+</div>
+
+<script>
+function save(){
+  const settings={
+    shopName:shopName.value,
+    currency:currency.value,
+    tax:+tax.value||0,
+    autosave:autosave.value,
+    printMode:printMode.value
+  };
+  localStorage.setItem("settings",JSON.stringify(settings));
+  msg.style.display="block";
+  setTimeout(()=>msg.style.display="none",2000);
+}
+
+(function load(){
+  const s=JSON.parse(localStorage.getItem("settings")||"{}");
+  shopName.value=s.shopName||"";
+  currency.value=s.currency||"جنيه";
+  tax.value=s.tax||0;
+  autosave.value=s.autosave||"on";
+  printMode.value=s.printMode||"thermal";
+})();
+</script>
+
+</body>
+</html>
