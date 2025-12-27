@@ -3,126 +3,125 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>POS كاشير</title>
+<title>POS System</title>
 
 <style>
 @media print{
  body{margin:0}
  .no-print{display:none}
- .receipt{
-  width:80mm;
-  font-family:Tahoma;
-  font-size:12px;
- }
+ .receipt{width:80mm;font-size:12px}
 }
-body{
- margin:0;
- font-family:Tajawal,Arial;
- background:#f1f5f9;
-}
-header{
- background:#020617;
- color:#fff;
- padding:10px;
- text-align:center;
-}
-#cashier{
- display:grid;
- grid-template-columns:1.2fr 1fr;
- gap:10px;
- padding:10px;
-}
-@media(max-width:768px){
- #cashier{grid-template-columns:1fr}
-}
-.box{
- background:#fff;
- border-radius:12px;
- padding:10px;
-}
-input,select,button{
- width:100%;
- padding:10px;
- margin-bottom:6px;
- border-radius:8px;
- border:1px solid #cbd5f5;
- font-size:14px;
-}
+body{margin:0;font-family:Tajawal,Arial;background:#f1f5f9}
+header{background:#020617;color:#fff;padding:12px;text-align:center}
+nav{display:flex;gap:5px;padding:5px;background:#0f172a}
+nav button{flex:1;padding:10px;border:0;border-radius:8px;color:#fff;background:#334155}
+.box{background:#fff;border-radius:12px;padding:10px;margin:8px}
+input,select,button{width:100%;padding:10px;margin-bottom:6px;border-radius:8px;border:1px solid #cbd5f5;font-size:14px}
 button{cursor:pointer;border:0}
 .btn{background:#22c55e;color:#fff}
 .btn-dark{background:#0f172a;color:#fff}
-.products{
- display:grid;
- grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
- gap:8px;
-}
-.product{
- background:#f8fafc;
- padding:10px;
- border-radius:10px;
- text-align:center;
- border:1px solid #e5e7eb;
- cursor:pointer;
-}
-.invoice-line{
- display:flex;
- justify-content:space-between;
- border-bottom:1px dashed #ccc;
- padding:4px 0;
-}
+.btn-danger{background:#ef4444;color:#fff}
+.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
+.product{background:#f8fafc;padding:10px;border-radius:10px;text-align:center;border:1px solid #e5e7eb;cursor:pointer}
+.low{border:2px solid #ef4444}
+.line{display:flex;justify-content:space-between;border-bottom:1px dashed #ccc;padding:4px 0}
 .total{font-weight:bold;margin-top:6px}
-.receipt{
- display:none;
-}
+.hidden{display:none}
+.receipt{display:none}
 </style>
 </head>
 
 <body>
 
-<header class="no-print">نقطة بيع</header>
+<header>نقطة بيع</header>
 
+<nav class="no-print">
+<button onclick="show('cashier')">🧾 كاشير</button>
+<button onclick="show('productsMng')">📦 الأصناف</button>
+<button onclick="show('customers')">👤 عملاء</button>
+<button onclick="show('reports')">📊 تقارير</button>
+</nav>
+
+<!-- ========== الكاشير ========== -->
 <div id="cashier" class="no-print">
 
-<!-- الأصناف -->
 <div class="box">
-<input id="search" placeholder="بحث" onkeyup="renderProducts()">
+<input id="search" placeholder="اسم أو باركود" onkeyup="renderProducts()">
+<button class="btn-dark" onclick="scanBarcode()">📷 مسح باركود</button>
 <div class="products" id="products"></div>
 </div>
 
-<!-- الفاتورة -->
 <div class="box">
+<select id="payType" onchange="toggleCustomer()">
+<option value="cash">نقدي</option>
+<option value="credit">آجل</option>
+</select>
+
+<select id="customerSelect" class="hidden"></select>
+
 <div id="invoice"></div>
 
 <input id="discount" placeholder="خصم">
 <select id="discountType" onchange="calc()">
- <option value="value">مبلغ</option>
- <option value="percent">%</option>
+<option value="value">مبلغ</option>
+<option value="percent">%</option>
 </select>
+
 <input id="tax" placeholder="ضريبة %">
 
 <div class="total" id="total"></div>
 <div class="total" id="net"></div>
 
 <button class="btn-dark" onclick="clearInvoice()">مسح</button>
+<button class="btn" onclick="saveInvoice()">حفظ</button>
 <button class="btn" onclick="printInvoice()">طباعة</button>
 </div>
 
 </div>
 
-<!-- الفاتورة الحرارية -->
+<!-- ========== إدارة الأصناف ========== -->
+<div id="productsMng" class="hidden no-print">
+
+<div class="box">
+<h3>إضافة / تعديل صنف</h3>
+<input id="pn" placeholder="اسم الصنف">
+<input id="pb" placeholder="باركود (اختياري)">
+<input id="pp" placeholder="سعر بيع">
+<input id="pc" placeholder="سعر شراء">
+<input id="ps" placeholder="الكمية">
+<button class="btn" onclick="addProduct()">حفظ</button>
+</div>
+
+<div class="box">
+<h3>قائمة الأصناف</h3>
+<div id="plist"></div>
+</div>
+
+</div>
+
+<!-- ========== العملاء ========== -->
+<div id="customers" class="hidden no-print">
+<div class="box">
+<input id="custName" placeholder="اسم العميل">
+<button class="btn" onclick="addCustomer()">إضافة</button>
+</div>
+<div class="box" id="customerList"></div>
+</div>
+
+<!-- ========== التقارير ========== -->
+<div id="reports" class="hidden no-print">
+<div class="box" id="dayReport"></div>
+</div>
+
+<!-- ========== الفاتورة ========== -->
 <div class="receipt" id="receipt">
 <center>
-<b id="shopName">اسم المحل</b><br>
-فاتورة بيع<br>
-رقم: <span id="invNo"></span><br>
-<span id="invDate"></span>
+<b>فاتورة بيع</b><br>
+<span id="rDate"></span>
 </center>
 <hr>
 <div id="rItems"></div>
 <hr>
-<div>الإجمالي: <span id="rTotal"></span></div>
-<div>الخصم: <span id="rDiscount"></span></div>
-<div>الضريبة: <span id="rTax"></span></div>
 <b>الصافي: <span id="rNet"></span></b>
 <hr>
 <center>شكراً لزيارتكم</center>
@@ -130,25 +129,29 @@ button{cursor:pointer;border:0}
 
 <script>
 let products=JSON.parse(localStorage.products||"[]");
+let customers=JSON.parse(localStorage.customers||"[]");
+let invoices=JSON.parse(localStorage.invoices||"[]");
 let cart=[];
-let invNo=localStorage.invNo||1;
+let invNo=+localStorage.invNo||1;
 
-if(products.length==0){
- products=[
-  {n:"سكر",p:10,s:100},
-  {n:"رز",p:20,s:50}
- ];
- localStorage.products=JSON.stringify(products);
+function show(id){
+ ["cashier","productsMng","customers","reports"].forEach(x=>document.getElementById(x).classList.add("hidden"));
+ document.getElementById(id).classList.remove("hidden");
+ if(id=="productsMng")renderProductList();
+ if(id=="customers")renderCustomers();
+ if(id=="reports")renderReports();
 }
 
 function renderProducts(){
  let q=search.value||"";
  productsBox.innerHTML="";
- products.filter(p=>p.n.includes(q)).forEach((p,i)=>{
+ products.filter(p=>p.n.includes(q)||p.b==q).forEach((p,i)=>{
   productsBox.innerHTML+=`
-   <div class="product" onclick="addItem(${i})">
-    <b>${p.n}</b><br>${p.p} ج
-   </div>`;
+  <div class="product ${p.s<=5?'low':''}" onclick="addItem(${i})">
+   <b>${p.n}</b><br>
+   ${p.p} ج<br>
+   مخزون: ${p.s}
+  </div>`;
  });
 }
 
@@ -156,20 +159,16 @@ function addItem(i){
  let p=products[i];
  if(p.s<=0)return alert("نفاد المخزون");
  let f=cart.find(x=>x.n==p.n);
- if(f)f.q++; else cart.push({n:p.n,p:p.p,q:1});
+ if(f)f.q++; else cart.push({n:p.n,p:p.p,c:p.c,q:1});
  p.s--;
- renderInvoice();
  localStorage.products=JSON.stringify(products);
+ renderInvoice();
 }
 
 function renderInvoice(){
  invoice.innerHTML="";
  cart.forEach(i=>{
-  invoice.innerHTML+=`
-   <div class="invoice-line">
-    <span>${i.n} × ${i.q}</span>
-    <span>${i.p*i.q}</span>
-   </div>`;
+  invoice.innerHTML+=`<div class="line"><span>${i.n} × ${i.q}</span><span>${i.p*i.q}</span></div>`;
  });
  calc();
 }
@@ -178,34 +177,10 @@ function calc(){
  let total=cart.reduce((a,i)=>a+i.p*i.q,0);
  let d=+discount.value||0;
  if(discountType.value=="percent") d=total*(d/100);
- let after=total-d;
- let t=after*(+tax.value||0)/100;
- let net=after+t;
- total.innerText="الإجمالي: "+total;
+ let net=total-d+(total-d)*(+tax.value||0)/100;
+ totalDiv.innerText="الإجمالي: "+total;
  netDiv.innerText="الصافي: "+net.toFixed(2);
- window._calc={total,d,t,net};
-}
-const netDiv=document.getElementById("net");
-
-function printInvoice(){
- if(cart.length==0)return;
- receipt.style.display="block";
- shopName.innerText=localStorage.shopName||"محل";
- invNoSpan.innerText=invNo;
- invDate.innerText=new Date().toLocaleString();
- rItems.innerHTML="";
- cart.forEach(i=>{
-  rItems.innerHTML+=`
-   <div>${i.n} × ${i.q} = ${i.p*i.q}</div>`;
- });
- rTotal.innerText=_calc.total;
- rDiscount.innerText=_calc.d;
- rTax.innerText=_calc.t.toFixed(2);
- rNet.innerText=_calc.net.toFixed(2);
- window.print();
- receipt.style.display="none";
- localStorage.invNo=++invNo;
- clearInvoice();
+ window._net=net;
 }
 
 function clearInvoice(){
@@ -214,8 +189,75 @@ function clearInvoice(){
  renderInvoice();
 }
 
+function saveInvoice(){
+ if(cart.length==0)return;
+ invoices.push({no:invNo,date:new Date().toISOString(),net:_net});
+ localStorage.invoices=JSON.stringify(invoices);
+ localStorage.invNo=++invNo;
+ clearInvoice();
+ alert("تم الحفظ");
+}
+
+function printInvoice(){
+ rItems.innerHTML="";
+ cart.forEach(i=>rItems.innerHTML+=`<div>${i.n} × ${i.q}</div>`);
+ rNet.innerText=_net;
+ rDate.innerText=new Date().toLocaleString();
+ receipt.style.display="block";
+ window.print();
+ receipt.style.display="none";
+ saveInvoice();
+}
+
+function addProduct(){
+ products.push({
+  n:pn.value,b:pb.value,p:+pp.value,c:+pc.value,s:+ps.value
+ });
+ localStorage.products=JSON.stringify(products);
+ pn.value=pb.value=pp.value=pc.value=ps.value="";
+ renderProductList();
+}
+
+function renderProductList(){
+ plist.innerHTML="";
+ products.forEach(p=>{
+  plist.innerHTML+=`<div class="line">${p.n} | مخزون ${p.s}</div>`;
+ });
+}
+
+function addCustomer(){
+ customers.push({name:custName.value,balance:0});
+ localStorage.customers=JSON.stringify(customers);
+ custName.value="";
+ renderCustomers();
+}
+
+function renderCustomers(){
+ customerList.innerHTML="";
+ customerSelect.innerHTML="";
+ customers.forEach((c,i)=>{
+  customerList.innerHTML+=`<div>${c.name} | ${c.balance}</div>`;
+  customerSelect.innerHTML+=`<option value="${i}">${c.name}</option>`;
+ });
+}
+
+function renderReports(){
+ let today=new Date().toISOString().slice(0,10);
+ let d=invoices.filter(i=>i.date.startsWith(today));
+ dayReport.innerHTML=`عدد الفواتير: ${d.length}<br>إجمالي: ${d.reduce((a,i)=>a+i.net,0)}`;
+}
+
+function toggleCustomer(){
+ customerSelect.classList.toggle("hidden",payType.value!="credit");
+}
+
+function scanBarcode(){
+ alert("ادخل الباركود في البحث أو استخدم قارئ خارجي");
+}
+
 const productsBox=document.getElementById("products");
-const invNoSpan=document.getElementById("invNo");
+const totalDiv=document.getElementById("total");
+const netDiv=document.getElementById("net");
 
 renderProducts();
 </script>
