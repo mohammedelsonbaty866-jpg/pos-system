@@ -1,214 +1,206 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>POS System</title>
+  <meta charset="UTF-8">
+  <title>POS System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<style>
-body{margin:0;font-family:Tahoma;background:#f1f5f9}
-header{background:#020617;color:#fff;padding:12px;text-align:center;font-size:18px}
-nav{display:flex;gap:5px;background:#020617;padding:6px}
-nav button{flex:1;background:#111827;color:#fff;border:0;border-radius:8px;padding:10px}
-section{padding:10px}
-input,select,button{width:100%;padding:10px;border-radius:8px;font-size:14px}
-button{border:0;cursor:pointer}
-.btn{background:#16a34a;color:#fff}
-.btn-danger{background:#dc2626;color:#fff}
-.card{background:#fff;padding:10px;border-radius:10px;margin-bottom:6px}
-.hidden{display:none}
-#invoice{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
-#totalBox{background:#020617;color:#fff;padding:12px;border-radius:12px;text-align:center;font-size:18px}
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0d1b2a">
 
-/* طباعة */
-@media print{
- nav,button,input,select{display:none}
- body{background:#fff}
- .card{border:1px dashed #000}
-}
-</style>
+  <style>
+    body {
+      margin: 0;
+      font-family: Tahoma, Arial;
+      background: #f1f5f9;
+    }
+
+    header {
+      background: #0d1b2a;
+      color: #fff;
+      padding: 12px;
+      text-align: center;
+      font-size: 18px;
+    }
+
+    .top-bar {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 8px;
+      padding: 10px;
+      background: #fff;
+    }
+
+    input, select, button {
+      padding: 10px;
+      font-size: 14px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+    }
+
+    button {
+      cursor: pointer;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+    }
+
+    button.secondary {
+      background: #16a34a;
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      height: calc(100vh - 120px);
+    }
+
+    @media (max-width: 768px) {
+      .content {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* المنتجات */
+    .products {
+      padding: 10px;
+      overflow-y: auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+    }
+
+    .product {
+      background: #fff;
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .product h4 {
+      margin: 0 0 5px;
+      font-size: 15px;
+    }
+
+    .product span {
+      color: #16a34a;
+      font-weight: bold;
+    }
+
+    /* الفاتورة */
+    .cart {
+      padding: 10px;
+      background: #e2e8f0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #invoice {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .invoice-item {
+      background: #fff;
+      border-radius: 8px;
+      padding: 8px;
+      margin-bottom: 6px;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr auto;
+      gap: 5px;
+      align-items: center;
+    }
+
+    .invoice-item button {
+      background: #dc2626;
+      padding: 6px;
+    }
+
+    #total {
+      background: #fff;
+      padding: 12px;
+      font-size: 18px;
+      text-align: center;
+      border-radius: 10px;
+      margin-top: 8px;
+    }
+
+    .bottom-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+    }
+  </style>
 </head>
 
 <body>
 
-<header>🧾 نظام كاشير احترافي</header>
+<header id="shopTitle">نقطة بيع</header>
 
-<nav>
- <button onclick="show('cashier')">كاشير</button>
- <button onclick="show('products')">الأصناف</button>
- <button onclick="show('reports')">التقارير</button>
-</nav>
+<!-- شريط الإدخال -->
+<div class="top-bar">
+  <input id="search" placeholder="اسم الصنف أو الباركود">
+  <input id="qty" type="number" value="1">
+  <button onclick="addToCart(search.value, qty.value)">إضافة</button>
+</div>
 
-<!-- الكاشير -->
-<section id="cashier">
- <input id="search" placeholder="اسم الصنف">
- <input id="qty" type="number" value="1" min="1">
+<div class="content">
 
- <button class="btn" onclick="addItem()">➕ إضافة</button>
+  <!-- المنتجات -->
+  <div class="products" id="productList"></div>
 
- <div id="invoice"></div>
- <div id="totalBox">الإجمالي: 0</div>
+  <!-- الفاتورة -->
+  <div class="cart">
+    <div id="invoice"></div>
 
- <button class="btn" onclick="saveAndPrint()">💾 حفظ وطباعة</button>
-</section>
+    <div id="total">الإجمالي: 0</div>
 
-<!-- الأصناف -->
-<section id="products" class="hidden">
- <h3>📦 إضافة صنف</h3>
- <input id="pn" placeholder="اسم الصنف">
- <input id="pp" type="number" placeholder="سعر البيع">
- <input id="pc" type="number" placeholder="سعر الشراء">
- <input id="ps" type="number" placeholder="المخزون">
- <button class="btn" onclick="addProduct()">حفظ</button>
+    <div class="bottom-bar">
+      <button class="secondary"
+        onclick="saveInvoice('cash', null, true)">
+        حفظ + طباعة (نقدي)
+      </button>
 
- <h3>📋 قائمة الأصناف</h3>
- <div id="plist"></div>
-</section>
+      <button
+        onclick="saveInvoice('credit',
+        prompt('ادخل ID العميل'), true)">
+        حفظ + طباعة (آجل)
+      </button>
+    </div>
+  </div>
 
-<!-- التقارير -->
-<section id="reports" class="hidden">
- <h3>📊 تقرير اليوم</h3>
- <div id="reportBox"></div>
- <button class="btn-danger" onclick="closeDay()">🔒 قفل اليوم</button>
-</section>
+</div>
+
+<script src="core.js"></script>
 
 <script>
-// ===== تهيئة التخزين =====
-let products = JSON.parse(localStorage.products || "[]");
-let invoices = JSON.parse(localStorage.invoices || "[]");
-let dailyCloses = JSON.parse(localStorage.dailyCloses || "[]");
-let cart = [];
+  // تحميل اسم المحل
+  if (DB.settings.shopName) {
+    document.getElementById("shopTitle").innerText = DB.settings.shopName;
+  }
 
-// ===== أدوات =====
-function todayISO(){
- return new Date().toISOString().slice(0,10);
-}
+  // عرض المنتجات
+  function renderProducts() {
+    let box = document.getElementById("productList");
+    box.innerHTML = "";
 
-function saveAll(){
- localStorage.products = JSON.stringify(products);
- localStorage.invoices = JSON.stringify(invoices);
- localStorage.dailyCloses = JSON.stringify(dailyCloses);
-}
+    DB.products.forEach(p => {
+      if (p.stock <= 0) return;
 
-function show(id){
- document.querySelectorAll("section").forEach(s=>s.classList.add("hidden"));
- document.getElementById(id).classList.remove("hidden");
-}
+      box.innerHTML += `
+        <div class="product"
+          onclick="addToCart('${p.name}', 1)">
+          <h4>${p.name}</h4>
+          <span>${p.price}</span>
+        </div>
+      `;
+    });
+  }
 
-function isDayClosed(date){
- return dailyCloses.some(d=>d.date === date);
-}
-
-// ===== الأصناف =====
-function addProduct(){
- if(!pn.value || pp.value<=0 || ps.value<0){
-  return alert("❌ بيانات الصنف غير صحيحة");
- }
- products.push({
-  n:pn.value.trim(),
-  p:+pp.value,
-  c:+pc.value||0,
-  s:+ps.value
- });
- saveAll();
- renderProducts();
- pn.value=pp.value=pc.value=ps.value="";
- alert("✅ تم حفظ الصنف");
-}
-
-function renderProducts(){
- plist.innerHTML="";
- products.forEach(p=>{
-  plist.innerHTML+=`
-   <div class="card">
-    ${p.n}<br>
-    بيع: ${p.p} | مخزون: ${p.s}
-   </div>`;
- });
-}
-
-// ===== الكاشير =====
-function addItem(){
- let p = products.find(x=>x.n===search.value.trim());
- if(!p) return alert("❌ الصنف غير موجود");
- if(p.s < qty.value) return alert("❌ نفاد المخزون");
-
- cart.push({n:p.n,p:p.p,c:p.c,q:+qty.value});
- p.s -= qty.value;
- renderInvoice();
- saveAll();
-}
-
-function renderInvoice(){
- invoice.innerHTML="";
- let total=0;
- cart.forEach(i=>{
-  total += i.p * i.q;
-  invoice.innerHTML+=`
-   <div class="card">
-    ${i.n}<br>
-    ${i.q} × ${i.p}
-   </div>`;
- });
- totalBox.innerText = "الإجمالي: " + total;
-}
-
-function saveAndPrint(){
- if(cart.length===0) return alert("❌ الفاتورة فارغة");
-
- let date = todayISO();
- if(isDayClosed(date)) return alert("❌ اليوم مقفول");
-
- let total = cart.reduce((a,i)=>a+i.p*i.q,0);
- let profit = cart.reduce((a,i)=>a+(i.p-i.c)*i.q,0);
-
- invoices.push({
-  no: invoices.length + 1,
-  date,
-  total,
-  profit
- });
-
- saveAll();
- window.print();
- cart=[];
- renderInvoice();
- renderReport();
-}
-
-// ===== التقارير =====
-function renderReport(){
- let date = todayISO();
- let list = invoices.filter(i=>i.date===date);
- let total = list.reduce((a,i)=>a+i.total,0);
- let profit = list.reduce((a,i)=>a+i.profit,0);
-
- reportBox.innerHTML = `
-  إجمالي اليوم: ${total}<br>
-  الأرباح: ${profit}<br>
-  عدد الفواتير: ${list.length}
- `;
-}
-
-function closeDay(){
- let date = todayISO();
- if(isDayClosed(date)) return alert("❌ اليوم مقفول بالفعل");
-
- let list = invoices.filter(i=>i.date===date);
- dailyCloses.push({
-  date,
-  total:list.reduce((a,i)=>a+i.total,0),
-  profit:list.reduce((a,i)=>a+i.profit,0),
-  count:list.length
- });
-
- saveAll();
- alert("✅ تم قفل اليوم");
-}
-
-// ===== تشغيل أولي =====
-renderProducts();
-renderReport();
+  renderProducts();
 </script>
 
 </body>
