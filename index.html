@@ -7,9 +7,7 @@
 
 <style>
 :root{
- --main:#0f172a;
- --accent:#22c55e;
- --danger:#ef4444;
+ --accent:#000;
  --bg:#f1f5f9;
 }
 
@@ -19,6 +17,7 @@ body{
  background:var(--bg);
 }
 
+/* ====== واجهة البرنامج ====== */
 header{
  background:#020617;
  color:#fff;
@@ -35,8 +34,8 @@ button{
  cursor:pointer;
 }
 
-.btn{background:var(--accent);color:#fff}
-.btn-danger{background:var(--danger);color:#fff}
+.btn{background:#16a34a;color:#fff}
+.btn-danger{background:#dc2626;color:#fff}
 
 input,select{
  width:100%;
@@ -90,6 +89,59 @@ input,select{
  grid-template-columns:1fr;
  gap:10px;
 }
+
+/* ====== تنسيق الطباعة الحرارية ====== */
+@media print{
+ body{background:#fff}
+
+ header,
+ .top-controls,
+ .bottom-actions{
+  display:none;
+ }
+
+ #cashier{
+  padding:0;
+ }
+
+ #invoice{
+  grid-template-columns:1fr;
+  gap:4px;
+ }
+
+ .card{
+  box-shadow:none;
+  border:1px dashed #000;
+  border-radius:0;
+  font-size:12px;
+ }
+
+ #totalBox{
+  background:none;
+  color:#000;
+  border-top:2px solid #000;
+  border-radius:0;
+  font-size:16px;
+ }
+
+ #printHeader{
+  display:block !important;
+  text-align:center;
+  font-size:14px;
+  margin-bottom:10px;
+ }
+
+ #printHeader h2{
+  margin:0;
+  font-size:18px;
+ }
+
+ #printHeader small{
+  font-size:11px;
+ }
+}
+
+#printHeader{display:none}
 </style>
 </head>
 
@@ -98,6 +150,13 @@ input,select{
 <header>🧾 شاشة الكاشير</header>
 
 <div id="cashier">
+
+<!-- رأس الفاتورة للطباعة -->
+<div id="printHeader">
+  <h2 id="shopNamePrint">اسم المحل</h2>
+  <small id="invoiceInfo"></small>
+  <hr>
+</div>
 
 <div class="top-controls">
  <input id="search" placeholder="اسم الصنف">
@@ -128,12 +187,14 @@ input,select{
 let products = JSON.parse(localStorage.products || "[]");
 let customers = JSON.parse(localStorage.customers || "[]");
 let invoices = JSON.parse(localStorage.invoices || "[]");
+let settings = JSON.parse(localStorage.settings || "{}");
 let cart = [];
 
 function saveAll(){
  localStorage.products = JSON.stringify(products);
  localStorage.customers = JSON.stringify(customers);
  localStorage.invoices = JSON.stringify(invoices);
+ localStorage.settings = JSON.stringify(settings);
 }
 
 function toggleCustomer(){
@@ -164,24 +225,18 @@ function renderInvoice(){
  invoice.innerHTML="";
  let total=0;
 
- cart.forEach((i,index)=>{
+ cart.forEach(i=>{
   total+=i.p*i.q;
   invoice.innerHTML+=`
    <div class="card">
-    <b>${i.n}</b><br>
+    ${i.n}<br>
     ${i.q} × ${i.p}<br>
-    <b>${i.q*i.p}</b><br>
-    <button class="btn-danger" onclick="removeItem(${index})">حذف</button>
+    <b>${i.q*i.p}</b>
    </div>
   `;
  });
 
  totalBox.innerText="الإجمالي: "+total;
-}
-
-function removeItem(i){
- cart.splice(i,1);
- renderInvoice();
 }
 
 function clearCart(){
@@ -197,6 +252,7 @@ function saveAndPrint(){
  let total = cart.reduce((a,i)=>a+i.p*i.q,0);
 
  let inv={
+  no:invoices.length+1,
   date:new Date().toLocaleString(),
   type:payType.value,
   total,
@@ -212,11 +268,16 @@ function saveAndPrint(){
  invoices.push(inv);
  saveAll();
 
- window.print();   // 🖨 طباعة
+ // بيانات الطباعة
+ document.getElementById("shopNamePrint").innerText =
+  settings.shopName || "اسم المحل";
+ document.getElementById("invoiceInfo").innerText =
+  "فاتورة رقم: " + inv.no + " | " + inv.date;
+
+ window.print();
 
  cart=[];
  renderInvoice();
- alert("تم الحفظ والطباعة بنجاح");
 }
 
 renderCustomers();
