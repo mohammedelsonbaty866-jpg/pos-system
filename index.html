@@ -5,90 +5,58 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>نظام كاشير احترافي</title>
 
+<!-- باركود -->
+<script src="https://unpkg.com/quagga@0.12.1/dist/quagga.min.js"></script>
+
 <style>
 :root{
-  --main:#0f172a;
   --accent:#22c55e;
   --blue:#0d6efd;
-  --danger:#ef4444;
   --bg:#f1f5f9;
 }
-body{
-  margin:0;
-  font-family:Tahoma,Arial;
-  background:var(--bg);
-}
+body{margin:0;font-family:Tahoma;background:var(--bg)}
 header{
-  background:linear-gradient(90deg,#020617,#0f172a);
-  color:#fff;
-  padding:14px;
-  text-align:center;
-  font-size:20px;
+  background:#020617;color:#fff;
+  padding:14px;text-align:center;font-size:20px
 }
-.container{
-  padding:10px;
-  max-width:900px;
-  margin:auto;
-}
+.container{padding:10px;max-width:900px;margin:auto}
 .section{
-  background:#fff;
-  border-radius:14px;
-  padding:12px;
-  margin-bottom:12px;
-  box-shadow:0 4px 10px rgba(0,0,0,.08);
+  background:#fff;border-radius:14px;
+  padding:12px;margin-bottom:12px;
+  box-shadow:0 4px 10px rgba(0,0,0,.08)
 }
 .row{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
-  gap:8px;
+  gap:8px
 }
 input,select,button{
-  padding:12px;
-  font-size:15px;
-  border-radius:10px;
-  border:1px solid #cbd5e1;
+  padding:12px;border-radius:10px;
+  border:1px solid #cbd5e1;font-size:15px
 }
-button{
-  border:none;
-  cursor:pointer;
-  font-weight:bold;
-}
+button{border:none;font-weight:bold;cursor:pointer}
 .btn{background:var(--accent);color:#fff}
 .btn-blue{background:var(--blue);color:#fff}
-.btn-danger{background:var(--danger);color:#fff}
 .hidden{display:none}
 
-/* الفاتورة */
 #invoice{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
-  gap:10px;
+  gap:10px
 }
 .item{
-  background:#f8fafc;
-  border:1px solid #e5e7eb;
-  border-radius:12px;
-  padding:10px;
-  text-align:center;
+  background:#f8fafc;border-radius:12px;
+  padding:10px;text-align:center;
+  border:1px solid #e5e7eb
 }
-.total{
-  font-size:22px;
-  text-align:center;
-  margin-top:10px;
-  font-weight:bold;
-}
+.total{text-align:center;font-size:22px;font-weight:bold}
 
-/* الطباعة */
-@media print{
-  body *{visibility:hidden}
-  #printArea,#printArea *{visibility:visible}
-  #printArea{
-    position:absolute;
-    top:0;right:0;
-    width:100%;
-    font-size:14px;
-  }
+#scanner{
+  position:fixed;top:0;right:0;
+  width:100%;height:100%;
+  background:#000;z-index:999
 }
+#scanner video{width:100%;height:100%;object-fit:cover}
 </style>
 </head>
 
@@ -98,123 +66,90 @@ button{
 
 <div class="container">
 
-  <!-- إدخال البيع -->
-  <div class="section">
-    <div class="row">
-      <input id="search" placeholder="اسم الصنف">
-      <input id="qty" type="number" min="1" value="1">
-      <select id="payType" onchange="toggleCustomer()">
-        <option value="cash">💵 نقدي</option>
-        <option value="credit">🕒 آجل</option>
-      </select>
-      <select id="customer" class="hidden"></select>
-      <button class="btn" onclick="addItem()">➕ إضافة</button>
-    </div>
+<!-- كاشير -->
+<div class="section">
+  <div class="row">
+    <input id="search" placeholder="اسم الصنف أو باركود">
+    <input id="qty" type="number" value="1">
+    <select id="payType" onchange="toggleCustomer()">
+      <option value="cash">نقدي</option>
+      <option value="credit">آجل</option>
+    </select>
+    <select id="customer" class="hidden"></select>
+    <button class="btn" onclick="addItem()">➕ إضافة</button>
+    <button class="btn-blue" onclick="startScan()">📷 باركود</button>
   </div>
+</div>
 
-  <!-- الفاتورة -->
-  <div class="section">
-    <h3 style="text-align:center">🧾 الفاتورة</h3>
-    <div id="invoice"></div>
-    <div class="total" id="total">الإجمالي: 0</div>
-
-    <div class="row" style="margin-top:10px">
-      <button class="btn" onclick="saveInvoice()">💾 حفظ</button>
-      <button class="btn-blue" onclick="printInvoice()">🖨️ طباعة</button>
-      <button class="btn-blue" onclick="goReports()">📊 التقارير</button>
-    </div>
+<!-- الفاتورة -->
+<div class="section">
+  <h3 style="text-align:center">🧾 الفاتورة</h3>
+  <div id="invoice"></div>
+  <div class="total" id="total">الإجمالي: 0</div>
+  <div class="row" style="margin-top:10px">
+    <button class="btn" onclick="saveInvoice()">💾 حفظ</button>
+    <button class="btn-blue" onclick="goReports()">📊 التقارير</button>
   </div>
+</div>
 
-  <!-- إضافة صنف -->
-  <div class="section">
-    <h3>📦 إضافة صنف</h3>
-    <div class="row">
-      <input id="pn" placeholder="اسم الصنف">
-      <input id="pp" type="number" placeholder="سعر البيع">
-      <input id="pc" type="number" placeholder="سعر الشراء">
-      <input id="ps" type="number" placeholder="المخزون">
-      <button class="btn" onclick="addProduct()">حفظ الصنف</button>
-    </div>
+<!-- إضافة صنف -->
+<div class="section">
+  <h3>📦 إضافة صنف</h3>
+  <div class="row">
+    <input id="pn" placeholder="اسم الصنف">
+    <input id="pb" placeholder="باركود (اختياري)">
+    <input id="pp" type="number" placeholder="سعر البيع">
+    <input id="pc" type="number" placeholder="سعر الشراء">
+    <input id="ps" type="number" placeholder="المخزون">
+    <button class="btn" onclick="addProduct()">حفظ</button>
   </div>
-
-  <!-- عملاء -->
-  <div class="section">
-    <h3>👤 العملاء (آجل)</h3>
-    <div class="row">
-      <input id="cn" placeholder="اسم العميل">
-      <button class="btn" onclick="addCustomer()">إضافة</button>
-    </div>
-    <div id="clist" style="margin-top:10px"></div>
-  </div>
+</div>
 
 </div>
 
-<!-- منطقة الطباعة -->
-<div id="printArea" class="hidden">
-  <h3 style="text-align:center" id="printShop"></h3>
-  <div id="printItems"></div>
-  <hr>
-  <div style="text-align:center;font-weight:bold" id="printTotal"></div>
-  <p style="text-align:center">شكراً لزيارتكم</p>
+<!-- الكاميرا -->
+<div id="scanner" class="hidden">
+  <button onclick="stopScan()" style="
+  position:absolute;top:10px;left:10px;
+  padding:10px;border-radius:8px">✖ إغلاق</button>
 </div>
 
 <script>
-/* ====== تخزين ====== */
-let products = JSON.parse(localStorage.products||"[]");
-let customers = JSON.parse(localStorage.customers||"[]");
-let invoices = JSON.parse(localStorage.invoices||"[]");
-let settings = JSON.parse(localStorage.settings||"{}");
+let products=JSON.parse(localStorage.products||"[]");
+let customers=JSON.parse(localStorage.customers||"[]");
+let invoices=JSON.parse(localStorage.invoices||"[]");
 let cart=[];
 
 function saveAll(){
   localStorage.products=JSON.stringify(products);
   localStorage.customers=JSON.stringify(customers);
   localStorage.invoices=JSON.stringify(invoices);
-  localStorage.settings=JSON.stringify(settings);
 }
 
-/* ====== أصناف ====== */
+/* أصناف */
 function addProduct(){
-  if(!pn.value||!pp.value)return alert("أدخل البيانات");
-  products.push({n:pn.value,p:+pp.value,c:+pc.value||0,s:+ps.value||0});
-  pn.value=pp.value=pc.value=ps.value="";
+  products.push({
+    n:pn.value,
+    b:pb.value,
+    p:+pp.value,
+    c:+pc.value||0,
+    s:+ps.value||0
+  });
+  pn.value=pb.value=pp.value=pc.value=ps.value="";
   saveAll();
   alert("تم حفظ الصنف");
 }
 
-/* ====== عملاء ====== */
-function addCustomer(){
-  if(!cn.value)return;
-  customers.push({n:cn.value,b:0});
-  cn.value="";
-  renderCustomers();
-  saveAll();
-}
-function renderCustomers(){
-  clist.innerHTML="";
-  customer.innerHTML="<option value=''>اختر عميل</option>";
-  customers.forEach((c,i)=>{
-    clist.innerHTML+=`<div class="item">${c.n} | ${c.b}</div>`;
-    customer.innerHTML+=`<option value="${i}">${c.n}</option>`;
-  });
-}
-renderCustomers();
-
-/* ====== كاشير ====== */
-function toggleCustomer(){
-  customer.classList.toggle("hidden",payType.value!=="credit");
-}
-
+/* كاشير */
 function addItem(){
-  let p=products.find(x=>x.n===search.value);
+  let val=search.value;
+  let p=products.find(x=>x.n===val || x.b===val);
   if(!p)return alert("الصنف غير موجود");
-  if(p.s<qty.value)return alert("المخزون غير كافي");
+  if(p.s<qty.value)return alert("نفاد المخزون");
   cart.push({n:p.n,p:p.p,c:p.c,q:+qty.value});
   p.s-=qty.value;
-  search.value="";
-  qty.value=1;
-  renderInvoice();
-  saveAll();
+  search.value="";qty.value=1;
+  renderInvoice();saveAll();
 }
 
 function renderInvoice(){
@@ -223,54 +158,49 @@ function renderInvoice(){
   cart.forEach(i=>{
     t+=i.p*i.q;
     invoice.innerHTML+=`
-      <div class="item">
-        <b>${i.n}</b><br>
-        ${i.q} × ${i.p}<br>
-        <b>${i.q*i.p}</b>
-      </div>`;
+    <div class="item">
+      <b>${i.n}</b><br>
+      ${i.q} × ${i.p}<br>
+      <b>${i.q*i.p}</b>
+    </div>`;
   });
   total.innerText="الإجمالي: "+t;
 }
 
 function saveInvoice(){
-  if(cart.length===0)return;
-  let totalVal=cart.reduce((a,i)=>a+i.p*i.q,0);
-  let profit=cart.reduce((a,i)=>a+(i.p-i.c)*i.q,0);
-  let inv={no:invoices.length+1,date:new Date().toLocaleString(),type:payType.value,total:totalVal,profit,items:cart};
-  if(inv.type==="credit"){
-    if(customer.value==="")return alert("اختر عميل");
-    customers[customer.value].b+=totalVal;
-    inv.customer=customers[customer.value].n;
-  }
-  invoices.push(inv);
-  cart=[];
-  renderInvoice();
-  renderCustomers();
-  saveAll();
+  if(!cart.length)return;
+  invoices.push({
+    no:invoices.length+1,
+    date:new Date().toLocaleString(),
+    type:payType.value,
+    total:cart.reduce((a,i)=>a+i.p*i.q,0),
+    profit:cart.reduce((a,i)=>a+(i.p-i.c)*i.q,0),
+    items:cart
+  });
+  cart=[];renderInvoice();saveAll();
   alert("تم حفظ الفاتورة");
 }
 
-/* ====== طباعة ====== */
-function printInvoice(){
-  printShop.innerText=settings.shopName||"المحل";
-  printItems.innerHTML="";
-  let t=0;
-  cart.forEach(i=>{
-    t+=i.p*i.q;
-    printItems.innerHTML+=`${i.n} - ${i.q} × ${i.p}<br>`;
+/* تقارير */
+function goReports(){location.href="reports.html";}
+
+/* باركود */
+function startScan(){
+  scanner.classList.remove("hidden");
+  Quagga.init({
+    inputStream:{name:"Live",type:"LiveStream",target:scanner},
+    decoder:{readers:["ean_reader","code_128_reader"]}
+  },()=>Quagga.start());
+
+  Quagga.onDetected(d=>{
+    search.value=d.codeResult.code;
+    stopScan();
   });
-  printTotal.innerText="الإجمالي: "+t;
-  document.getElementById("printArea").classList.remove("hidden");
-  window.print();
-  document.getElementById("printArea").classList.add("hidden");
 }
-
-/* ====== تقارير ====== */
-function goReports(){
-  location.href="reports.html";
+function stopScan(){
+  Quagga.stop();
+  scanner.classList.add("hidden");
 }
-
-shopTitle.innerText=settings.shopName||"نظام كاشير";
 </script>
 
 </body>
