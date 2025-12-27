@@ -1,65 +1,76 @@
 let products = JSON.parse(localStorage.products || "[]");
 let cart = [];
+let settings = JSON.parse(localStorage.settings || "{}");
 
+/* بيانات افتراضية */
 if(products.length === 0){
-  products = [
-    {name:"توت", price:50},
-    {name:"عصير", price:20},
-    {name:"مياه", price:10}
-  ];
-  localStorage.products = JSON.stringify(products);
+products = [
+{n:"مياه",p:10},
+{n:"عصير",p:20},
+{n:"شيبسي",p:7}
+];
+localStorage.products = JSON.stringify(products);
 }
 
 const productsList = document.getElementById("productsList");
 const invoiceItems = document.getElementById("invoiceItems");
-const totalEl = document.getElementById("total");
+const invoiceHeader = document.getElementById("invoiceHeader");
+const invoiceTotal = document.getElementById("invoiceTotal");
 
 function renderProducts(){
-  productsList.innerHTML = "";
-  products.forEach((p,i)=>{
-    productsList.innerHTML += `
-      <div class="product-box" onclick="addToCart(${i})">
-        <strong>${p.name}</strong>
-        <span>${p.price} جنيه</span>
-      </div>
-    `;
-  });
+productsList.innerHTML="";
+products.forEach((p,i)=>{
+productsList.innerHTML+=`
+<div class="product-box" onclick="addToCart(${i})">
+<strong>${p.n}</strong>
+<span>${p.p} جنيه</span>
+</div>`;
+});
 }
 
 function addToCart(i){
-  cart.push(products[i]);
-  renderInvoice();
+cart.push(products[i]);
+renderInvoice();
 }
 
 function renderInvoice(){
-  invoiceItems.innerHTML = "";
-  let total = 0;
+invoiceItems.innerHTML="";
+let total=0;
 
-  cart.forEach(p=>{
-    total += p.price;
-    invoiceItems.innerHTML += `
-      <div class="invoice-row">
-        <span>${p.name}</span>
-        <span>${p.price}</span>
-      </div>
-    `;
-  });
+invoiceHeader.innerHTML=`
+<strong>${settings.shopName || "اسم المحل"}</strong><br>
+فاتورة بيع<br>
+${new Date().toLocaleString()}
+`;
 
-  totalEl.innerText = total;
+cart.forEach(item=>{
+total+=item.p;
+invoiceItems.innerHTML+=`
+<div class="invoice-item">
+<div>${item.n}</div>
+<div>1×</div>
+<div>${item.p}</div>
+</div>`;
+});
+
+invoiceTotal.innerText="الإجمالي: "+total+" جنيه";
 }
 
 function clearInvoice(){
-  cart = [];
-  renderInvoice();
+cart=[];
+renderInvoice();
 }
 
 function pay(){
-  if(cart.length === 0){
-    alert("لا توجد أصناف");
-    return;
-  }
-  alert("تم الدفع بنجاح");
-  clearInvoice();
+if(cart.length===0){alert("الفاتورة فارغة");return;}
+alert("تم الدفع");
+clearInvoice();
+}
+
+function printInvoice(){
+if(cart.length===0){alert("لا توجد أصناف للطباعة");return;}
+window.print();
 }
 
 renderProducts();
+renderInvoice();
