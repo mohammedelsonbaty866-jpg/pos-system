@@ -2,14 +2,12 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>POS System</title>
-
-<link rel="manifest" href="manifest.json">
 
 <style>
 :root{
- --main:#020617;
+ --main:#0f172a;
  --accent:#22c55e;
  --danger:#ef4444;
  --bg:#f1f5f9;
@@ -18,193 +16,240 @@
 body{
  margin:0;
  font-family:Tahoma;
- background:var(--bg)
+ background:var(--bg);
 }
 
+/* ===== Header ===== */
 header{
- background:linear-gradient(90deg,#020617,#0f172a);
+ background:#020617;
  color:#fff;
- padding:14px;
- text-align:center;
- font-size:18px
-}
-
-button{
  padding:12px;
- border:0;
- border-radius:14px;
- font-size:15px;
- cursor:pointer
+ text-align:center;
+ font-size:18px;
 }
 
+/* ===== Buttons ===== */
+button{
+ border:0;
+ border-radius:10px;
+ padding:10px;
+ font-size:14px;
+ cursor:pointer;
+}
 .btn{background:var(--accent);color:#fff}
 .btn-danger{background:var(--danger);color:#fff}
 
+/* ===== Inputs ===== */
 input,select{
- padding:12px;
  width:100%;
- border-radius:12px;
- border:1px solid #cbd5f5;
- font-size:15px
-}
-
-.hidden{display:none}
-
-/* ===== القائمة الجانبية ===== */
-#menu{
- position:fixed;
- right:-220px;
- top:0;
- width:200px;
- height:100%;
- background:#020617;
- color:#fff;
  padding:10px;
- transition:.3s;
- z-index:9
+ font-size:14px;
+ border-radius:8px;
+ border:1px solid #cbd5f5;
 }
 
-#menu button{
- width:100%;
- background:none;
- color:#fff;
- text-align:right;
- padding:14px
-}
-
-/* ===== الكاشير ===== */
+/* ===== Layout ===== */
 #cashier{
  padding:10px;
- display:grid;
- grid-template-rows:auto 1fr auto;
- gap:12px
+ display:flex;
+ flex-direction:column;
+ gap:10px;
 }
 
-.cashier-bar{
+/* ===== Top Controls ===== */
+.top-controls{
  background:#fff;
- border-radius:16px;
  padding:10px;
- display:grid;
- grid-template-columns:2fr 1fr 1fr;
- gap:8px;
- box-shadow:0 3px 8px rgba(0,0,0,.08)
-}
-
-.cashier-actions{
+ border-radius:12px;
  display:grid;
  grid-template-columns:1fr 1fr;
- gap:8px
+ gap:8px;
 }
 
+.top-controls button{
+ font-weight:bold;
+}
+
+/* ===== Items Grid ===== */
 #invoice{
  display:grid;
  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
- gap:10px
+ gap:8px;
 }
 
+/* ===== Item Card ===== */
 .card{
  background:#fff;
- border-radius:14px;
- padding:12px;
+ border-radius:12px;
+ padding:10px;
  text-align:center;
- box-shadow:0 3px 8px rgba(0,0,0,.08)
+ box-shadow:0 3px 6px rgba(0,0,0,.1);
 }
 
-#total{
+.card b{
+ font-size:16px;
+}
+
+/* ===== Total ===== */
+#totalBox{
  background:#020617;
  color:#fff;
- padding:14px;
- border-radius:16px;
- font-size:20px;
- text-align:center
+ padding:12px;
+ border-radius:12px;
+ text-align:center;
+ font-size:18px;
 }
 
-/* ===== الطباعة ===== */
-@media print {
- body * { visibility:hidden }
- #print-area, #print-area * { visibility:visible }
- #print-area{
-  position:absolute;
-  top:0;right:0;
-  width:58mm;
-  font-size:12px;
-  direction:rtl
- }
- .p-center{text-align:center}
- .p-line{border-top:1px dashed #000;margin:6px 0}
-}
-
-@media(max-width:768px){
- .cashier-bar{grid-template-columns:1fr}
+/* ===== Bottom Buttons ===== */
+.bottom-actions{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:10px;
 }
 </style>
 </head>
 
 <body>
 
-<header id="shopTitle">نظام كاشير</header>
-<button onclick="toggleMenu()" style="position:fixed;top:10px;right:10px;font-size:22px">☰</button>
+<header>🧾 شاشة الكاشير</header>
 
-<div id="menu">
- <button onclick="show('cashier')">🧾 الكاشير</button>
- <button onclick="show('products')">📦 الأصناف</button>
- <button onclick="show('customers')">👤 العملاء</button>
- <button onclick="show('reports')">📊 التقارير</button>
- <button onclick="show('settings')">⚙️ الإعدادات</button>
-</div>
-
-<div id="screens">
-
-<!-- ===== الكاشير ===== -->
 <div id="cashier">
- <div class="cashier-bar">
-  <input id="search" placeholder="اسم الصنف / باركود">
-  <input id="qty" type="number" value="1">
-  <select id="payType" onchange="toggleCustomer()">
-   <option value="cash">💵 نقدي</option>
-   <option value="credit">🧾 آجل</option>
-  </select>
-  <select id="customer" class="hidden"></select>
-  <div class="cashier-actions">
-   <button class="btn" onclick="addItem()">➕ إضافة</button>
-   <button class="btn-danger" onclick="saveInvoice()">💾 حفظ</button>
-  </div>
+
+ <!-- Top -->
+ <div class="top-controls">
+   <input id="search" placeholder="اسم الصنف">
+   <input id="qty" type="number" value="1" min="1">
+
+   <select id="payType" onchange="toggleCustomer()">
+     <option value="cash">💵 نقدي</option>
+     <option value="credit">🧾 آجل</option>
+   </select>
+
+   <select id="customer" style="display:none"></select>
+
+   <button class="btn" onclick="addItem()">➕ إضافة صنف</button>
+   <button class="btn-danger" onclick="clearCart()">🗑 مسح</button>
  </div>
 
+ <!-- Invoice -->
  <div id="invoice"></div>
- <div id="total">الإجمالي: 0</div>
-</div>
 
-<!-- ===== باقي الشاشات ===== -->
-<div id="products" class="hidden"></div>
-<div id="customers" class="hidden"></div>
-<div id="reports" class="hidden"></div>
-<div id="settings" class="hidden"></div>
+ <!-- Total -->
+ <div id="totalBox">الإجمالي: 0</div>
 
-</div>
-
-<!-- ===== فاتورة الطباعة ===== -->
-<div id="print-area" style="display:none">
- <div class="p-center">
-  <b id="p-shop"></b><br>
-  <small>فاتورة بيع</small>
+ <!-- Bottom -->
+ <div class="bottom-actions">
+   <button class="btn" onclick="saveInvoice()">💾 حفظ الفاتورة</button>
+   <button onclick="window.print()">🖨 طباعة</button>
  </div>
- <div class="p-line"></div>
- <div id="p-items"></div>
- <div class="p-line"></div>
- <b>الإجمالي: <span id="p-total"></span></b>
- <div class="p-line"></div>
- <div class="p-center">
-  <small>شكراً لزيارتكم</small>
- </div>
-</div>
 
-<script src="core.js"></script>
+</div>
 
 <script>
-if("serviceWorker" in navigator){
- navigator.serviceWorker.register("sw.js");
+let products = JSON.parse(localStorage.products || "[]");
+let customers = JSON.parse(localStorage.customers || "[]");
+let invoices = JSON.parse(localStorage.invoices || "[]");
+let cart = [];
+
+/* ===== Helpers ===== */
+function saveAll(){
+ localStorage.products = JSON.stringify(products);
+ localStorage.customers = JSON.stringify(customers);
+ localStorage.invoices = JSON.stringify(invoices);
 }
+
+function toggleCustomer(){
+ document.getElementById("customer").style.display =
+  payType.value === "credit" ? "block" : "none";
+ renderCustomers();
+}
+
+/* ===== Customers ===== */
+function renderCustomers(){
+ customer.innerHTML = "<option value=''>اختر عميل</option>";
+ customers.forEach((c,i)=>{
+  customer.innerHTML += `<option value="${i}">${c.n}</option>`;
+ });
+}
+
+/* ===== Add Item ===== */
+function addItem(){
+ let p = products.find(x => x.n === search.value);
+ if(!p) return alert("الصنف غير موجود");
+ if(p.s < qty.value) return alert("المخزون غير كافي");
+
+ cart.push({
+  n:p.n,
+  p:p.p,
+  q:+qty.value
+ });
+
+ p.s -= qty.value;
+ renderInvoice();
+ saveAll();
+}
+
+/* ===== Render Invoice ===== */
+function renderInvoice(){
+ invoice.innerHTML="";
+ let total=0;
+
+ cart.forEach((i,index)=>{
+  total += i.p * i.q;
+  invoice.innerHTML += `
+   <div class="card">
+    <b>${i.n}</b><br>
+    ${i.q} × ${i.p}<br>
+    <b>${i.q * i.p}</b><br>
+    <button class="btn-danger" onclick="removeItem(${index})">حذف</button>
+   </div>
+  `;
+ });
+
+ totalBox.innerText = "الإجمالي: " + total;
+}
+
+/* ===== Remove ===== */
+function removeItem(i){
+ cart.splice(i,1);
+ renderInvoice();
+}
+
+/* ===== Clear ===== */
+function clearCart(){
+ if(confirm("مسح الفاتورة؟")){
+  cart=[];
+  renderInvoice();
+ }
+}
+
+/* ===== Save Invoice ===== */
+function saveInvoice(){
+ if(cart.length===0) return alert("الفاتورة فارغة");
+
+ let total = cart.reduce((a,i)=>a+i.p*i.q,0);
+
+ let inv={
+  date:new Date().toLocaleString(),
+  type:payType.value,
+  total,
+  items:cart
+ };
+
+ if(inv.type==="credit"){
+  if(customer.value==="") return alert("اختر عميل");
+  customers[customer.value].b = (customers[customer.value].b||0) + total;
+  inv.customer = customers[customer.value].n;
+ }
+
+ invoices.push(inv);
+ cart=[];
+ renderInvoice();
+ saveAll();
+ alert("تم حفظ الفاتورة");
+}
+
+renderCustomers();
 </script>
 
 </body>
