@@ -1,103 +1,108 @@
-/* =============================
-   بيانات الأصناف
-============================= */
+/* ==============================
+   POS SYSTEM - CORE LOGIC
+   ============================== */
+
+/* المنتجات */
 let products = [
-  { id: 1, name: "سكر", price: 10 },
-  { id: 2, name: "أرز", price: 15 },
-  { id: 3, name: "زيت", price: 25 }
+  { id: 1, name: "توت", price: 50 },
+  { id: 2, name: "بيبسي", price: 15 },
+  { id: 3, name: "شيبسي", price: 10 },
+  { id: 4, name: "مياه", price: 7 },
+  { id: 5, name: "عصير", price: 12 }
 ];
 
-let invoice = [];
+/* الفاتورة */
+let cart = [];
 
-/* =============================
-   تحميل الأصناف
-============================= */
+/* عناصر الصفحة */
+const productsContainer = document.getElementById("products");
+const invoiceBody = document.getElementById("invoice-body");
+const totalEl = document.getElementById("total");
+
+/* تحميل المنتجات */
 function loadProducts() {
-  const box = document.getElementById("productsBox");
-  box.innerHTML = "";
+  productsContainer.innerHTML = "";
 
   products.forEach(p => {
-    box.innerHTML += `
-      <div class="product-card" onclick="addToInvoice(${p.id})">
-        <strong>${p.name}</strong>
-        <span>${p.price} ج</span>
-      </div>
+    const div = document.createElement("div");
+    div.className = "product";
+    div.innerHTML = `
+      <div class="product-name">${p.name}</div>
+      <div class="product-price">${p.price} ج</div>
     `;
+    div.onclick = () => addToCart(p.id);
+    productsContainer.appendChild(div);
   });
 }
 
-/* =============================
-   إضافة للفاتورة
-============================= */
-function addToInvoice(id) {
-  let item = products.find(p => p.id === id);
-  let exists = invoice.find(i => i.id === id);
+/* إضافة للفاتورة */
+function addToCart(id) {
+  const product = products.find(p => p.id === id);
+  const item = cart.find(i => i.id === id);
 
-  if (exists) {
-    exists.qty++;
+  if (item) {
+    item.qty++;
   } else {
-    invoice.push({
-      id: item.id,
-      name: item.name,
-      price: item.price,
+    cart.push({
+      id: product.id,
+      name: product.name,
+      price: product.price,
       qty: 1
     });
   }
-
   renderInvoice();
 }
 
-/* =============================
-   عرض الفاتورة
-============================= */
+/* حذف عنصر */
+function removeItem(id) {
+  cart = cart.filter(i => i.id !== id);
+  renderInvoice();
+}
+
+/* رسم الفاتورة */
 function renderInvoice() {
-  const body = document.getElementById("invoiceBody");
-  body.innerHTML = "";
+  invoiceBody.innerHTML = "";
   let total = 0;
 
-  invoice.forEach((i, index) => {
-    let rowTotal = i.qty * i.price;
-    total += rowTotal;
+  cart.forEach(item => {
+    const row = document.createElement("tr");
+    const itemTotal = item.price * item.qty;
+    total += itemTotal;
 
-    body.innerHTML += `
-      <tr>
-        <td>${i.name}</td>
-        <td>${i.qty}</td>
-        <td>${i.price}</td>
-        <td>${rowTotal}</td>
-        <td>
-          <button onclick="removeItem(${index})">✖</button>
-        </td>
-      </tr>
+    row.innerHTML = `
+      <td>${item.name}</td>
+      <td>${item.qty}</td>
+      <td>${item.price}</td>
+      <td>${itemTotal}</td>
+      <td>
+        <button onclick="removeItem(${item.id})">✖</button>
+      </td>
     `;
+    invoiceBody.appendChild(row);
   });
 
-  document.getElementById("totalBox").innerText = total + " ج";
+  totalEl.innerText = total + " ج";
 }
 
-/* =============================
-   حذف صنف
-============================= */
-function removeItem(index) {
-  invoice.splice(index, 1);
-  renderInvoice();
-}
-
-/* =============================
-   حفظ + طباعة
-============================= */
-function saveInvoice() {
-  if (invoice.length === 0) {
-    alert("الفاتورة فارغة");
+/* حفظ + طباعة */
+function saveAndPrint() {
+  if (cart.length === 0) {
+    alert("الفاتورة فاضية");
     return;
   }
 
+  localStorage.setItem("lastInvoice", JSON.stringify(cart));
   window.print();
-  invoice = [];
+}
+
+/* مسح الفاتورة */
+function clearInvoice() {
+  cart = [];
   renderInvoice();
 }
 
-/* =============================
-   تشغيل عند الفتح
-============================= */
-loadProducts();
+/* تحميل عند الفتح */
+document.addEventListener("DOMContentLoaded", () => {
+  loadProducts();
+  renderInvoice();
+});
