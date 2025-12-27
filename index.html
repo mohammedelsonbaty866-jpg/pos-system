@@ -3,159 +3,95 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>POS | الكاشير</title>
+<title>POS كاشير</title>
 
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0f172a">
 
 <style>
-:root{
---main:#0f172a;
---green:#22c55e;
---blue:#0ea5e9;
---purple:#6366f1;
---bg:#f1f5f9;
---red:#ef4444;
-}
-
 body{
 margin:0;
 font-family:Tahoma;
-background:var(--bg)
+background:#f1f5f9;
 }
 
+/* الهيدر */
 header{
-background:linear-gradient(90deg,#020617,#0f172a);
+background:#0f172a;
 color:#fff;
 padding:12px;
 text-align:center;
-font-size:18px
+font-size:18px;
 }
 
-.container{padding:10px}
+/* التخطيط */
+.container{
+display:flex;
+flex-direction:column;
+padding:10px;
+gap:10px;
+}
 
-/* أزرار علوية */
-.top-buttons{
+/* صندوق */
+.box{
+background:#fff;
+border-radius:14px;
+padding:12px;
+box-shadow:0 2px 6px rgba(0,0,0,.08);
+}
+
+/* الإدخال */
+input,select{
+width:100%;
+padding:10px;
+font-size:16px;
+margin-top:6px;
+border-radius:10px;
+border:1px solid #ccc;
+}
+
+/* الأزرار */
+.btn{
+width:100%;
+padding:12px;
+font-size:16px;
+border-radius:12px;
+border:0;
+margin-top:8px;
+cursor:pointer;
+}
+
+.green{background:#22c55e;color:#fff}
+.blue{background:#3b82f6;color:#fff}
+.orange{background:#f97316;color:#fff}
+.red{background:#ef4444;color:#fff}
+.gray{background:#64748b;color:#fff}
+
+/* شبكة الأزرار */
+.grid{
 display:grid;
 grid-template-columns:1fr 1fr;
 gap:8px;
-margin-bottom:10px
-}
-
-.top-buttons button{
-padding:12px;
-font-size:15px;
-border:0;
-border-radius:12px;
-color:#fff;
-cursor:pointer
-}
-.admin{background:var(--blue)}
-.print{background:var(--purple)}
-
-/* إدخال */
-.inputs{
-background:#fff;
-padding:10px;
-border-radius:14px;
-display:grid;
-grid-template-columns:2fr 1fr 1fr 1fr;
-gap:6px;
-margin-bottom:10px
-}
-
-.inputs input,
-.inputs button{
-padding:12px;
-font-size:15px;
-border-radius:10px;
-border:1px solid #cbd5f5
-}
-
-.inputs button{
-background:var(--green);
-color:#fff;
-border:0
-}
-
-.scan-btn{
-background:#000;
-color:#fff;
-font-size:18px
 }
 
 /* الفاتورة */
-#invoice{
-display:grid;
-grid-template-columns:repeat(auto-fill,minmax(130px,1fr));
-gap:8px
+#invoice .item{
+border-bottom:1px dashed #ccc;
+padding:6px 0;
 }
 
-.item{
-background:#fff;
-border-radius:14px;
-padding:10px;
-text-align:center;
-box-shadow:0 4px 10px rgba(0,0,0,.08)
-}
-
-.item b{
-display:block;
-margin-bottom:6px
-}
-
-/* الإجمالي */
-.total{
-margin-top:10px;
-background:#fff;
-padding:14px;
-border-radius:14px;
-font-size:22px;
-text-align:center;
-font-weight:bold
-}
-
-/* حفظ */
-.save-btn{
-margin-top:10px;
-width:100%;
-padding:14px;
+#total{
 font-size:18px;
-background:var(--green);
-color:#fff;
-border:0;
-border-radius:14px;
-cursor:pointer
+font-weight:bold;
+margin-top:8px;
+text-align:center;
 }
 
-/* الكاميرا */
-#scanner{
+/* العملاء */
+#customerBox{
 display:none;
-position:fixed;
-top:0;left:0;
-width:100%;
-height:100%;
-background:#000;
-z-index:9999
+margin-top:6px;
 }
 
-#scanner button{
-position:absolute;
-top:10px;
-right:10px;
-padding:10px 14px;
-background:var(--red);
-color:#fff;
-border:0;
-border-radius:10px;
-font-size:16px;
-z-index:10
-}
-
-#camera{
-width:100%;
-height:100%
-}
 </style>
 </head>
 
@@ -165,82 +101,55 @@ height:100%
 
 <div class="container">
 
-<!-- أزرار -->
-<div class="top-buttons">
-<button class="admin" onclick="openAdmin()">⚙ إدارة الأصناف</button>
-<button class="print" onclick="printInvoice()">🖨 طباعة</button>
-</div>
-
-<!-- إدخال -->
-<div class="inputs">
-<input id="search" placeholder="اسم الصنف أو باركود">
-<input id="qty" type="number" value="1">
-<button onclick="addItem()">➕</button>
-<button class="scan-btn" onclick="startScanner()">📷</button>
+<!-- إدخال الصنف -->
+<div class="box">
+<input id="search" placeholder="اسم الصنف أو الباركود">
+<input id="qty" type="number" value="1" min="1">
+<button class="btn blue" onclick="addItem()">➕ إضافة</button>
 </div>
 
 <!-- الفاتورة -->
+<div class="box">
+<h3>🧾 الفاتورة</h3>
 <div id="invoice"></div>
-
-<!-- الإجمالي -->
-<div class="total" id="total">الإجمالي: 0</div>
-
-<button class="save-btn" onclick="saveInvoice()">💾 حفظ الفاتورة</button>
-
+<div id="total">الإجمالي: 0</div>
 </div>
 
-<!-- الكاميرا -->
-<div id="scanner">
-<button onclick="stopScanner()">إغلاق</button>
-<div id="camera"></div>
+<!-- الدفع -->
+<div class="box">
+<h3>💳 طريقة الدفع</h3>
+
+<div class="grid">
+<button class="btn green" onclick="setPay('cash')">💵 كاش</button>
+<button class="btn orange" onclick="setPay('credit')">📒 آجل</button>
 </div>
 
-<!-- مكتبة الباركود -->
-<script src="https://unpkg.com/quagga/dist/quagga.min.js"></script>
-
-<!-- كود النظام -->
-<script src="core.js"></script>
-
+<div id="customerBox">
+<select onchange="selectCustomer(this.selectedIndex-1)">
+<option>اختر العميل</option>
 <script>
-/* تشغيل الكاميرا */
-function startScanner(){
-document.getElementById("scanner").style.display="block";
-
-Quagga.init({
-inputStream:{
-type:"LiveStream",
-target:document.querySelector('#camera'),
-constraints:{ facingMode:"environment" }
-},
-decoder:{
-readers:["ean_reader","code_128_reader"]
-}
-},function(err){
-if(err){
-alert("تعذر فتح الكاميرا");
-return;
-}
-Quagga.start();
+let customers = JSON.parse(localStorage.customers||"[]");
+customers.forEach(c=>{
+document.write(`<option>${c.name}</option>`);
 });
-
-Quagga.onDetected(function(data){
-let code = data.codeResult.code;
-document.getElementById("search").value = code;
-stopScanner();
-});
-}
-
-/* إيقاف الكاميرا */
-function stopScanner(){
-Quagga.stop();
-document.getElementById("scanner").style.display="none";
-}
-
-/* Service Worker */
-if('serviceWorker' in navigator){
-navigator.serviceWorker.register('sw.js');
-}
 </script>
+</select>
+</div>
+</div>
+
+<!-- أزرار التحكم -->
+<div class="box">
+<div class="grid">
+<button class="btn green" onclick="saveInvoice()">💾 حفظ</button>
+<button class="btn blue" onclick="printInvoice()">🖨 طباعة</button>
+<button class="btn gray" onclick="openCustomers()">👤 العملاء</button>
+<button class="btn red" onclick="cart=[];renderInvoice()">❌ مسح</button>
+</div>
+</div>
+
+</div>
+
+<script src="core.js"></script>
 
 </body>
 </html>
