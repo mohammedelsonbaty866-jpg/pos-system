@@ -2,14 +2,79 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>التقارير</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>التقارير والأرباح</title>
 
 <style>
-body{font-family:Tahoma;background:#f1f5f9;margin:0}
-header{background:#0f172a;color:#fff;padding:12px;text-align:center}
-.box{background:#fff;margin:10px;padding:12px;border-radius:12px}
-.total{font-size:18px;font-weight:bold;margin-top:6px}
+body{
+  margin:0;
+  font-family:Tahoma, Arial;
+  background:#f2f4f8;
+}
+header{
+  background:#198754;
+  color:#fff;
+  padding:12px;
+  text-align:center;
+  font-size:20px;
+}
+.container{
+  padding:15px;
+  max-width:700px;
+  margin:auto;
+}
+.card{
+  background:#fff;
+  border-radius:10px;
+  padding:15px;
+  margin-bottom:15px;
+  box-shadow:0 0 10px rgba(0,0,0,.1);
+}
+.stat{
+  display:flex;
+  justify-content:space-between;
+  padding:10px;
+  border-bottom:1px solid #eee;
+  font-size:16px;
+}
+.stat:last-child{border-bottom:none}
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:14px;
+}
+th,td{
+  border-bottom:1px solid #ddd;
+  padding:8px;
+  text-align:center;
+}
+th{
+  background:#f0f0f0;
+}
+button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:8px;
+  background:#0d6efd;
+  color:#fff;
+  font-size:18px;
+  cursor:pointer;
+  margin-top:10px;
+}
+.back{
+  display:block;
+  text-align:center;
+  background:#6c757d;
+  color:#fff;
+  padding:10px;
+  border-radius:8px;
+  text-decoration:none;
+  margin-top:10px;
+}
+@media print{
+  button,.back{display:none}
+}
 </style>
 </head>
 
@@ -17,43 +82,79 @@ header{background:#0f172a;color:#fff;padding:12px;text-align:center}
 
 <header>📊 التقارير والأرباح</header>
 
-<div class="box">
-<h3>📅 تقرير اليوم</h3>
-<div id="today"></div>
-</div>
+<div class="container">
 
-<div class="box">
-<h3>📆 تقرير الشهر</h3>
-<div id="month"></div>
+  <!-- ملخص اليوم -->
+  <div class="card">
+    <h3>📌 ملخص اليوم</h3>
+    <div class="stat">
+      <span>عدد الفواتير</span>
+      <b id="invCount">0</b>
+    </div>
+    <div class="stat">
+      <span>إجمالي المبيعات</span>
+      <b id="totalSales">0</b>
+    </div>
+    <div class="stat">
+      <span>إجمالي الأرباح</span>
+      <b id="totalProfit">0</b>
+    </div>
+  </div>
+
+  <!-- جدول الفواتير -->
+  <div class="card">
+    <h3 style="text-align:center">🧾 الفواتير</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>التاريخ</th>
+          <th>النوع</th>
+          <th>الإجمالي</th>
+          <th>الربح</th>
+        </tr>
+      </thead>
+      <tbody id="invoiceTable"></tbody>
+    </table>
+
+    <button onclick="printReport()">🖨️ طباعة التقرير</button>
+  </div>
+
+  <a href="index.html" class="back">⬅️ الرجوع للكاشير</a>
+
 </div>
 
 <script>
-let invoices = JSON.parse(localStorage.invoices || "[]");
+let invoices = JSON.parse(localStorage.getItem("invoices")) || [];
 
-function calc(filterFn){
-let f = invoices.filter(filterFn);
-let total = f.reduce((a,i)=>a+i.total,0);
-let profit = f.reduce((a,i)=>a+i.profit,0);
-return {count:f.length,total,profit};
+let invCount = invoices.length;
+let totalSales = 0;
+let totalProfit = 0;
+
+const table = document.getElementById("invoiceTable");
+
+invoices.forEach((inv,i)=>{
+  totalSales += inv.total;
+  totalProfit += inv.profit;
+
+  table.innerHTML += `
+    <tr>
+      <td>${i+1}</td>
+      <td>${inv.date}</td>
+      <td>${inv.type === "cash" ? "نقدي" : "آجل"}</td>
+      <td>${inv.total}</td>
+      <td>${inv.profit}</td>
+    </tr>
+  `;
+});
+
+document.getElementById("invCount").innerText = invCount;
+document.getElementById("totalSales").innerText = totalSales;
+document.getElementById("totalProfit").innerText = totalProfit;
+
+function printReport(){
+  window.print();
 }
-
-let todayStr = new Date().toISOString().slice(0,10);
-let monthStr = new Date().toISOString().slice(0,7);
-
-let today = calc(i=>i.date.startsWith(todayStr));
-let month = calc(i=>i.date.startsWith(monthStr));
-
-todayDiv.innerHTML = `
-عدد الفواتير: ${today.count}<br>
-إجمالي المبيعات: ${today.total}<br>
-الربح: ${today.profit}
-`;
-
-monthDiv.innerHTML = `
-عدد الفواتير: ${month.count}<br>
-إجمالي المبيعات: ${month.total}<br>
-الربح: ${month.profit}
-`;
 </script>
 
 </body>
