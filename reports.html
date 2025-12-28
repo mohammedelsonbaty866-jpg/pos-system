@@ -1,34 +1,140 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>التقارير</title>
-  <link rel="stylesheet" href="assets/css/main.css">
+<meta charset="UTF-8">
+<title>POS | التقارير</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- CSS -->
+<link rel="stylesheet" href="assets/css/style.css">
 </head>
+
 <body>
 
-<h2>📊 التقارير</h2>
+<!-- ===== HEADER ===== -->
+<header class="top-bar">
+  <h1>التقارير</h1>
+  <nav>
+    <a href="index.html">الكاشير</a>
+    <a href="products.html">الأصناف</a>
+    <a href="inventory.html">المخزون</a>
+    <a href="returns.html">المرتجعات</a>
+    <a href="reports.html" class="active">التقارير</a>
+  </nav>
+</header>
 
-<div class="form-box">
-  <button onclick="loadToday()">📅 تقرير اليوم</button>
-  <button onclick="loadAll()">📚 كل الفواتير</button>
-  <button onclick="clearReports()" class="danger">🗑 مسح التقارير</button>
-</div>
+<!-- ===== MAIN ===== -->
+<main class="reports-layout">
 
-<table>
-  <thead>
-    <tr>
-      <th>#</th>
-      <th>التاريخ</th>
-      <th>عدد الأصناف</th>
-      <th>الإجمالي</th>
-    </tr>
-  </thead>
-  <tbody id="reportsTable"></tbody>
-</table>
+  <!-- إحصائيات سريعة -->
+  <section class="stats-grid">
+    <div class="stat-card">
+      <h3>إجمالي المبيعات</h3>
+      <strong id="totalSales">0 ج</strong>
+    </div>
 
-<h3>💰 إجمالي المبيعات: <span id="grandTotal">0</span> جنيه</h3>
+    <div class="stat-card">
+      <h3>عدد الفواتير</h3>
+      <strong id="totalInvoices">0</strong>
+    </div>
 
-<script src="assets/js/reports.js"></script>
+    <div class="stat-card">
+      <h3>المرتجعات</h3>
+      <strong id="totalReturns">0</strong>
+    </div>
+
+    <div class="stat-card">
+      <h3>قيمة المخزون</h3>
+      <strong id="inventoryValue">0 ج</strong>
+    </div>
+  </section>
+
+  <!-- تقرير المبيعات -->
+  <section class="table-card">
+    <h2>تفاصيل الفواتير</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>عدد الأصناف</th>
+          <th>الإجمالي</th>
+          <th>التاريخ</th>
+        </tr>
+      </thead>
+      <tbody id="salesTable"></tbody>
+    </table>
+  </section>
+
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  تقارير النظام – POS System
+</footer>
+
+<!-- ===== JS ===== -->
+<script src="assets/js/data.js"></script>
+
+<script>
+/* ===============================
+   REPORTS LOGIC
+================================ */
+
+function loadReports() {
+  let totalSales = 0;
+  let inventoryTotal = 0;
+
+  /* إجمالي المبيعات */
+  invoices.forEach(inv => {
+    totalSales += inv.total;
+  });
+
+  /* قيمة المخزون */
+  inventory.forEach(item => {
+    const product = products.find(p => p.id === item.productId);
+    if (product) {
+      inventoryTotal += product.price * item.qty;
+    }
+  });
+
+  document.getElementById("totalSales").textContent = totalSales + " ج";
+  document.getElementById("totalInvoices").textContent = invoices.length;
+  document.getElementById("totalReturns").textContent = returns.length;
+  document.getElementById("inventoryValue").textContent = inventoryTotal + " ج";
+
+  renderSalesTable();
+}
+
+/* جدول الفواتير */
+function renderSalesTable() {
+  const table = document.getElementById("salesTable");
+  table.innerHTML = "";
+
+  if (invoices.length === 0) {
+    table.innerHTML = `
+      <tr>
+        <td colspan="4" style="text-align:center">لا توجد فواتير</td>
+      </tr>
+    `;
+    return;
+  }
+
+  invoices.forEach((inv, index) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${index + 1}</td>
+      <td>${inv.items.length}</td>
+      <td>${inv.total} ج</td>
+      <td>${inv.date}</td>
+    `;
+    table.appendChild(row);
+  });
+}
+
+/* تحميل الصفحة */
+document.addEventListener("DOMContentLoaded", loadReports);
+</script>
+
 </body>
 </html>
