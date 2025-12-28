@@ -1,16 +1,16 @@
-/* =========================
-   CORE.JS – POS SYSTEM
-   نسخة احترافية مستقرة
-========================= */
+/* ===================================
+   CORE.JS
+   قلب نظام الكاشير الاحترافي
+=================================== */
 
-/* ====== DATA ====== */
-let products   = JSON.parse(localStorage.products || "[]");
+/* ===== تحميل البيانات ===== */
+let products   = JSON.parse(localStorage.products  || "[]");
 let customers  = JSON.parse(localStorage.customers || "[]");
-let invoices   = JSON.parse(localStorage.invoices || "[]");
-let settings   = JSON.parse(localStorage.settings || "{}");
+let invoices   = JSON.parse(localStorage.invoices  || "[]");
+let settings   = JSON.parse(localStorage.settings  || "{}");
 let cart = [];
 
-/* ====== SAVE ====== */
+/* ===== حفظ ===== */
 function saveAll(){
   localStorage.products  = JSON.stringify(products);
   localStorage.customers = JSON.stringify(customers);
@@ -18,162 +18,177 @@ function saveAll(){
   localStorage.settings  = JSON.stringify(settings);
 }
 
-/* ====== MENU ====== */
+/* ===== القوائم ===== */
 function toggleMenu(){
-  menu.style.right = menu.style.right === "0px" ? "-220px" : "0px";
+  menu.style.right = (menu.style.right === "0px") ? "-220px" : "0px";
 }
 
 function showScreen(id){
-  document.querySelectorAll(".screen").forEach(s=>{
-    s.classList.remove("active");
-  });
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
   menu.style.right = "-220px";
 }
 
-/* ====== PRODUCTS ====== */
+/* ===== الكاشير ===== */
 function renderProducts(){
-  productsGrid.innerHTML = "";
-  products.forEach((p,index)=>{
-    let div = document.createElement("div");
-    div.className = "product";
-    div.innerHTML = `
-      <b>${p.n}</b>
-      <span>${p.p} جنيه</span>
-    `;
-    div.onclick = ()=> addToCart(index);
-    productsGrid.appendChild(div);
+  const grid = document.getElementById("productsGrid");
+  if(!grid) return;
+
+  grid.innerHTML = "";
+  products.forEach((p)=>{
+    if(p.s <= 0) return;
+
+    const d = document.createElement("div");
+    d.className = "product";
+    d.innerHTML = `<b>${p.n}</b>${p.p} جنيه`;
+    d.onclick = ()=>addToCart(p);
+    grid.appendChild(d);
   });
 }
 
-function addProduct(){
-  if(!pn.value || !pp.value) return alert("أدخل البيانات كاملة");
-
-  products.push({
-    n: pn.value,
-    p: Number(pp.value),
-    c: Number(pc.value || 0),
-    s: Number(ps.value || 0)
-  });
-
-  pn.value = pp.value = pc.value = ps.value = "";
-  saveAll();
-  renderProducts();
-  alert("تم حفظ الصنف");
-}
-
-/* ====== CART ====== */
-function addToCart(index){
-  let p = products[index];
-  if(p.s <= 0) return alert("المخزون نفد");
-
-  let existing = cart.find(i => i.n === p.n);
-
-  if(existing){
-    existing.q += 1;
-  }else{
-    cart.push({
-      n: p.n,
-      p: p.p,
-      c: p.c,
-      q: 1
-    });
+function addToCart(p){
+  if(isClosed()){
+    alert("اليوم مقفول");
+    return;
   }
 
-  p.s -= 1;
+  if(p.s <= 0){
+    alert("نفاد المخزون");
+    return;
+  }
+
+  let item = cart.find(i=>i.n===p.n);
+  if(item){
+    item.q++;
+  }else{
+    cart.push({n:p.n,p:p.p,c:p.c,q:1});
+  }
+
+  p.s--;
   saveAll();
   renderInvoice();
 }
 
 function renderInvoice(){
-  invoiceItems.innerHTML = "";
-  let totalVal = 0;
+  const box = document.getElementById("invoiceItems");
+  const totalBox = document.getElementById("total");
+  if(!box) return;
 
-  cart.forEach((i,idx)=>{
-    totalVal += i.p * i.q;
-    invoiceItems.innerHTML += `
+  let total = 0;
+  box.innerHTML = "";
+
+  cart.forEach(i=>{
+    const line = i.q * i.p;
+    total += line;
+
+    box.innerHTML += `
       <div class="item">
-        <b>${i.n}</b><br>
+        ${i.n}<br>
         ${i.q} × ${i.p}
       </div>
     `;
   });
 
-  total.innerText = "الإجمالي: " + totalVal;
+  totalBox.innerText = "الإجمالي: " + total;
 }
 
-/* ====== INVOICE ====== */
+/* ===== حفظ الفاتورة ===== */
 function saveInvoice(){
   if(cart.length === 0){
-    alert("لا توجد أصناف");
+    alert("الفاتورة فارغة");
     return;
   }
 
-  let totalVal = cart.reduce((a,i)=> a + (i.p * i.q), 0);
-  let profit   = cart.reduce((a,i)=> a + ((i.p - i.c) * i.q), 0);
+  if(isClosed()){
+    alert("اليوم مقفول");
+    return;
+  }
+
+  const total = cart.reduce((a,i)=>a + i.q*i.p,0);
+  const profit = cart.reduce((a,i)=>a + (i.p - i.c)*i.q,0);
+
+  const payType = document.getElementById("payType")?.value || "cash";
+  const customerIndex = document.getElementById("customer")?.value;
 
   let invoice = {
     no: invoices.length + 1,
-    date: new Date().toLocaleString("ar-EG"),
-    type: payType.value,
-    total: totalVal,
-    profit: profit,
+    date: new Date().toLocaleString(),
+    type: payType,
+    total,
+    profit,
     items: JSON.parse(JSON.stringify(cart))
   };
 
-  if(payType.value === "credit"){
-    if(customer.value === ""){
+  if(payType === "credit"){
+    if(customerIndex === "" || customerIndex == null){
       alert("اختر عميل");
       return;
     }
-    let c = customers[customer.value];
-    c.b += totalVal;
-    invoice.customer = c.n;
+    customers[customerIndex].b += total;
+    invoice.customer = customers[customerIndex].n;
   }
 
   invoices.push(invoice);
   cart = [];
   saveAll();
   renderInvoice();
-  alert("تم حفظ الفاتورة بنجاح");
+  alert("تم حفظ الفاتورة");
 }
 
-/* ====== CUSTOMERS ====== */
-function addCustomer(){
-  if(!cn.value) return;
-  customers.push({ n: cn.value, b: 0 });
-  cn.value = "";
-  saveAll();
-  renderCustomers();
-}
-
+/* ===== العملاء ===== */
 function renderCustomers(){
-  customerList.innerHTML = "";
-  customer.innerHTML = `<option value="">اختر عميل</option>`;
+  const list = document.getElementById("customerList");
+  const select = document.getElementById("customer");
+  if(!list || !select) return;
+
+  list.innerHTML = "";
+  select.innerHTML = "<option value=''>اختر عميل</option>";
 
   customers.forEach((c,i)=>{
-    customerList.innerHTML += `
-      <div class="item">${c.n} : ${c.b} جنيه</div>
-    `;
-    customer.innerHTML += `
-      <option value="${i}">${c.n}</option>
-    `;
+    list.innerHTML += `<div>${c.n} | مديونية: ${c.b}</div>`;
+    select.innerHTML += `<option value="${i}">${c.n}</option>`;
   });
 }
 
-/* ====== SETTINGS ====== */
+function addCustomer(){
+  const name = document.getElementById("cn").value.trim();
+  if(!name) return alert("ادخل اسم العميل");
+
+  customers.push({n:name,b:0});
+  saveAll();
+  renderCustomers();
+  document.getElementById("cn").value="";
+}
+
+/* ===== الإعدادات ===== */
 function saveSettings(){
-  settings.shopName = shopInput.value;
-  shopName.innerText = settings.shopName || "نظام كاشير";
+  const input = document.getElementById("shopInput");
+  if(!input) return;
+
+  settings.shopName = input.value;
+  document.getElementById("shopName").innerText =
+    settings.shopName || "نظام كاشير";
   saveAll();
 }
 
-/* ====== INIT ====== */
-shopName.innerText = settings.shopName || "نظام كاشير";
-renderProducts();
-renderCustomers();
+/* ===== تغيير نوع الدفع ===== */
+document.addEventListener("change",(e)=>{
+  if(e.target.id === "payType"){
+    const c = document.getElementById("customer");
+    if(e.target.value === "credit"){
+      c.style.display = "block";
+    }else{
+      c.style.display = "none";
+    }
+  }
+});
 
-/* ====== PAY TYPE ====== */
-payType.onchange = ()=>{
-  customer.style.display = payType.value === "credit" ? "block" : "none";
-};
+/* ===== بدء التشغيل ===== */
+document.addEventListener("DOMContentLoaded",()=>{
+  document.getElementById("shopName").innerText =
+    settings.shopName || "نظام كاشير";
+
+  renderProducts();
+  renderCustomers();
+  renderInvoice();
+});
