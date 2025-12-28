@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>POS System</title>
+
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+</head>
+
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div id="loginScreen" class="screen active">
+  <div class="login-box">
+    <h2>تسجيل الدخول</h2>
+    <input id="loginUser" placeholder="اسم المستخدم">
+    <input id="loginPass" type="password" placeholder="كلمة المرور">
+    <button onclick="login()">دخول</button>
+    <p id="loginMsg"></p>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div id="app" class="screen">
+
+<header>
+  <span id="shopName">POS System</span>
+  <button onclick="toggleMenu()">☰</button>
+</header>
+
+<nav id="menu">
+  <button onclick="showScreen('cashier')">🧾 كاشير</button>
+  <button onclick="showScreen('products')" class="admin">📦 الأصناف</button>
+  <button onclick="showScreen('customers')" class="admin">👤 العملاء</button>
+  <button onclick="showScreen('reports')" class="admin">📊 التقارير</button>
+  <button onclick="showScreen('users')" class="admin">👥 المستخدمين</button>
+  <button onclick="logout()">🚪 خروج</button>
+</nav>
+
+<!-- ===== CASHIER ===== -->
+<section id="cashier" class="page active">
+  <div class="top">
+    <input id="search" placeholder="بحث / باركود">
+    <select id="payType">
+      <option value="cash">نقدي</option>
+      <option value="credit">آجل</option>
+    </select>
+    <select id="customer" style="display:none"></select>
+  </div>
+
+  <div id="productsGrid"></div>
+
+  <div class="invoice">
+    <div id="invoiceItems"></div>
+    <div id="total">الإجمالي: 0</div>
+
+    <div class="actions">
+      <button onclick="saveInvoice()">حفظ</button>
+      <button onclick="printInvoice()">طباعة</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PRODUCTS ===== -->
+<section id="products" class="page">
+  <h3>إدارة الأصناف</h3>
+  <input id="pn" placeholder="اسم الصنف">
+  <input id="pp" placeholder="سعر البيع">
+  <input id="pc" placeholder="سعر الشراء">
+  <input id="ps" placeholder="المخزون">
+  <button onclick="addProduct()">حفظ</button>
+  <div id="productList"></div>
+</section>
+
+<!-- ===== CUSTOMERS ===== -->
+<section id="customers" class="page">
+  <h3>العملاء (آجل)</h3>
+  <input id="cn" placeholder="اسم العميل">
+  <button onclick="addCustomer()">إضافة</button>
+  <div id="customerList"></div>
+</section>
+
+<!-- ===== REPORTS ===== -->
+<section id="reports" class="page">
+  <h3>التقارير</h3>
+  <div class="cards">
+    <div class="card" id="rSales">0</div>
+    <div class="card" id="rInvoices">0</div>
+    <div class="card" id="rProfit">0</div>
+  </div>
+  <button onclick="dailyReport()">تقرير اليوم</button>
+  <div id="reportBox"></div>
+</section>
+
+<!-- ===== USERS ===== -->
+<section id="users" class="page">
+  <h3>المستخدمين</h3>
+  <input id="un" placeholder="اسم المستخدم">
+  <input id="up" placeholder="كلمة المرور">
+  <select id="ur">
+    <option value="admin">مدير</option>
+    <option value="cashier">كاشير</option>
+  </select>
+  <button onclick="addUser()">إضافة</button>
+  <div id="userList"></div>
+</section>
+
+</div>
+
+<script src="auth.js"></script>
+<script src="core.js"></script>
+<script src="reports.js"></script>
+
+</body>
+</html>
