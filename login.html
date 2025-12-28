@@ -2,81 +2,94 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<title>POS | تسجيل الدخول</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>تسجيل الدخول</title>
+
+<link rel="stylesheet" href="assets/css/style.css">
 
 <style>
-body{
-  margin:0;
-  height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:#0f172a;
-  font-family:Arial;
-}
-.box{
+.auth-box{
+  max-width:400px;
+  margin:80px auto;
   background:#fff;
-  padding:20px;
-  width:90%;
-  max-width:320px;
+  padding:30px;
   border-radius:14px;
+  box-shadow:0 10px 25px rgba(0,0,0,.15);
+}
+.auth-box h2{
   text-align:center;
+  margin-bottom:20px;
 }
-h2{margin-bottom:15px}
-input{
-  width:100%;
-  padding:10px;
-  margin-bottom:10px;
-  border-radius:8px;
-  border:1px solid #ccc;
-}
-button{
+.auth-box input{
   width:100%;
   padding:12px;
-  background:#22c55e;
+  margin-bottom:12px;
+  border-radius:10px;
+  border:1px solid #ccc;
+}
+.auth-box button{
+  width:100%;
+  padding:12px;
+  background:#2563eb;
   color:#fff;
   border:none;
   border-radius:10px;
   font-size:16px;
   cursor:pointer;
 }
-small{color:#555}
+.auth-box p{
+  color:red;
+  text-align:center;
+  margin-top:10px;
+}
 </style>
 </head>
 
 <body>
 
-<div class="box">
+<div class="auth-box">
   <h2>تسجيل الدخول</h2>
 
-  <input id="user" placeholder="اسم المستخدم">
-  <input id="pass" type="password" placeholder="كلمة المرور">
+  <input id="username" placeholder="اسم المستخدم">
+  <input id="password" type="password" placeholder="كلمة المرور">
 
   <button onclick="login()">دخول</button>
 
-  <small>admin / 1234</small>
+  <p id="error"></p>
 </div>
 
+<script src="assets/js/data.js"></script>
+
 <script>
-/* ===== USERS ===== */
-const users = [
-  {u:"admin",p:"1234",role:"admin"},
-  {u:"cashier",p:"1111",role:"cashier"}
-];
+/* =====================
+   LOGIN SYSTEM
+===================== */
 
 function login(){
-  const u = user.value;
-  const p = pass.value;
+  const u = document.getElementById("username").value.trim();
+  const p = document.getElementById("password").value.trim();
+  const error = document.getElementById("error");
 
-  const found = users.find(x=>x.u===u && x.p===p);
-  if(!found){
-    alert("بيانات غير صحيحة");
+  if(!u || !p){
+    error.textContent = "أدخل اسم المستخدم وكلمة المرور";
     return;
   }
 
-  localStorage.currentUser = JSON.stringify(found);
-  location.href="index.html";
+  const user = users.find(x => x.username === u && x.password === p);
+
+  if(!user){
+    error.textContent = "بيانات الدخول غير صحيحة";
+    return;
+  }
+
+  localStorage.setItem("currentUser", JSON.stringify(user));
+
+  // تحويل حسب الصلاحية
+  if(user.role === "admin"){
+    window.location.href = "index.html";
+  }else{
+    window.location.href = "index.html";
+  }
 }
 </script>
 
