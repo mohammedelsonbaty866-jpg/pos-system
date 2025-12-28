@@ -1,111 +1,99 @@
-/* =============================
-   CASHIER LOGIC
-============================= */
-
 let products = JSON.parse(localStorage.getItem("products")) || [];
-let cart = [];
+let invoice = [];
 
-/* =============================
-   RENDER PRODUCTS
-============================= */
-function renderProducts() {
-  const container = document.getElementById("productsGrid");
-  if (!container) return;
+document.addEventListener("DOMContentLoaded", () => {
+  loadProducts();
+});
 
-  container.innerHTML = "";
+function loadProducts() {
+  const select = document.getElementById("productSelect");
+  select.innerHTML = "";
 
-  products.forEach((p, index) => {
-    const div = document.createElement("div");
-    div.className = "product";
-    div.innerHTML = `
-      <b>${p.name}</b>
-      <small>${p.price} جنيه</small>
-    `;
-    div.onclick = () => addToCart(index);
-    container.appendChild(div);
+  products.forEach(p => {
+    const option = document.createElement("option");
+    option.value = p.id;
+    option.textContent = `${p.name} - ${p.price}ج`;
+    select.appendChild(option);
   });
 }
 
-/* =============================
-   ADD TO CART
-============================= */
-function addToCart(index) {
-  const product = products[index];
+function addToInvoice() {
+  const productId = document.getElementById("productSelect").value;
+  const qty = Number(document.getElementById("qty").value);
 
-  const existing = cart.find(i => i.id === index);
+  if (qty <= 0) {
+    alert("أدخل كمية صحيحة");
+    return;
+  }
+
+  const product = products.find(p => p.id == productId);
+  const existing = invoice.find(i => i.id == productId);
+
   if (existing) {
-    existing.qty++;
+    existing.qty += qty;
   } else {
-    cart.push({
-      id: index,
+    invoice.push({
+      id: product.id,
       name: product.name,
       price: product.price,
-      qty: 1
+      qty
     });
   }
 
   renderInvoice();
 }
 
-/* =============================
-   RENDER INVOICE
-============================= */
 function renderInvoice() {
-  const box = document.getElementById("invoiceItems");
-  const totalBox = document.getElementById("totalAmount");
-
-  if (!box || !totalBox) return;
-
-  box.innerHTML = "";
+  const table = document.getElementById("invoiceTable");
+  table.innerHTML = "";
   let total = 0;
 
-  cart.forEach(item => {
-    total += item.price * item.qty;
+  invoice.forEach((item, i) => {
+    const rowTotal = item.price * item.qty;
+    total += rowTotal;
 
-    const div = document.createElement("div");
-    div.className = "invoice-item";
-    div.innerHTML = `
-      ${item.name}<br>
-      ${item.qty} × ${item.price} = ${item.qty * item.price}
+    table.innerHTML += `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${item.name}</td>
+        <td>${item.price}</td>
+        <td>${item.qty}</td>
+        <td>${rowTotal}</td>
+        <td>
+          <button onclick="removeItem(${item.id})">🗑</button>
+        </td>
+      </tr>
     `;
-    box.appendChild(div);
   });
 
-  totalBox.innerText = total + " جنيه";
+  document.getElementById("total").textContent = total;
 }
 
-/* =============================
-   SAVE INVOICE
-============================= */
+function removeItem(id) {
+  invoice = invoice.filter(i => i.id !== id);
+  renderInvoice();
+}
+
 function saveInvoice() {
-  if (cart.length === 0) {
-    alert("لا توجد أصناف في الفاتورة");
+  if (invoice.length === 0) {
+    alert("الفاتورة فارغة");
     return;
   }
 
-  const invoices = JSON.parse(localStorage.getItem("invoices")) || [];
-
+  let invoices = JSON.parse(localStorage.getItem("invoices")) || [];
   invoices.push({
+    id: Date.now(),
     date: new Date().toLocaleString("ar-EG"),
-    items: cart,
-    total: cart.reduce((s, i) => s + i.price * i.qty, 0)
+    items: invoice
   });
 
   localStorage.setItem("invoices", JSON.stringify(invoices));
-  cart = [];
-  renderInvoice();
+  alert("تم حفظ الفاتورة ✅");
 
-  alert("تم حفظ الفاتورة بنجاح");
+  invoice = [];
+  renderInvoice();
 }
 
-/* =============================
-   INIT
-============================= */
-document.addEventListener("DOMContentLoaded", () => {
-  renderProducts();
-});
-function finishInvoice() {
-  saveInvoice(cart);
-  cart = [];
-  renderCart();
+function printInvoice() {
+  window.print();
 }
