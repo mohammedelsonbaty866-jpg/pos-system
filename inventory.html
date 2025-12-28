@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>POS | إدارة المخزون</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- CSS -->
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="top-bar">
+  <h1>إدارة المخزون</h1>
+  <nav>
+    <a href="index.html">الكاشير</a>
+    <a href="products.html">الأصناف</a>
+    <a href="inventory.html" class="active">المخزون</a>
+    <a href="returns.html">المرتجعات</a>
+    <a href="reports.html">التقارير</a>
+  </nav>
+</header>
+
+<!-- ===== MAIN ===== -->
+<main class="inventory-layout">
+
+  <!-- إضافة كمية -->
+  <section class="form-card">
+    <h2>إضافة كمية للمخزون</h2>
+
+    <select id="inventoryProduct"></select>
+    <input id="inventoryQty" type="number" placeholder="الكمية">
+
+    <button class="btn-save" onclick="addToInventory()">إضافة</button>
+  </section>
+
+  <!-- جدول المخزون -->
+  <section class="table-card">
+    <h2>حالة المخزون</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>الصنف</th>
+          <th>الكمية</th>
+        </tr>
+      </thead>
+      <tbody id="inventoryTable"></tbody>
+    </table>
+  </section>
+
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  إدارة المخزون – POS System
+</footer>
+
+<!-- ===== JS ===== -->
+<script src="assets/js/data.js"></script>
+
+<script>
+/* ===============================
+   INVENTORY PAGE LOGIC
+================================ */
+
+/* تحميل الأصناف في القائمة */
+function loadProductsSelect() {
+  const select = document.getElementById("inventoryProduct");
+  select.innerHTML = "";
+
+  products.forEach(p => {
+    const option = document.createElement("option");
+    option.value = p.id;
+    option.textContent = p.name;
+    select.appendChild(option);
+  });
+}
+
+/* عرض المخزون */
+function renderInventoryTable() {
+  const table = document.getElementById("inventoryTable");
+  table.innerHTML = "";
+
+  if (inventory.length === 0) {
+    table.innerHTML = `
+      <tr>
+        <td colspan="3" style="text-align:center">المخزون فارغ</td>
+      </tr>
+    `;
+    return;
+  }
+
+  inventory.forEach((item, index) => {
+    const product = products.find(p => p.id === item.productId);
+    if (!product) return;
+
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${index + 1}</td>
+      <td>${product.name}</td>
+      <td>${item.qty}</td>
+    `;
+    table.appendChild(row);
+  });
+}
+
+/* إضافة كمية */
+function addToInventory() {
+  const productId = Number(document.getElementById("inventoryProduct").value);
+  const qty = Number(document.getElementById("inventoryQty").value);
+
+  if (qty <= 0) {
+    alert("أدخل كمية صحيحة");
+    return;
+  }
+
+  const existing = inventory.find(i => i.productId === productId);
+
+  if (existing) {
+    existing.qty += qty;
+  } else {
+    inventory.push({
+      productId: productId,
+      qty: qty
+    });
+  }
+
+  saveData();
+  renderInventoryTable();
+  document.getElementById("inventoryQty").value = "";
+}
+
+/* تحميل الصفحة */
+document.addEventListener("DOMContentLoaded", () => {
+  loadProductsSelect();
+  renderInventoryTable();
+});
+</script>
+
+</body>
+</html>
