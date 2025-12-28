@@ -5,17 +5,17 @@
   <title>إدارة الأصناف</title>
   <link rel="stylesheet" href="assets/css/main.css">
 </head>
-
 <body>
 
-<h2>إدارة الأصناف</h2>
+<h2>📦 إدارة الأصناف</h2>
 
-<input id="productName" placeholder="اسم الصنف">
-<input id="productPrice" type="number" placeholder="السعر">
+<div class="form-box">
+  <input id="productName" placeholder="اسم الصنف">
+  <input id="productPrice" type="number" placeholder="السعر">
+  <button onclick="addProduct()">➕ إضافة</button>
+</div>
 
-<button onclick="addProduct()">➕ إضافة</button>
-
-<table border="1" width="100%">
+<table>
   <thead>
     <tr>
       <th>#</th>
