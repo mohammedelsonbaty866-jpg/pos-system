@@ -3,37 +3,42 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>POS System Pro</title>
+<title>POS | نظام كاشير احترافي</title>
 
 <link rel="manifest" href="manifest.json">
 
 <style>
+/* ========== ROOT ========== */
 :root{
- --main:#020617;
- --accent:#16a34a;
- --danger:#dc2626;
+ --primary:#0f172a;
+ --secondary:#1e293b;
+ --accent:#22c55e;
+ --danger:#ef4444;
  --bg:#f1f5f9;
  --card:#ffffff;
+ --border:#e5e7eb;
 }
 
+/* ========== GLOBAL ========== */
 *{box-sizing:border-box}
 body{
  margin:0;
- font-family:Tahoma,Arial;
+ font-family:"Tajawal",Arial;
  background:var(--bg);
  color:#020617;
 }
 
-/* ===== HEADER ===== */
+/* ========== HEADER ========== */
 header{
+ height:56px;
  background:linear-gradient(90deg,#020617,#0f172a);
  color:#fff;
- padding:12px 14px;
  display:flex;
- justify-content:space-between;
  align-items:center;
+ justify-content:space-between;
+ padding:0 15px;
 }
-header span{font-size:16px;font-weight:bold}
+header b{font-size:18px}
 header button{
  background:none;
  border:none;
@@ -42,18 +47,18 @@ header button{
  cursor:pointer;
 }
 
-/* ===== MENU ===== */
+/* ========== MENU ========== */
 #menu{
  position:fixed;
- right:-240px;
  top:0;
+ right:-240px;
  width:220px;
  height:100%;
  background:#020617;
  color:#fff;
- padding:10px;
  transition:.3s;
- z-index:100;
+ z-index:10;
+ padding-top:60px;
 }
 #menu button{
  width:100%;
@@ -61,96 +66,110 @@ header button{
  border:none;
  color:#fff;
  text-align:right;
- padding:12px;
+ padding:14px;
  font-size:15px;
  cursor:pointer;
 }
-#menu hr{border:0;border-top:1px solid #1e293b}
+#menu button:hover{background:#1e293b}
 
-/* ===== SCREENS ===== */
-.screen{display:none;padding:10px}
-.screen.active{display:block}
-
-/* ===== CASHIER ===== */
-#topBar{
- background:#fff;
- padding:10px;
- border-radius:12px;
+/* ========== LAYOUT ========== */
+#app{
+ height:calc(100vh - 56px);
  display:grid;
- grid-template-columns:2fr 1fr;
- gap:8px;
+ grid-template-columns:1fr 360px;
 }
-#topBar input,#topBar select{
- padding:10px;
- border-radius:10px;
- border:1px solid #cbd5f5;
+
+/* ========== PRODUCTS ========== */
+#products{
+ padding:12px;
+ overflow:auto;
+}
+#search{
+ width:100%;
+ padding:12px;
+ border-radius:12px;
+ border:1px solid var(--border);
+ margin-bottom:10px;
  font-size:14px;
 }
 
 #productsGrid{
- margin-top:10px;
  display:grid;
- grid-template-columns:repeat(auto-fill,minmax(130px,1fr));
+ grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
  gap:10px;
 }
 .product{
  background:var(--card);
  border-radius:14px;
- padding:10px;
- text-align:center;
- box-shadow:0 4px 10px rgba(0,0,0,.08);
+ padding:12px;
+ box-shadow:0 6px 14px rgba(0,0,0,.08);
  cursor:pointer;
+ transition:.2s;
+ text-align:center;
 }
+.product:hover{transform:scale(1.03)}
 .product b{display:block;margin-bottom:6px}
+.product span{color:#16a34a;font-weight:bold}
 
-#invoiceBox{
- margin-top:10px;
+/* ========== INVOICE ========== */
+#invoice{
  background:#fff;
- padding:10px;
- border-radius:14px;
+ border-right:2px solid var(--border);
+ display:flex;
+ flex-direction:column;
 }
+#invoice h3{
+ margin:0;
+ padding:12px;
+ border-bottom:1px solid var(--border);
+ text-align:center;
+}
+
 #invoiceItems{
- display:grid;
- grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
- gap:8px;
+ flex:1;
+ overflow:auto;
+ padding:10px;
 }
 .item{
  background:#f8fafc;
  border-radius:10px;
- padding:8px;
- text-align:center;
+ padding:10px;
+ margin-bottom:8px;
+ display:flex;
+ justify-content:space-between;
+ font-size:14px;
 }
 
 #total{
- margin-top:8px;
+ padding:12px;
  font-size:18px;
  font-weight:bold;
  text-align:center;
+ border-top:1px solid var(--border);
 }
 
+/* ========== ACTIONS ========== */
 #actions{
  display:grid;
  grid-template-columns:1fr 1fr;
  gap:8px;
- margin-top:8px;
+ padding:10px;
 }
 .btn{
- padding:12px;
+ padding:14px;
  border:none;
- border-radius:12px;
+ border-radius:14px;
  font-size:15px;
  cursor:pointer;
 }
 .save{background:var(--accent);color:#fff}
 .print{background:#334155;color:#fff}
+.clear{background:var(--danger);color:#fff}
 
-/* ===== FORMS ===== */
-input,select{
- width:100%;
- margin-bottom:8px;
- padding:10px;
- border-radius:10px;
- border:1px solid #cbd5f5;
+/* ========== RESPONSIVE ========== */
+@media(max-width:900px){
+ #app{grid-template-columns:1fr}
+ #invoice{order:-1}
 }
 </style>
 </head>
@@ -158,154 +177,77 @@ input,select{
 <body>
 
 <header>
- <span id="shopTitle">POS System</span>
+ <b>POS SYSTEM</b>
  <button onclick="toggleMenu()">☰</button>
 </header>
 
 <div id="menu">
- <button onclick="showScreen('cashier')">🧾 الكاشير</button>
- <button onclick="showScreen('products')">📦 الأصناف</button>
- <button onclick="showScreen('reports')">📊 التقارير</button>
- <hr>
- <button onclick="adminLogin()">🔒 دخول الأدمن</button>
+ <button>🧾 الكاشير</button>
+ <button>📦 الأصناف</button>
+ <button>👤 المستخدمين</button>
+ <button>📊 التقارير</button>
+ <button>⚙️ الإعدادات</button>
 </div>
 
-<!-- ================= CASHIER ================= -->
-<div id="cashier" class="screen active">
+<div id="app">
 
- <div id="topBar">
-  <input id="search" placeholder="بحث / باركود">
-  <select id="payType">
-   <option value="cash">نقدي</option>
-   <option value="credit">آجل</option>
-  </select>
+ <!-- PRODUCTS -->
+ <div id="products">
+  <input id="search" placeholder="بحث بالاسم أو الباركود">
+  <div id="productsGrid"></div>
  </div>
 
- <div id="productsGrid"></div>
-
- <div id="invoiceBox">
+ <!-- INVOICE -->
+ <div id="invoice">
+  <h3>الفاتورة</h3>
   <div id="invoiceItems"></div>
   <div id="total">الإجمالي: 0</div>
-
   <div id="actions">
-   <button class="btn save" onclick="saveInvoice()">حفظ</button>
-   <button class="btn print" onclick="printInvoice()">طباعة</button>
+   <button class="btn save">حفظ</button>
+   <button class="btn print">طباعة</button>
+   <button class="btn clear">إلغاء</button>
   </div>
  </div>
 
 </div>
 
-<!-- ================= PRODUCTS ================= -->
-<div id="products" class="screen">
- <h3>إضافة صنف</h3>
- <input id="pn" placeholder="اسم الصنف">
- <input id="pp" type="number" placeholder="سعر البيع">
- <input id="pc" type="number" placeholder="سعر الشراء">
- <input id="ps" type="number" placeholder="المخزون">
- <button class="btn save" onclick="addProduct()">حفظ الصنف</button>
-</div>
-
-<!-- ================= REPORTS ================= -->
-<div id="reports" class="screen">
- <h3>التقارير</h3>
- <div id="reportBox"></div>
-</div>
-
 <script>
-/* ===== DATA ===== */
-let products = JSON.parse(localStorage.products||"[]");
-let invoices = JSON.parse(localStorage.invoices||"[]");
-let settings = JSON.parse(localStorage.settings||"{}");
-let cart=[];
+/* UI ONLY – المنطق هيتقسم في ملفات JS بعد كده */
 
-/* ===== MENU ===== */
+let menu=document.getElementById("menu");
 function toggleMenu(){
  menu.style.right = menu.style.right=="0px" ? "-240px":"0px";
 }
-function showScreen(id){
- document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
- document.getElementById(id).classList.add("active");
- menu.style.right="-240px";
-}
 
-/* ===== ADMIN LOGIN (12345) ===== */
-function adminLogin(){
- const pass = prompt("كلمة مرور الأدمن:");
- if(pass==="12345"){
-  alert("تم الدخول كأدمن");
-  showScreen("products");
- }else{
-  alert("كلمة المرور غير صحيحة");
- }
-}
+/* بيانات تجريبية */
+const products=[
+ {n:"سكر",p:25},
+ {n:"زيت",p:70},
+ {n:"أرز",p:30},
+ {n:"مكرونة",p:12},
+ {n:"شاي",p:55}
+];
 
-/* ===== PRODUCTS ===== */
-function renderProducts(){
- productsGrid.innerHTML="";
- products.forEach(p=>{
-  let d=document.createElement("div");
-  d.className="product";
-  d.innerHTML=`<b>${p.n}</b>${p.p} جنيه`;
-  d.onclick=()=>addToCart(p);
-  productsGrid.appendChild(d);
- });
-}
-function addProduct(){
- products.push({n:pn.value,p:+pp.value,c:+pc.value,s:+ps.value});
- saveAll();renderProducts();
- alert("تم حفظ الصنف");
-}
+let grid=document.getElementById("productsGrid");
+let invoice=document.getElementById("invoiceItems");
+let totalBox=document.getElementById("total");
+let total=0;
 
-/* ===== CART ===== */
-function addToCart(p){
- if(p.s<=0) return alert("نفاد المخزون");
- cart.push({...p,q:1});
- p.s--;
- renderInvoice();saveAll();
-}
-function renderInvoice(){
- invoiceItems.innerHTML="";
- let t=0;
- cart.forEach(i=>{
-  t+=i.p*i.q;
-  invoiceItems.innerHTML+=`
+products.forEach(p=>{
+ let d=document.createElement("div");
+ d.className="product";
+ d.innerHTML=`<b>${p.n}</b><span>${p.p} ج</span>`;
+ d.onclick=()=>{
+  invoice.innerHTML+=`
    <div class="item">
-    ${i.n}<br>${i.q} × ${i.p}
+    <span>${p.n}</span>
+    <span>${p.p} ج</span>
    </div>`;
- });
- total.innerText="الإجمالي: "+t;
-}
-
-/* ===== SAVE INVOICE ===== */
-function saveInvoice(){
- if(cart.length===0) return;
- invoices.push({
-  no:invoices.length+1,
-  date:new Date().toLocaleString(),
-  total:cart.reduce((a,i)=>a+i.p*i.q,0),
-  items:cart
- });
- cart=[];
- renderInvoice();
- saveAll();
- alert("تم حفظ الفاتورة");
-}
-
-/* ===== PRINT ===== */
-function printInvoice(){
- window.print();
-}
-
-/* ===== SAVE ALL ===== */
-function saveAll(){
- localStorage.products=JSON.stringify(products);
- localStorage.invoices=JSON.stringify(invoices);
- localStorage.settings=JSON.stringify(settings);
-}
-
-/* ===== INIT ===== */
-shopTitle.innerText=settings.shopName||"POS System";
-renderProducts();
+  total+=p.p;
+  totalBox.innerText="الإجمالي: "+total;
+ };
+ grid.appendChild(d);
+});
 </script>
 
 </body>
