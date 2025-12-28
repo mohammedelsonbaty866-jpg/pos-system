@@ -1,99 +1,117 @@
-let products = JSON.parse(localStorage.getItem("products")) || [];
-let invoice = [];
+/* ================= CASHIER ================= */
 
-document.addEventListener("DOMContentLoaded", () => {
-  loadProducts();
-});
+let cart = [];
 
+/* ===== LOAD PRODUCTS ===== */
 function loadProducts() {
-  const select = document.getElementById("productSelect");
-  select.innerHTML = "";
+  const products = Storage.get(DB.products);
+  const grid = document.getElementById("productsGrid");
+  if (!grid) return;
 
-  products.forEach(p => {
-    const option = document.createElement("option");
-    option.value = p.id;
-    option.textContent = `${p.name} - ${p.price}ج`;
-    select.appendChild(option);
+  grid.innerHTML = "";
+
+  products.forEach((p, i) => {
+    const div = document.createElement("div");
+    div.className = "product";
+    div.innerHTML = `
+      <b>${p.name}</b>
+      <small>${p.price} ج</small>
+    `;
+    div.onclick = () => addToCart(i);
+    grid.appendChild(div);
   });
 }
 
-function addToInvoice() {
-  const productId = document.getElementById("productSelect").value;
-  const qty = Number(document.getElementById("qty").value);
+/* ===== ADD TO CART ===== */
+function addToCart(index) {
+  const products = Storage.get(DB.products);
+  const product = products[index];
 
-  if (qty <= 0) {
-    alert("أدخل كمية صحيحة");
-    return;
-  }
+  if (!product) return;
 
-  const product = products.find(p => p.id == productId);
-  const existing = invoice.find(i => i.id == productId);
+  const existing = cart.find(i => i.id === index);
 
   if (existing) {
-    existing.qty += qty;
+    existing.qty++;
   } else {
-    invoice.push({
-      id: product.id,
+    cart.push({
+      id: index,
       name: product.name,
       price: product.price,
-      qty
+      qty: 1
     });
   }
 
   renderInvoice();
 }
 
+/* ===== RENDER INVOICE ===== */
 function renderInvoice() {
-  const table = document.getElementById("invoiceTable");
-  table.innerHTML = "";
+  const box = document.getElementById("invoiceItems");
+  const totalBox = document.getElementById("total");
+  if (!box || !totalBox) return;
+
+  box.innerHTML = "";
   let total = 0;
 
-  invoice.forEach((item, i) => {
-    const rowTotal = item.price * item.qty;
-    total += rowTotal;
+  cart.forEach((item, i) => {
+    total += item.price * item.qty;
 
-    table.innerHTML += `
-      <tr>
-        <td>${i + 1}</td>
-        <td>${item.name}</td>
-        <td>${item.price}</td>
-        <td>${item.qty}</td>
-        <td>${rowTotal}</td>
-        <td>
-          <button onclick="removeItem(${item.id})">🗑</button>
-        </td>
-      </tr>
+    box.innerHTML += `
+      <div class="item">
+        ${item.name}<br>
+        ${item.qty} × ${item.price}
+        <br>
+        <button onclick="removeItem(${i})">❌</button>
+      </div>
     `;
   });
 
-  document.getElementById("total").textContent = total;
+  totalBox.innerText = "الإجمالي: " + total + " ج";
 }
 
-function removeItem(id) {
-  invoice = invoice.filter(i => i.id !== id);
+/* ===== REMOVE ITEM ===== */
+function removeItem(index) {
+  cart.splice(index, 1);
   renderInvoice();
 }
 
+/* ===== SAVE INVOICE ===== */
 function saveInvoice() {
-  if (invoice.length === 0) {
-    alert("الفاتورة فارغة");
+  if (cart.length === 0) {
+    alert("لا توجد أصناف");
     return;
   }
 
-  let invoices = JSON.parse(localStorage.getItem("invoices")) || [];
-  invoices.push({
-    id: Date.now(),
-    date: new Date().toLocaleString("ar-EG"),
-    items: invoice
+  const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+
+  Storage.add(DB.invoices, {
+    date: new Date().toLocaleString(),
+    items: cart,
+    total: total
   });
 
-  localStorage.setItem("invoices", JSON.stringify(invoices));
-  alert("تم حفظ الفاتورة ✅");
-
-  invoice = [];
+  cart = [];
   renderInvoice();
+  alert("تم حفظ الفاتورة");
 }
 
-function printInvoice() {
-  window.print();
+/* ===== SEARCH ===== */
+function searchProduct(value) {
+  const products = Storage.get(DB.products);
+  const grid = document.getElementById("productsGrid");
+  grid.innerHTML = "";
+
+  products
+    .filter(p => p.name.includes(value))
+    .forEach((p, i) => {
+      const div = document.createElement("div");
+      div.className = "product";
+      div.innerHTML = `<b>${p.name}</b><small>${p.price} ج</small>`;
+      div.onclick = () => addToCart(i);
+      grid.appendChild(div);
+    });
 }
+
+/* ===== INIT ===== */
+document.addEventListener("DOMContentLoaded", loadProducts);
