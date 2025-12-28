@@ -1,31 +1,69 @@
 /* ===============================
-   PRODUCTS.JS
-   إدارة الأصناف – نسخة احترافية
-================================ */
+   PRODUCTS.JS – POS SYSTEM
+   =============================== */
 
-/* عرض الأصناف */
-function renderProductsTable(){
+/* ===== ADD PRODUCT ===== */
+function addProduct() {
+  const name  = document.getElementById("pn").value.trim();
+  const price = parseFloat(document.getElementById("pp").value);
+  const cost  = parseFloat(document.getElementById("pc").value);
+  const stock = parseInt(document.getElementById("ps").value);
+
+  if (!name || isNaN(price) || price <= 0) {
+    alert("بيانات الصنف غير صحيحة");
+    return;
+  }
+
+  products.push({
+    id: Date.now(),
+    name,
+    price,
+    cost: isNaN(cost) ? 0 : cost,
+    stock: isNaN(stock) ? 0 : stock
+  });
+
+  saveProducts();
+  clearProductForm();
+  renderProducts();
+  renderProductsTable();
+
+  alert("تم إضافة الصنف بنجاح");
+}
+
+/* ===== SAVE PRODUCTS ===== */
+function saveProducts() {
+  localStorage.setItem("products", JSON.stringify(products));
+}
+
+/* ===== CLEAR FORM ===== */
+function clearProductForm() {
+  document.getElementById("pn").value = "";
+  document.getElementById("pp").value = "";
+  document.getElementById("pc").value = "";
+  document.getElementById("ps").value = "";
+}
+
+/* ===== RENDER PRODUCTS TABLE ===== */
+function renderProductsTable() {
   const box = document.getElementById("productsTable");
-  if(!box) return;
+  if (!box) return;
 
   box.innerHTML = `
-    <table style="width:100%;border-collapse:collapse">
+    <table class="table">
       <thead>
         <tr>
           <th>الصنف</th>
-          <th>بيع</th>
-          <th>شراء</th>
-          <th>مخزون</th>
+          <th>سعر البيع</th>
+          <th>المخزون</th>
           <th>تحكم</th>
         </tr>
       </thead>
       <tbody>
-        ${products.map((p,i)=>`
+        ${products.map((p, i) => `
           <tr>
-            <td>${p.n}</td>
-            <td>${p.p}</td>
-            <td>${p.c}</td>
-            <td>${p.s}</td>
+            <td>${p.name}</td>
+            <td>${p.price}</td>
+            <td>${p.stock}</td>
             <td>
               <button onclick="editProduct(${i})">✏️</button>
               <button onclick="deleteProduct(${i})">🗑️</button>
@@ -37,46 +75,57 @@ function renderProductsTable(){
   `;
 }
 
-/* تعديل صنف */
-function editProduct(index){
+/* ===== EDIT PRODUCT ===== */
+function editProduct(index) {
   const p = products[index];
-  const name = prompt("اسم الصنف", p.n);
-  if(name === null) return;
+  if (!p) return;
 
-  const price = prompt("سعر البيع", p.p);
-  const cost  = prompt("سعر الشراء", p.c);
-  const stock = prompt("المخزون", p.s);
+  document.getElementById("pn").value = p.name;
+  document.getElementById("pp").value = p.price;
+  document.getElementById("pc").value = p.cost;
+  document.getElementById("ps").value = p.stock;
 
-  products[index] = {
-    n: name,
-    p: Number(price),
-    c: Number(cost),
-    s: Number(stock)
-  };
+  deleteProduct(index);
+}
 
-  saveAll();
+/* ===== DELETE PRODUCT ===== */
+function deleteProduct(index) {
+  if (!confirm("حذف الصنف؟")) return;
+
+  products.splice(index, 1);
+  saveProducts();
   renderProducts();
   renderProductsTable();
 }
 
-/* حذف صنف */
-function deleteProduct(index){
-  if(!confirm("حذف الصنف نهائيًا؟")) return;
-  products.splice(index,1);
-  saveAll();
-  renderProducts();
-  renderProductsTable();
-}
+/* ===== SEARCH PRODUCT ===== */
+function searchProducts(value) {
+  const grid = document.getElementById("productsGrid");
+  if (!grid) return;
 
-/* تشغيل تلقائي عند فتح شاشة الأصناف */
-document.addEventListener("DOMContentLoaded",()=>{
-  const productsScreen = document.getElementById("products");
-  if(productsScreen){
-    const observer = new MutationObserver(()=>{
-      if(productsScreen.classList.contains("active")){
-        renderProductsTable();
-      }
+  grid.innerHTML = "";
+  products
+    .filter(p => p.name.includes(value))
+    .forEach((p, i) => {
+      const div = document.createElement("div");
+      div.className = "product-card";
+      div.innerHTML = `
+        <strong>${p.name}</strong>
+        <span>${p.price} جنيه</span>
+      `;
+      div.onclick = () => addToCart(i);
+      grid.appendChild(div);
     });
-    observer.observe(productsScreen,{attributes:true});
+}
+
+/* ===== INIT ===== */
+document.addEventListener("DOMContentLoaded", () => {
+  renderProductsTable();
+
+  const search = document.getElementById("search");
+  if (search) {
+    search.addEventListener("input", e =>
+      searchProducts(e.target.value)
+    );
   }
 });
