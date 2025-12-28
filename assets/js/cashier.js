@@ -1,38 +1,29 @@
-/*********************************
- * CASHIER.JS
- *********************************/
+/* ===============================
+   CASHIER.JS
+   السلة + الفاتورة + الإجمالي
+================================ */
+
+/*
+  يعتمد على:
+  - products (Array) من data.js
+  - invoices (Array) من data.js
+  - saveData() من data.js
+*/
 
 let cart = [];
 
-/* ===== RENDER PRODUCTS ===== */
-function renderProducts() {
-  const grid = document.getElementById("productsGrid");
-  if (!grid) return;
+/* ===== إضافة للسلة ===== */
+function addToCart(productIndex) {
+  const product = products[productIndex];
+  if (!product) return;
 
-  grid.innerHTML = "";
+  const existing = cart.find(item => item.id === product.id);
 
-  products.forEach((p, index) => {
-    const div = document.createElement("div");
-    div.className = "product";
-    div.innerHTML = `
-      <b>${p.name}</b>
-      <span>${p.price} ج</span>
-    `;
-    div.onclick = () => addToCart(index);
-    grid.appendChild(div);
-  });
-}
-
-/* ===== ADD TO CART ===== */
-function addToCart(index) {
-  const product = products[index];
-
-  const found = cart.find(i => i.id === index);
-  if (found) {
-    found.qty++;
+  if (existing) {
+    existing.qty += 1;
   } else {
     cart.push({
-      id: index,
+      id: product.id,
       name: product.name,
       price: product.price,
       qty: 1
@@ -42,80 +33,86 @@ function addToCart(index) {
   renderInvoice();
 }
 
-/* ===== RENDER INVOICE ===== */
+/* ===== عرض الفاتورة ===== */
 function renderInvoice() {
-  const itemsBox = document.getElementById("invoiceItems");
+  const invoiceBox = document.getElementById("invoiceItems");
   const totalBox = document.getElementById("total");
 
-  if (!itemsBox || !totalBox) return;
+  if (!invoiceBox || !totalBox) return;
 
-  itemsBox.innerHTML = "";
+  invoiceBox.innerHTML = "";
+
   let total = 0;
 
-  cart.forEach((item, i) => {
-    const row = document.createElement("div");
-    row.className = "invoice-item";
-    row.innerHTML = `
-      ${item.name} × ${item.qty}
-      <span>${item.price * item.qty} ج</span>
-    `;
-    itemsBox.appendChild(row);
-
-    total += item.price * item.qty;
-  });
-
-  totalBox.innerText = "الإجمالي: " + total + " ج";
-}
-
-/* ===== SAVE INVOICE ===== */
-function saveInvoice() {
   if (cart.length === 0) {
-    alert("الفاتورة فارغة");
+    invoiceBox.innerHTML = `<p class="empty">لا توجد أصناف</p>`;
+    totalBox.textContent = "0 ج";
     return;
   }
 
-  const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+  cart.forEach((item, index) => {
+    total += item.price * item.qty;
 
-  invoices.push({
-    id: invoices.length + 1,
-    date: formatDate(),
-    items: cart,
-    total: total
+    const row = document.createElement("div");
+    row.className = "invoice-item";
+
+    row.innerHTML = `
+      <span>${item.name}</span>
+      <span>${item.qty} × ${item.price}</span>
+      <button onclick="removeItem(${index})">✖</button>
+    `;
+
+    invoiceBox.appendChild(row);
   });
 
-  saveInvoices();
+  totalBox.textContent = total + " ج";
+}
+
+/* ===== حذف صنف ===== */
+function removeItem(index) {
+  cart.splice(index, 1);
+  renderInvoice();
+}
+
+/* ===== تفريغ الفاتورة ===== */
+function clearInvoice() {
+  if (cart.length === 0) return;
+
+  if (!confirm("تفريغ الفاتورة؟")) return;
+
+  cart = [];
+  renderInvoice();
+}
+
+/* ===== حفظ الفاتورة ===== */
+function saveInvoice() {
+  if (cart.length === 0) {
+    alert("لا توجد أصناف في الفاتورة");
+    return;
+  }
+
+  const total = cart.reduce(
+    (sum, item) => sum + item.price * item.qty,
+    0
+  );
+
+  const invoice = {
+    id: Date.now(),
+    date: new Date().toLocaleString("ar-EG"),
+    items: [...cart],
+    total: total
+  };
+
+  invoices.push(invoice);
+  saveData();
+
   cart = [];
   renderInvoice();
 
-  alert("تم حفظ الفاتورة");
+  alert("تم حفظ الفاتورة بنجاح");
 }
 
-/* ===== INIT ===== */
+/* ===== تحميل أولي ===== */
 document.addEventListener("DOMContentLoaded", () => {
-  renderProducts();
   renderInvoice();
 });
-/* ===== SEARCH PRODUCTS ===== */
-function searchProduct(text) {
-  const grid = document.getElementById("productsGrid");
-  grid.innerHTML = "";
-
-  products
-    .filter(p => p.name.includes(text))
-    .forEach((p, index) => {
-      const div = document.createElement("div");
-      div.className = "product";
-      div.innerHTML = `
-        <b>${p.name}</b>
-        <span>${p.price} ج</span>
-      `;
-      div.onclick = () => addToCart(index);
-      grid.appendChild(div);
-    });
-}
-
-/* ===== CLEAR INVOICE ===== */
-function clearInvoice() {
-  cart = [];
-  renderInvoice();
-}
