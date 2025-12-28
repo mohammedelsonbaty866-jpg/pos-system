@@ -222,6 +222,15 @@ input,select{
 
 <!-- ================= REPORTS ================= -->
 <div id="reports" class="screen">
+ <h3>📊 التقارير</h3>
+
+ <button class="btn save" onclick="dailyReport()">تقرير اليوم</button>
+ <button class="btn save" onclick="monthlyReport()">تقرير شهري</button>
+ <button class="btn save" onclick="yearlyReport()">تقرير سنوي</button>
+ <button class="btn print" onclick="dailyClose()">قفل يومي</button>
+
+ <div id="reportBox" style="margin-top:10px"></div>
+</div>
  <h3>التقارير</h3>
  <div id="reportBox"></div>
 </div>
@@ -291,6 +300,10 @@ function renderInvoice(){
 
 /* ===== SAVE INVOICE ===== */
 function saveInvoice(){
+ if(isClosed()){
+ alert("اليوم مقفول");
+ return;
+}
  if(cart.length==0)return;
  invoices.push({
   no:invoices.length+1,
@@ -340,7 +353,6 @@ function saveAll(){
 shopName.innerText=settings.shopName||"نظام كاشير";
 renderProducts();
 renderCustomers();
-</script>
-
+<script src="reports.js"></script>
 </body>
 </html>
