@@ -1,113 +1,122 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>POS System</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام كاشير احترافي</title>
 
-<link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="style.css">
-
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
 
-<!-- ===== HEADER ===== -->
-<header class="header">
-  <div class="logo">POS System</div>
+<!-- ===== TOP BAR ===== -->
+<header class="top-bar">
+  <div class="logo" id="shopName">نظام كاشير</div>
   <button class="menu-btn" onclick="toggleMenu()">☰</button>
 </header>
 
 <!-- ===== SIDE MENU ===== -->
-<nav id="sideMenu" class="side-menu">
+<nav id="menu" class="side-menu">
   <button onclick="showScreen('cashier')">🧾 الكاشير</button>
   <button onclick="showScreen('products')">📦 الأصناف</button>
-  <button onclick="showScreen('customers')">👤 العملاء</button>
+  <button onclick="showScreen('customers')">👥 العملاء</button>
   <button onclick="showScreen('reports')">📊 التقارير</button>
   <button onclick="showScreen('settings')">⚙️ الإعدادات</button>
 </nav>
 
-<!-- ===== APP ===== -->
-<main class="app">
+<!-- ===== MAIN ===== -->
+<main>
 
-<!-- ===== CASHIER ===== -->
+<!-- ================== CASHIER ================== -->
 <section id="cashier" class="screen active">
+  <div class="cashier-layout">
 
-  <div class="top-bar">
-    <input type="text" id="searchInput" placeholder="بحث / باركود">
-    <select id="payType">
-      <option value="cash">نقدي</option>
-      <option value="credit">آجل</option>
-    </select>
-    <select id="customerSelect" style="display:none"></select>
-  </div>
-
-  <div id="productsGrid" class="products-grid"></div>
-
-  <div class="invoice-box">
-    <div id="invoiceItems" class="invoice-items"></div>
-    <div id="invoiceTotal" class="invoice-total">الإجمالي: 0</div>
-
-    <div class="actions">
-      <button class="btn save" onclick="saveInvoice()">حفظ</button>
-      <button class="btn print" onclick="printInvoice()">طباعة</button>
+    <!-- PRODUCTS -->
+    <div class="products-area">
+      <h2>الأصناف</h2>
+      <div id="productsGrid" class="products-grid">
+        <!-- products.js -->
+      </div>
     </div>
+
+    <!-- INVOICE -->
+    <div class="invoice-area">
+      <h2>فاتورة</h2>
+
+      <div id="invoiceItems" class="invoice-items"></div>
+
+      <div class="invoice-footer">
+
+        <div class="total">
+          الإجمالي: <span id="total">0</span>
+        </div>
+
+        <select id="payType" onchange="toggleCustomer()">
+          <option value="cash">نقدي</option>
+          <option value="credit">آجل</option>
+        </select>
+
+        <select id="customer" style="display:none"></select>
+
+        <button class="save-btn" onclick="saveInvoice()">
+          💾 حفظ الفاتورة
+        </button>
+
+      </div>
+    </div>
+
   </div>
-
 </section>
 
-<!-- ===== PRODUCTS ===== -->
+<!-- ================== PRODUCTS ================== -->
 <section id="products" class="screen">
-  <h2>إضافة صنف</h2>
-  <input id="prodName" placeholder="اسم الصنف">
-  <input id="prodPrice" type="number" placeholder="سعر البيع">
-  <input id="prodCost" type="number" placeholder="سعر الشراء">
-  <input id="prodStock" type="number" placeholder="المخزون">
-  <button class="btn save" onclick="addProduct()">حفظ الصنف</button>
-<div id="productsTable"></div>
-  <div id="productsList"></div>
+  <h2>إدارة الأصناف</h2>
+
+  <input id="pName" placeholder="اسم الصنف">
+  <input id="pPrice" type="number" placeholder="السعر">
+
+  <button onclick="addProduct()">➕ إضافة صنف</button>
+
+  <div id="productList"></div>
 </section>
 
-<!-- ===== CUSTOMERS ===== -->
+<!-- ================== CUSTOMERS ================== -->
 <section id="customers" class="screen">
   <h2>العملاء</h2>
-  <input id="custName" placeholder="اسم العميل">
-  <button class="btn save" onclick="addCustomer()">إضافة عميل</button>
-  <div id="customersList"></div>
+
+  <input id="cName" placeholder="اسم العميل">
+  <button onclick="addCustomer()">➕ إضافة عميل</button>
+
+  <div id="customerList"></div>
 </section>
 
-<!-- ===== REPORTS ===== -->
+<!-- ================== REPORTS ================== -->
 <section id="reports" class="screen">
   <h2>التقارير</h2>
-  <button class="btn save" onclick="dailyReport()">تقرير اليوم</button>
-  <button class="btn save" onclick="monthlyReport()">تقرير شهري</button>
-  <button class="btn save" onclick="yearlyReport()">تقرير سنوي</button>
-  <div id="reportBox"></div>
+
+  <button onclick="dailyReport()">📅 تقرير اليوم</button>
+  <button onclick="monthlyReport()">📆 تقرير الشهر</button>
+
+  <div id="reportsResult"></div>
 </section>
 
-<!-- ===== SETTINGS ===== -->
+<!-- ================== SETTINGS ================== -->
 <section id="settings" class="screen">
   <h2>الإعدادات</h2>
-  <input id="shopNameInput" placeholder="اسم المحل">
-  <button class="btn save" onclick="saveSettings()">حفظ</button>
+
+  <input id="shopInput" placeholder="اسم المحل">
+  <button onclick="saveSettings()">💾 حفظ الإعدادات</button>
 </section>
 
 </main>
 
-<!-- ===== SCRIPTS ===== -->
-<script src="core.js"></script>
-<script src="products.js"></script>
-<script src="customers.js"></script>
-<script src="reports.js"></script>
-<script src="print.js"></script>
+<!-- ===== JS FILES ===== -->
+<script src="js/core.js"></script>
+<script src="js/products.js"></script>
+<script src="js/reports.js"></script>
+<script src="js/print.js"></script>
 
-<script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js");
-}
-</script>
-<script src="products.js"></script>
-  <script src="reports.js"></script>
-  <script src="print.js"></script>
 </body>
-  <button class="btn print" onclick="printInvoice()">طباعة</button>
 </html>
