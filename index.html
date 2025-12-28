@@ -409,5 +409,104 @@ shopName.innerText=settings.shopName||"نظام كاشير";
 renderProducts();
 renderCustomers();
 <script src="reports.js"></script>
+<script>
+function printInvoice() {
+
+  const invoiceItems = document.getElementById("invoiceItems");
+  const totalBox = document.getElementById("total");
+
+  if (!invoiceItems || invoiceItems.innerHTML.trim() === "") {
+    alert("لا توجد أصناف في الفاتورة");
+    return;
+  }
+
+  const printWindow = window.open("", "", "width=400,height=700");
+
+  printWindow.document.write(`
+    <html lang="ar">
+    <head>
+      <meta charset="UTF-8">
+      <title>فاتورة</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          direction: rtl;
+          margin: 0;
+          padding: 10px;
+        }
+
+        .page {
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+        }
+
+        h2 {
+          text-align: center;
+          margin: 5px 0;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 10px;
+        }
+
+        th, td {
+          border: 1px solid #000;
+          padding: 6px;
+          text-align: center;
+          font-size: 14px;
+        }
+
+        .footer {
+          border-top: 2px dashed #000;
+          padding-top: 10px;
+          font-size: 14px;
+          text-align: center;
+        }
+      </style>
+    </head>
+
+    <body>
+      <div class="page">
+
+        <div>
+          <h2>فاتورة بيع</h2>
+
+          <table>
+            <thead>
+              <tr>
+                <th>الصنف</th>
+                <th>الكمية</th>
+                <th>السعر</th>
+                <th>الإجمالي</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${invoiceItems.innerHTML}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- الفاتورة تطلع تحت -->
+        <div class="footer">
+          <p><strong>${totalBox.innerText}</strong></p>
+          <p>شكراً لتعاملكم معنا</p>
+          <p>POS System ©</p>
+        </div>
+
+      </div>
+    </body>
+    </html>
+  `);
+
+  printWindow.document.close();
+  printWindow.focus();
+  printWindow.print();
+  printWindow.close();
+}
+</script>
 </body>
 </html>
