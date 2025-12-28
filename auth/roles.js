@@ -1,58 +1,52 @@
-// auth/auth.service.js
+/* ===============================
+   ROLES & PERMISSIONS
+   =============================== */
 
-import { ROLES } from "./roles.js";
+const userData = localStorage.getItem("loggedUser");
+const currentUser = userData ? JSON.parse(userData) : null;
 
-const USERS_KEY = "pos_users";
-const SESSION_KEY = "pos_session";
+/*
+ROLES:
+- admin   → كل الصلاحيات
+- cashier → بيع فقط
+- viewer  → تقارير فقط
+*/
 
-// مستخدمين افتراضيين (أول مرة)
-const defaultUsers = [
-  { username: "admin", password: "1234", role: ROLES.ADMIN },
-  { username: "cashier", password: "1234", role: ROLES.CASHIER }
-];
-
-// تجهيز المستخدمين أول مرة
-function initUsers() {
-  if (!localStorage.getItem(USERS_KEY)) {
-    localStorage.setItem(USERS_KEY, JSON.stringify(defaultUsers));
-  }
+function hasRole(role) {
+  return currentUser && currentUser.role === role;
 }
 
-// تسجيل دخول
-export function login(username, password) {
-  initUsers();
-
-  const users = JSON.parse(localStorage.getItem(USERS_KEY));
-  const user = users.find(
-    u => u.username === username && u.password === password
-  );
-
-  if (!user) return false;
-
-  localStorage.setItem(
-    SESSION_KEY,
-    JSON.stringify({
-      username: user.username,
-      role: user.role,
-      time: Date.now()
-    })
-  );
-
-  return true;
+function isAdmin() {
+  return hasRole("admin");
 }
 
-// تسجيل خروج
-export function logout() {
-  localStorage.removeItem(SESSION_KEY);
+function isCashier() {
+  return hasRole("cashier");
 }
 
-// المستخدم الحالي
-export function getCurrentUser() {
-  const session = localStorage.getItem(SESSION_KEY);
-  return session ? JSON.parse(session) : null;
+function isViewer() {
+  return hasRole("viewer");
 }
 
-// هل مسجل دخول؟
-export function isLoggedIn() {
-  return !!getCurrentUser();
+/* إخفاء العناصر حسب الصلاحية */
+function applyPermissions() {
+  if (!currentUser) return;
+
+  /* عناصر للأدمن فقط */
+  document.querySelectorAll("[data-role='admin']").forEach(el => {
+    if (!isAdmin()) el.style.display = "none";
+  });
+
+  /* الكاشير */
+  document.querySelectorAll("[data-role='cashier']").forEach(el => {
+    if (!(isAdmin() || isCashier())) el.style.display = "none";
+  });
+
+  /* التقارير */
+  document.querySelectorAll("[data-role='viewer']").forEach(el => {
+    if (!(isAdmin() || isViewer())) el.style.display = "none";
+  });
 }
+
+/* تشغيل تلقائي */
+document.addEventListener("DOMContentLoaded", applyPermissions);
