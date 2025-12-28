@@ -104,3 +104,8 @@ function saveInvoice() {
 document.addEventListener("DOMContentLoaded", () => {
   renderProducts();
 });
+function finishInvoice() {
+  saveInvoice(cart);
+  cart = [];
+  renderCart();
+}
