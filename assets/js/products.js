@@ -1,52 +1,77 @@
-let products = JSON.parse(localStorage.getItem("products")) || [];
+/*********************************
+ * PRODUCTS.JS
+ * إدارة الأصناف
+ *********************************/
 
-document.addEventListener("DOMContentLoaded", renderProducts);
+/* ====== عناصر الصفحة ====== */
+const pName   = document.getElementById("productName");
+const pPrice  = document.getElementById("productPrice");
+const pStock  = document.getElementById("productStock");
+const table   = document.getElementById("productsTable");
 
+/* ====== إضافة صنف ====== */
 function addProduct() {
-  const name = document.getElementById("productName").value.trim();
-  const price = document.getElementById("productPrice").value;
+  const name  = pName.value.trim();
+  const price = Number(pPrice.value);
+  const stock = Number(pStock.value);
 
-  if (name === "" || price === "") {
-    alert("من فضلك أدخل اسم الصنف والسعر");
+  if (!name || price <= 0 || stock < 0) {
+    alert("أدخل بيانات صحيحة");
     return;
   }
 
   products.push({
-    id: Date.now(),
     name,
-    price
+    price,
+    stock
   });
 
-  localStorage.setItem("products", JSON.stringify(products));
-  clearInputs();
-  renderProducts();
+  saveProducts();
+  renderProductsTable();
+
+  pName.value  = "";
+  pPrice.value = "";
+  pStock.value = "";
 }
 
-function renderProducts() {
-  const table = document.getElementById("productsTable");
+/* ====== حذف صنف ====== */
+function deleteProduct(index) {
+  if (!confirm("حذف الصنف؟")) return;
+
+  products.splice(index, 1);
+  saveProducts();
+  renderProductsTable();
+}
+
+/* ====== عرض الأصناف ====== */
+function renderProductsTable() {
   table.innerHTML = "";
+
+  if (products.length === 0) {
+    table.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align:center">لا توجد أصناف</td>
+      </tr>
+    `;
+    return;
+  }
 
   products.forEach((p, i) => {
     table.innerHTML += `
       <tr>
         <td>${i + 1}</td>
         <td>${p.name}</td>
-        <td>${p.price}</td>
+        <td>${p.price} ج</td>
+        <td>${p.stock}</td>
         <td>
-          <button onclick="deleteProduct(${p.id})">🗑</button>
+          <button onclick="deleteProduct(${i})">❌</button>
         </td>
       </tr>
     `;
   });
 }
 
-function deleteProduct(id) {
-  products = products.filter(p => p.id !== id);
-  localStorage.setItem("products", JSON.stringify(products));
-  renderProducts();
-}
-
-function clearInputs() {
-  document.getElementById("productName").value = "";
-  document.getElementById("productPrice").value = "";
+/* ====== تشغيل أولي ====== */
+if (table) {
+  renderProductsTable();
 }
