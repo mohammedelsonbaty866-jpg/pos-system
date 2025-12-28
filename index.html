@@ -1,1 +1,286 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>نظام كاشير احترافي</title>
+
+<link rel="manifest" href="manifest.json">
+
+<style>
+:root{
+ --main:#0f172a;
+ --accent:#22c55e;
+ --bg:#f1f5f9;
+ --card:#ffffff;
+}
+
+*{box-sizing:border-box}
+body{
+ margin:0;
+ font-family:Arial,Tahoma;
+ background:var(--bg);
+ color:#020617;
+}
+
+/* ===== HEADER ===== */
+header{
+ background:linear-gradient(90deg,#020617,#0f172a);
+ color:#fff;
+ padding:12px;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+}
+header button{
+ background:none;
+ border:none;
+ color:#fff;
+ font-size:22px;
+}
+
+/* ===== MENU ===== */
+#menu{
+ position:fixed;
+ right:-220px;
+ top:0;
+ width:200px;
+ height:100%;
+ background:#020617;
+ color:#fff;
+ padding:10px;
+ transition:.3s;
+ z-index:9;
+}
+#menu button{
+ width:100%;
+ background:none;
+ border:none;
+ color:#fff;
+ text-align:right;
+ padding:12px;
+ font-size:15px;
+}
+
+/* ===== LAYOUT ===== */
+#app{
+ padding:10px;
+}
+
+/* ===== SCREENS ===== */
+.screen{display:none}
+.screen.active{display:block}
+
+/* ===== CASHIER ===== */
+#productsGrid{
+ display:grid;
+ grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+ gap:10px;
+}
+.product{
+ background:#fff;
+ border-radius:12px;
+ padding:10px;
+ text-align:center;
+ box-shadow:0 3px 8px rgba(0,0,0,.1);
+ cursor:pointer;
+}
+
+#invoice{
+ margin-top:10px;
+ background:#fff;
+ padding:10px;
+ border-radius:12px;
+}
+.item{
+ border-bottom:1px dashed #ccc;
+ padding:6px 0;
+}
+#total{
+ font-size:18px;
+ text-align:center;
+ margin-top:10px;
+}
+
+.btn{
+ width:100%;
+ padding:12px;
+ border:none;
+ border-radius:10px;
+ font-size:15px;
+ cursor:pointer;
+ margin-top:6px;
+}
+.save{background:var(--accent);color:#fff}
+.print{background:#334155;color:#fff}
+</style>
+</head>
+
+<body>
+
+<header>
+ <span id="shopName">نظام كاشير</span>
+ <button onclick="toggleMenu()">☰</button>
+</header>
+
+<!-- ===== MENU ===== -->
+<div id="menu">
+ <button data-role="cashier" onclick="showScreen('cashier')">🧾 الكاشير</button>
+
+ <button data-role="admin" onclick="showScreen('products')">📦 الأصناف</button>
+ <button data-role="admin" onclick="showScreen('customers')">👤 العملاء</button>
+ <button data-role="admin" onclick="showScreen('reports')">📊 التقارير</button>
+ <button data-role="admin" onclick="showScreen('settings')">⚙️ الإعدادات</button>
+
+ <button onclick="logout()">🚪 تسجيل خروج</button>
+</div>
+
+<div id="app">
+
+<!-- ===== CASHIER ===== -->
+<div id="cashier" class="screen active">
+ <h3>الكاشير</h3>
+
+ <div id="productsGrid"></div>
+
+ <div id="invoice">
+  <div id="invoiceItems"></div>
+  <div id="total">الإجمالي: 0</div>
+
+  <button class="btn save" onclick="saveInvoice()">حفظ الفاتورة</button>
+  <button class="btn print" onclick="printInvoice()">طباعة</button>
+ </div>
+</div>
+
+<!-- ===== PRODUCTS ===== -->
+<div id="products" class="screen">
+ <h3>إضافة صنف</h3>
+ <input id="pn" placeholder="اسم الصنف">
+ <input id="pp" placeholder="سعر البيع">
+ <input id="ps" placeholder="المخزون">
+ <button class="btn save" onclick="addProduct()">حفظ</button>
+</div>
+
+<!-- ===== CUSTOMERS ===== -->
+<div id="customers" class="screen">
+ <h3>العملاء</h3>
+ <div id="customerList"></div>
+</div>
+
+<!-- ===== REPORTS ===== -->
+<div id="reports" class="screen">
+ <h3>التقارير</h3>
+ <div id="reportBox"></div>
+</div>
+
+<!-- ===== SETTINGS ===== -->
+<div id="settings" class="screen">
+ <h3>الإعدادات</h3>
+ <input id="shopInput" placeholder="اسم المحل">
+ <button class="btn save" onclick="saveSettings()">حفظ</button>
+</div>
+
+</div>
+
+<!-- ===== SCRIPTS ===== -->
 <script src="js/auth-guard.js"></script>
+<script src="js/permissions.js"></script>
+
+<script>
+/* ===== DATA ===== */
+let products = JSON.parse(localStorage.products||"[]");
+let invoices = JSON.parse(localStorage.invoices||"[]");
+let settings = JSON.parse(localStorage.settings||"{}");
+let cart=[];
+
+/* ===== MENU ===== */
+function toggleMenu(){
+ menu.style.right = menu.style.right=="0px" ? "-220px":"0px";
+}
+function showScreen(id){
+ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
+ menu.style.right="-220px";
+}
+function logout(){
+ localStorage.removeItem("loggedUser");
+ location.href="auth/login.html";
+}
+
+/* ===== PRODUCTS ===== */
+function renderProducts(){
+ productsGrid.innerHTML="";
+ products.forEach(p=>{
+  let d=document.createElement("div");
+  d.className="product";
+  d.innerHTML=`<b>${p.n}</b><br>${p.p} جنيه`;
+  d.onclick=()=>addToCart(p);
+  productsGrid.appendChild(d);
+ });
+}
+function addProduct(){
+ products.push({n:pn.value,p:+pp.value,s:+ps.value});
+ saveAll();
+ renderProducts();
+ alert("تم الحفظ");
+}
+
+/* ===== CART ===== */
+function addToCart(p){
+ if(p.s<=0)return alert("نفاد المخزون");
+ cart.push({...p,q:1});
+ p.s--;
+ renderInvoice();
+ saveAll();
+}
+function renderInvoice(){
+ invoiceItems.innerHTML="";
+ let t=0;
+ cart.forEach(i=>{
+  t+=i.p*i.q;
+  invoiceItems.innerHTML+=`
+   <div class="item">${i.n} × ${i.q} = ${i.p*i.q}</div>
+  `;
+ });
+ total.innerText="الإجمالي: "+t;
+}
+
+/* ===== INVOICE ===== */
+function saveInvoice(){
+ if(cart.length==0)return;
+ invoices.push({
+  no:invoices.length+1,
+  date:new Date().toLocaleString(),
+  total:cart.reduce((a,i)=>a+i.p*i.q,0),
+  items:cart
+ });
+ cart=[];
+ renderInvoice();
+ saveAll();
+ alert("تم حفظ الفاتورة");
+}
+function printInvoice(){
+ window.print();
+}
+
+/* ===== SETTINGS ===== */
+function saveSettings(){
+ settings.shopName=shopInput.value;
+ shopName.innerText=settings.shopName;
+ saveAll();
+}
+
+/* ===== SAVE ===== */
+function saveAll(){
+ localStorage.products=JSON.stringify(products);
+ localStorage.invoices=JSON.stringify(invoices);
+ localStorage.settings=JSON.stringify(settings);
+}
+
+/* ===== INIT ===== */
+shopName.innerText=settings.shopName||"نظام كاشير";
+renderProducts();
+</script>
+
+</body>
+</html>
