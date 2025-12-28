@@ -63,7 +63,7 @@
   <input id="prodCost" type="number" placeholder="سعر الشراء">
   <input id="prodStock" type="number" placeholder="المخزون">
   <button class="btn save" onclick="addProduct()">حفظ الصنف</button>
-
+<div id="productsTable"></div>
   <div id="productsList"></div>
 </section>
 
@@ -105,6 +105,6 @@ if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js");
 }
 </script>
-
+<script src="products.js"></script>
 </body>
 </html>
