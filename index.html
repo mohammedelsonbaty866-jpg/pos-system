@@ -1,64 +1,71 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>نظام كاشير احترافي</title>
+<meta charset="UTF-8">
+<title>POS | شاشة الكاشير</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- تنسيق أساسي -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- ملف CSS -->
-  <link rel="stylesheet" href="assets/css/style.css">
+<!-- CSS -->
+<link rel="stylesheet" href="assets/css/style.css">
 </head>
 
 <body>
 
-  <!-- ===== الهيدر ===== -->
-  <header>
-    <h1>نظام الكاشير</h1>
-    <nav>
-      <a href="index.html">الكاشير</a>
-      <a href="products.html">الأصناف</a>
-      <a href="inventory.html">المخزون</a>
-      <a href="returns.html">المرتجعات</a>
-      <a href="reports.html">التقارير</a>
-    </nav>
-  </header>
+<!-- ===== HEADER ===== -->
+<header class="top-bar">
+  <h1>نظام نقاط بيع</h1>
+  <nav>
+    <a href="index.html" class="active">الكاشير</a>
+    <a href="products.html">الأصناف</a>
+    <a href="inventory.html">المخزون</a>
+    <a href="returns.html">المرتجعات</a>
+    <a href="reports.html">التقارير</a>
+  </nav>
+</header>
 
-  <!-- ===== المحتوى ===== -->
-  <main>
+<!-- ===== MAIN ===== -->
+<main class="pos-layout">
 
-    <!-- المنتجات -->
-    <section>
-      <h2>المنتجات</h2>
-      <div id="productsGrid"></div>
-    </section>
+  <!-- المنتجات -->
+  <section class="products-panel">
+    <h2>المنتجات</h2>
+    <input 
+      type="text" 
+      placeholder="بحث عن صنف..." 
+      onkeyup="searchProduct(this.value)"
+    >
 
-    <hr>
+    <div id="productsGrid"></div>
+  </section>
 
-    <!-- الفاتورة -->
-    <section>
-      <h2>الفاتورة</h2>
+  <!-- الفاتورة -->
+  <section class="invoice-panel">
+    <h2>الفاتورة</h2>
 
-      <div id="invoiceItems"></div>
+    <div id="invoiceItems"></div>
 
-      <h3 id="total">الإجمالي: 0 ج</h3>
+    <div class="total-box">
+      <span>الإجمالي:</span>
+      <strong id="total">0 ج</strong>
+    </div>
 
-      <button onclick="saveInvoice()">حفظ الفاتورة</button>
-      <button onclick="clearInvoice()">تفريغ</button>
-    </section>
+    <div class="actions">
+      <button class="btn-save" onclick="saveInvoice()">حفظ</button>
+      <button class="btn-clear" onclick="clearInvoice()">تفريغ</button>
+    </div>
+  </section>
 
-  </main>
+</main>
 
-  <!-- ===== الفوتر ===== -->
-  <footer>
-    <p>© نظام كاشير احترافي</p>
-  </footer>
+<!-- ===== FOOTER ===== -->
+<footer>
+  نظام كاشير احترافي
+</footer>
 
-  <!-- ===== ملفات JavaScript ===== -->
-  <script src="assets/js/data.js"></script>
-  <script src="assets/js/products.js"></script>
-  <script src="assets/js/cashier.js"></script>
+<!-- ===== JS ===== -->
+<script src="assets/js/data.js"></script>
+<script src="assets/js/products.js"></script>
+<script src="assets/js/cashier.js"></script>
 
 </body>
 </html>
