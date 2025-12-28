@@ -1,58 +1,56 @@
-let returns = JSON.parse(localStorage.getItem("returns") || "[]");
-let products = JSON.parse(localStorage.getItem("products") || "[]");
+// مصفوفة لتخزين المرتجعات
+let returns = JSON.parse(localStorage.getItem("returns")) || [];
 
+// عند فتح الصفحة
+document.addEventListener("DOMContentLoaded", renderReturns);
+
+// إضافة مرتجع جديد
 function addReturn() {
-  const name = document.getElementById("returnName").value;
-  const qty = Number(document.getElementById("returnQty").value);
-  const reason = document.getElementById("returnReason").value;
+  const name = document.getElementById("returnName").value.trim();
+  const qty = document.getElementById("returnQty").value;
+  const reason = document.getElementById("returnReason").value.trim();
 
-  if (!name || qty <= 0) {
-    alert("بيانات غير صحيحة");
+  if (name === "" || qty === "" || reason === "") {
+    alert("من فضلك اكمل كل البيانات");
     return;
   }
 
-  const product = products.find(p => p.name === name);
-  if (!product) {
-    alert("الصنف غير موجود");
-    return;
-  }
-
-  // رجوع للمخزون
-  product.stock += qty;
-
-  returns.push({
+  const newReturn = {
     id: Date.now(),
     name,
     qty,
     reason,
     date: new Date().toLocaleString("ar-EG")
-  });
+  };
 
+  returns.push(newReturn);
   localStorage.setItem("returns", JSON.stringify(returns));
-  localStorage.setItem("products", JSON.stringify(products));
 
-  document.getElementById("returnName").value = "";
-  document.getElementById("returnQty").value = "";
-  document.getElementById("returnReason").value = "";
-
+  clearInputs();
   renderReturns();
 }
+
+// عرض المرتجعات في الجدول
 function renderReturns() {
   const table = document.getElementById("returnsTable");
-  if (!table) return;
-
   table.innerHTML = "";
-  returns.forEach((r, i) => {
+
+  returns.forEach((item, index) => {
     table.innerHTML += `
       <tr>
-        <td>${i + 1}</td>
-        <td>${r.name}</td>
-        <td>${r.qty}</td>
-        <td>${r.reason || "-"}</td>
-        <td>${r.date}</td>
+        <td>${index + 1}</td>
+        <td>${item.name}</td>
+        <td>${item.qty}</td>
+        <td>${item.reason}</td>
+        <td>${item.date}</td>
       </tr>
     `;
   });
 }
 
-renderReturns();
+// مسح الحقول
+function clearInputs() {
+  document.getElementById("returnName").value = "";
+  document.getElementById("returnQty").value = "";
+  document.getElementById("returnReason").value = "";
+}
