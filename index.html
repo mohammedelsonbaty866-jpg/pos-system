@@ -3,293 +3,195 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>POS PRO</title>
+<title>POS System</title>
 
 <style>
-:root{
-  --main:#020617;
-  --accent:#22c55e;
-  --danger:#ef4444;
-  --bg:#f1f5f9;
-  --card:#ffffff;
-}
-*{box-sizing:border-box}
-body{margin:0;font-family:Tahoma;background:var(--bg)}
-header{background:var(--main);color:#fff;padding:14px;text-align:center;font-size:18px}
-
-/* ===== LOGIN ===== */
-#login{
-  height:100vh;display:flex;align-items:center;justify-content:center;
-}
-.login-box{
-  background:#fff;padding:20px;border-radius:16px;
-  width:100%;max-width:320px;
-  box-shadow:0 10px 30px rgba(0,0,0,.15)
-}
-.login-box h3{text-align:center;margin-bottom:15px}
-.login-box input{
-  width:100%;padding:12px;margin-bottom:10px;
-  border-radius:10px;border:1px solid #cbd5e1;font-size:15px
-}
-.login-box button{
-  width:100%;padding:12px;border:none;border-radius:12px;
-  background:var(--accent);color:#fff;font-size:16px
-}
-.error{color:var(--danger);text-align:center;margin-top:8px}
-
-/* ===== APP ===== */
-#app{display:none}
-
-/* NAV */
-nav{
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr 1fr;
-  gap:6px;
-  padding:8px;
-  background:#fff;
-}
-nav button{
-  padding:12px;border:none;border-radius:10px;font-size:14px;
-  background:#e5e7eb;cursor:pointer
-}
-nav button.active{background:var(--accent);color:#fff}
-
-/* TOP */
-#top{
-  display:grid;
-  grid-template-columns:2fr 1fr 1fr;
-  gap:8px;
-  padding:10px;
-  background:#fff;
-}
-#top input,#top button{
-  padding:12px;border-radius:10px;border:1px solid #cbd5e1;font-size:15px
-}
-#top button{background:var(--accent);color:#fff;border:none}
-
-/* PRODUCTS */
-#products{
-  padding:10px;
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
-  gap:10px;
-}
-.product{
-  background:var(--card);
-  border-radius:14px;
-  padding:12px;
-  box-shadow:0 4px 10px rgba(0,0,0,.08);
-  cursor:pointer;
-}
-
-/* INVOICE */
-#invoice{
-  background:#fff;padding:10px;border-top:2px solid #e5e7eb;
-  position:sticky;bottom:0;
-}
-#items{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
-.item{background:#f8fafc;padding:8px;border-radius:10px;text-align:center}
-#summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px;font-weight:bold}
-#actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
-.save{background:var(--accent);color:#fff}
-.clear{background:var(--danger);color:#fff}
-
-/* SCREENS */
-.screen{display:none}
-.screen.active{display:block}
-
-/* REPORTS */
-.report{
-  background:#fff;border-radius:14px;padding:14px;margin:10px;
-  box-shadow:0 4px 10px rgba(0,0,0,.08)
-}
+body{margin:0;font-family:Arial;background:#f1f5f9}
+.hidden{display:none}
+header{background:#020617;color:#fff;padding:12px;text-align:center}
+button{padding:10px;border:none;border-radius:8px;cursor:pointer}
+.btn{background:#22c55e;color:#fff}
+.btn-danger{background:#ef4444;color:#fff}
+input,select{padding:10px;width:100%;margin-bottom:8px;border-radius:8px;border:1px solid #cbd5f5}
+.card{background:#fff;padding:10px;border-radius:10px;margin-bottom:8px;box-shadow:0 3px 6px rgba(0,0,0,.1)}
+#menu{position:fixed;right:-220px;top:0;width:200px;height:100%;background:#020617;color:#fff;padding:10px;transition:.3s}
+#menu button{width:100%;background:none;color:#fff;text-align:right}
+#productsGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
 </style>
 </head>
 
 <body>
 
-<!-- ===== LOGIN ===== -->
+<!-- LOGIN -->
 <div id="login">
-  <div class="login-box">
-    <h3>تسجيل الدخول</h3>
-    <input id="user" placeholder="اسم المستخدم">
-    <input id="pass" type="password" placeholder="كلمة المرور">
-    <button onclick="login()">دخول</button>
-    <div id="err" class="error"></div>
-  </div>
+<header>تسجيل الدخول</header>
+<div style="padding:15px">
+<input id="username" placeholder="اسم المستخدم">
+<input id="password" type="password" placeholder="كلمة المرور">
+<button class="btn" onclick="login()">دخول</button>
+</div>
 </div>
 
-<!-- ===== APP ===== -->
-<div id="app">
+<!-- APP -->
+<div id="app" class="hidden">
 
 <header>
-  نظام كاشير احترافي
-  <button style="float:left;background:none;border:none;color:#fff"
-    onclick="logout()">خروج</button>
+<span id="shopName">POS System</span>
+<button onclick="toggleMenu()">☰</button>
 </header>
 
-<nav>
-  <button class="active" onclick="show('cashier',this)">الكاشير</button>
-  <button id="repBtn" onclick="show('reports',this)">التقارير</button>
-  <button id="setBtn" onclick="show('settings',this)">الإعدادات</button>
-  <button onclick="logout()">خروج</button>
-</nav>
+<div id="menu">
+<button onclick="show('cashier')">🧾 كاشير</button>
+<button onclick="show('products')">📦 أصناف</button>
+<button onclick="show('customers')">👤 عملاء</button>
+<button onclick="show('reports')">📊 تقارير</button>
+<button onclick="logout()">🚪 خروج</button>
+</div>
 
 <!-- CASHIER -->
-<div id="cashier" class="screen active">
-  <div id="top">
-    <input placeholder="بحث">
-    <button onclick="addProduct()">➕ صنف</button>
-    <button onclick="saveInvoice()">حفظ</button>
-  </div>
-  <div id="products"></div>
-  <div id="invoice">
-    <div id="items"></div>
-    <div id="summary">
-      <div id="total">إجمالي: 0</div>
-      <div id="cost">تكلفة: 0</div>
-      <div id="profit">ربح: 0</div>
-    </div>
-  </div>
+<div id="cashier" class="screen">
+<h3>الكاشير</h3>
+<input id="search" placeholder="اسم الصنف">
+<button class="btn" onclick="addItem()">إضافة</button>
+<div id="invoice"></div>
+<div id="total">الإجمالي: 0</div>
+<button class="btn" onclick="saveInvoice()">حفظ الفاتورة</button>
+</div>
+
+<!-- PRODUCTS -->
+<div id="products" class="screen hidden">
+<h3>الأصناف</h3>
+<input id="pn" placeholder="اسم الصنف">
+<input id="pp" placeholder="سعر البيع">
+<input id="pc" placeholder="سعر الشراء">
+<input id="ps" placeholder="المخزون">
+<button class="btn" onclick="addProduct()">حفظ</button>
+<div id="productsGrid"></div>
+</div>
+
+<!-- CUSTOMERS -->
+<div id="customers" class="screen hidden">
+<h3>العملاء</h3>
+<input id="cn" placeholder="اسم العميل">
+<button class="btn" onclick="addCustomer()">إضافة</button>
+<div id="customerList"></div>
 </div>
 
 <!-- REPORTS -->
-<div id="reports" class="screen">
-  <div class="report">
-    <h3>📊 تقرير عام</h3>
-    <div id="rSales">المبيعات: 0</div>
-    <div id="rProfit">الأرباح: 0</div>
-  </div>
-</div>
-
-<!-- SETTINGS -->
-<div id="settings" class="screen">
-  <div class="report">
-    <h3>⚙️ إعدادات</h3>
-    <button class="clear" onclick="resetAll()">مسح كل البيانات</button>
-  </div>
+<div id="reports" class="screen hidden">
+<h3>التقارير</h3>
+<div id="reportBox"></div>
 </div>
 
 </div>
 
 <script>
-/* ===== USERS ===== */
+/* USERS */
 const users=[
-  {u:"admin",p:"1234",role:"admin"},
-  {u:"cashier",p:"1234",role:"cashier"}
+ {u:"admin",p:"1234",role:"admin"},
+ {u:"cashier",p:"1234",role:"cashier"}
 ];
+let currentUser=null;
 
-/* ===== STORAGE ===== */
+/* DATA */
 let products=JSON.parse(localStorage.products||"[]");
+let customers=JSON.parse(localStorage.customers||"[]");
 let invoices=JSON.parse(localStorage.invoices||"[]");
 let cart=[];
-let currentUser=JSON.parse(localStorage.user||"null");
 
-/* ===== LOGIN ===== */
+/* LOGIN */
 function login(){
-  let u=user.value,p=pass.value;
-  let found=users.find(x=>x.u===u && x.p===p);
-  if(!found){err.innerText="بيانات غير صحيحة";return;}
-  localStorage.user=JSON.stringify(found);
-  location.reload();
+ let u=username.value.trim();
+ let p=password.value.trim();
+ let user=users.find(x=>x.u===u && x.p===p);
+ if(!user){alert("بيانات غير صحيحة");return}
+ currentUser=user;
+ document.getElementById("login").classList.add("hidden");
+ document.getElementById("app").classList.remove("hidden");
+ renderProducts();
+ renderCustomers();
 }
 function logout(){
-  localStorage.removeItem("user");
-  location.reload();
+ location.reload();
 }
 
-/* ===== INIT ===== */
-if(currentUser){
-  loginDiv.style.display="none";
-  app.style.display="block";
-  if(currentUser.role!=="admin"){
-    repBtn.style.display="none";
-    setBtn.style.display="none";
-  }
-}else{
-  app.style.display="none";
+/* MENU */
+function toggleMenu(){
+ menu.style.right=menu.style.right=="0px"?"-220px":"0px";
+}
+function show(id){
+ document.querySelectorAll(".screen").forEach(s=>s.classList.add("hidden"));
+ document.getElementById(id).classList.remove("hidden");
+ menu.style.right="-220px";
 }
 
-/* ===== NAV ===== */
-function show(id,btn){
-  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
-  btn.classList.add("active");
+/* PRODUCTS */
+function addProduct(){
+ products.push({n:pn.value,p:+pp.value,c:+pc.value,s:+ps.value});
+ save();renderProducts();
 }
-
-/* ===== PRODUCTS ===== */
-if(products.length===0){
-  products.push({n:"مياه",sell:5,buy:3,qty:50});
-  saveAll();
-}
-const prodDiv=document.getElementById("products");
 function renderProducts(){
-  prodDiv.innerHTML="";
-  products.forEach((p,i)=>{
-    let d=document.createElement("div");
-    d.className="product";
-    d.innerHTML=`${p.n}<br>بيع: ${p.sell}`;
-    d.onclick=()=>addToCart(i);
-    prodDiv.appendChild(d);
-  });
+ productsGrid.innerHTML="";
+ products.forEach(p=>{
+  productsGrid.innerHTML+=`
+  <div class="card" onclick="addFromGrid('${p.n}')">
+  <b>${p.n}</b><br>${p.p} جنيه
+  </div>`;
+ });
 }
-renderProducts();
 
-/* ===== CART ===== */
-function addToCart(i){
-  if(products[i].qty<=0)return;
-  cart.push(products[i]);
-  products[i].qty--;
-  renderInvoice();saveAll();
+/* CASHIER */
+function addFromGrid(name){
+ search.value=name;
+ addItem();
+}
+function addItem(){
+ let p=products.find(x=>x.n===search.value);
+ if(!p){alert("الصنف غير موجود");return}
+ if(p.s<=0){alert("نفاد المخزون");return}
+ cart.push(p);
+ p.s--;
+ renderInvoice();save();
 }
 function renderInvoice(){
-  items.innerHTML="";
-  let t=0,c=0;
-  cart.forEach(i=>{
-    t+=i.sell;c+=i.buy;
-    items.innerHTML+=`<div class="item">${i.n}</div>`;
-  });
-  total.innerText="إجمالي: "+t;
-  cost.innerText="تكلفة: "+c;
-  profit.innerText="ربح: "+(t-c);
+ invoice.innerHTML="";
+ let t=0;
+ cart.forEach(i=>{
+  t+=i.p;
+  invoice.innerHTML+=`<div class="card">${i.n} - ${i.p}</div>`;
+ });
+ total.innerText="الإجمالي: "+t;
 }
-
-/* ===== SAVE ===== */
 function saveInvoice(){
-  if(cart.length===0)return;
-  let t=0,c=0;
-  cart.forEach(i=>{t+=i.sell;c+=i.buy});
-  invoices.push({total:t,profit:t-c});
-  cart=[];renderInvoice();saveAll();calcReports();
+ if(cart.length==0)return;
+ invoices.push({date:new Date().toLocaleString(),items:cart});
+ cart=[];renderInvoice();save();
+ alert("تم حفظ الفاتورة");
 }
 
-/* ===== REPORT ===== */
-function calcReports(){
-  let s=0,p=0;
-  invoices.forEach(i=>{s+=i.total;p+=i.profit});
-  rSales.innerText="المبيعات: "+s;
-  rProfit.innerText="الأرباح: "+p;
+/* CUSTOMERS */
+function addCustomer(){
+ customers.push({n:cn.value,b:0});
+ save();renderCustomers();
 }
-calcReports();
-
-/* ===== ADD ===== */
-function addProduct(){
-  let n=prompt("اسم"); if(!n)return;
-  let sell=+prompt("بيع"),buy=+prompt("شراء"),qty=+prompt("كمية");
-  products.push({n,sell,buy,qty});
-  saveAll();renderProducts();
+function renderCustomers(){
+ customerList.innerHTML="";
+ customers.forEach(c=>{
+  customerList.innerHTML+=`<div class="card">${c.n}</div>`;
+ });
 }
 
-/* ===== RESET ===== */
-function resetAll(){
-  if(confirm("مسح كل شيء؟")){
-    localStorage.clear();location.reload();
-  }
+/* REPORTS */
+function renderReports(){
+ reportBox.innerHTML="عدد الفواتير: "+invoices.length;
 }
-function saveAll(){
-  localStorage.products=JSON.stringify(products);
-  localStorage.invoices=JSON.stringify(invoices);
+
+/* SAVE */
+function save(){
+ localStorage.products=JSON.stringify(products);
+ localStorage.customers=JSON.stringify(customers);
+ localStorage.invoices=JSON.stringify(invoices);
+ renderReports();
 }
 </script>
 
