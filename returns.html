@@ -1,0 +1,22 @@
+<h2>🔄 مرتجعات العملاء</h2>
+
+<input id="returnName" placeholder="اسم الصنف">
+<input id="returnQty" type="number" placeholder="الكمية">
+<input id="returnReason" placeholder="سبب الإرجاع">
+
+<button onclick="addReturn()">➕ تسجيل مرتجع</button>
+
+<table border="1" width="100%" style="margin-top:10px">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>الصنف</th>
+      <th>الكمية</th>
+      <th>السبب</th>
+      <th>التاريخ</th>
+    </tr>
+  </thead>
+  <tbody id="returnsTable"></tbody>
+</table>
+
+<script src="assets/js/returns.js"></script>
