@@ -1,22 +1,157 @@
-<h2>🔄 مرتجعات العملاء</h2>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>POS | المرتجعات</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<input id="returnName" placeholder="اسم الصنف">
-<input id="returnQty" type="number" placeholder="الكمية">
-<input id="returnReason" placeholder="سبب الإرجاع">
+<!-- CSS -->
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
 
-<button onclick="addReturn()">➕ تسجيل مرتجع</button>
+<body>
 
-<table border="1" width="100%" style="margin-top:10px">
-  <thead>
-    <tr>
-      <th>#</th>
-      <th>الصنف</th>
-      <th>الكمية</th>
-      <th>السبب</th>
-      <th>التاريخ</th>
-    </tr>
-  </thead>
-  <tbody id="returnsTable"></tbody>
-</table>
+<!-- ===== HEADER ===== -->
+<header class="top-bar">
+  <h1>المرتجعات</h1>
+  <nav>
+    <a href="index.html">الكاشير</a>
+    <a href="products.html">الأصناف</a>
+    <a href="inventory.html">المخزون</a>
+    <a href="returns.html" class="active">المرتجعات</a>
+    <a href="reports.html">التقارير</a>
+  </nav>
+</header>
 
-<script src="assets/js/returns.js"></script>
+<!-- ===== MAIN ===== -->
+<main class="returns-layout">
+
+  <!-- إرجاع صنف -->
+  <section class="form-card">
+    <h2>إرجاع صنف</h2>
+
+    <select id="returnProduct"></select>
+    <input id="returnQty" type="number" placeholder="الكمية">
+    <input id="returnReason" type="text" placeholder="سبب الإرجاع (اختياري)">
+
+    <button class="btn-save" onclick="addReturn()">تأكيد الإرجاع</button>
+  </section>
+
+  <!-- سجل المرتجعات -->
+  <section class="table-card">
+    <h2>سجل المرتجعات</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>الصنف</th>
+          <th>الكمية</th>
+          <th>السبب</th>
+          <th>التاريخ</th>
+        </tr>
+      </thead>
+      <tbody id="returnsTable"></tbody>
+    </table>
+  </section>
+
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  إدارة المرتجعات – POS System
+</footer>
+
+<!-- ===== JS ===== -->
+<script src="assets/js/data.js"></script>
+
+<script>
+/* ===============================
+   RETURNS PAGE LOGIC
+================================ */
+
+/* تحميل الأصناف */
+function loadReturnProducts() {
+  const select = document.getElementById("returnProduct");
+  select.innerHTML = "";
+
+  products.forEach(p => {
+    const option = document.createElement("option");
+    option.value = p.id;
+    option.textContent = p.name;
+    select.appendChild(option);
+  });
+}
+
+/* إضافة مرتجع */
+function addReturn() {
+  const productId = Number(document.getElementById("returnProduct").value);
+  const qty = Number(document.getElementById("returnQty").value);
+  const reason = document.getElementById("returnReason").value;
+
+  if (qty <= 0) {
+    alert("أدخل كمية صحيحة");
+    return;
+  }
+
+  returns.push({
+    productId,
+    qty,
+    reason,
+    date: new Date().toLocaleString("ar-EG")
+  });
+
+  /* رجوع الكمية للمخزون */
+  const inv = inventory.find(i => i.productId === productId);
+  if (inv) {
+    inv.qty += qty;
+  } else {
+    inventory.push({ productId, qty });
+  }
+
+  saveData();
+  renderReturnsTable();
+
+  document.getElementById("returnQty").value = "";
+  document.getElementById("returnReason").value = "";
+}
+
+/* عرض جدول المرتجعات */
+function renderReturnsTable() {
+  const table = document.getElementById("returnsTable");
+  table.innerHTML = "";
+
+  if (returns.length === 0) {
+    table.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align:center">لا توجد مرتجعات</td>
+      </tr>
+    `;
+    return;
+  }
+
+  returns.forEach((r, index) => {
+    const product = products.find(p => p.id === r.productId);
+    if (!product) return;
+
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${index + 1}</td>
+      <td>${product.name}</td>
+      <td>${r.qty}</td>
+      <td>${r.reason || "-"}</td>
+      <td>${r.date}</td>
+    `;
+    table.appendChild(row);
+  });
+}
+
+/* تحميل الصفحة */
+document.addEventListener("DOMContentLoaded", () => {
+  loadReturnProducts();
+  renderReturnsTable();
+});
+</script>
+
+</body>
+</html>
