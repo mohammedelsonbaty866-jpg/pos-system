@@ -133,6 +133,10 @@ button{
 </div>
 
 <script>
+if(!localStorage.currentUser){
+  location.href="login.html";
+}
+</script>
 /* ===== DATA ===== */
 let products = JSON.parse(localStorage.products || "[]");
 let cart = [];
