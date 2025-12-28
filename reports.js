@@ -1,97 +1,101 @@
-/* ===============================
-   REPORTS.JS – POS SYSTEM
-   =============================== */
+/*************************
+ * REPORTS & USERS SYSTEM
+ * Commercial Stable
+ *************************/
+
+/* ===== LOAD DATA ===== */
+function loadData(key, def = []) {
+  try {
+    return JSON.parse(localStorage.getItem(key)) || def;
+  } catch {
+    return def;
+  }
+}
+
+const invoicesR = loadData("invoices");
+const users = loadData("users", [
+  { username: "admin", role: "admin" },
+  { username: "cashier", role: "cashier" }
+]);
 
 /* ===== HELPERS ===== */
-function getTodayDate() {
-  return new Date().toISOString().split("T")[0];
+function formatMoney(n) {
+  return Number(n).toFixed(2);
 }
 
-function formatDate(date) {
-  return new Date(date).toLocaleDateString("ar-EG");
+/* ===== REPORTS ===== */
+function reportDaily() {
+  const today = new Date().toLocaleDateString("ar-EG");
+  return invoicesR.filter(i => i.date.includes(today));
 }
 
-/* ===== DAILY REPORT ===== */
-function dailyReport() {
-  const today = getTodayDate();
-
-  const dailyInvoices = invoices.filter(inv =>
-    inv.date.startsWith(today)
-  );
-
-  renderReport(dailyInvoices, "📅 تقرير اليوم");
+function reportMonthly() {
+  const m = new Date().toLocaleDateString("ar-EG", { month: "2-digit", year: "numeric" });
+  return invoicesR.filter(i => i.date.includes(m));
 }
 
-/* ===== MONTHLY REPORT ===== */
-function monthlyReport() {
-  const now = new Date();
-  const month = now.getMonth();
-  const year = now.getFullYear();
+function reportYearly() {
+  const y = new Date().getFullYear();
+  return invoicesR.filter(i => i.date.includes(y));
+}
 
-  const monthlyInvoices = invoices.filter(inv => {
-    const d = new Date(inv.date);
-    return d.getMonth() === month && d.getFullYear() === year;
+/* ===== CALCULATIONS ===== */
+function calcSummary(list) {
+  let total = 0, profit = 0;
+  list.forEach(i => {
+    total += i.total;
+    profit += i.profit || 0;
   });
-
-  renderReport(monthlyInvoices, "📆 تقرير شهري");
+  return { count: list.length, total, profit };
 }
 
-/* ===== YEARLY REPORT ===== */
-function yearlyReport() {
-  const year = new Date().getFullYear();
+/* ===== RENDER ===== */
+function renderReport(type = "daily") {
+  let list = [];
+  if (type === "daily") list = reportDaily();
+  if (type === "monthly") list = reportMonthly();
+  if (type === "yearly") list = reportYearly();
 
-  const yearlyInvoices = invoices.filter(inv =>
-    new Date(inv.date).getFullYear() === year
-  );
+  const s = calcSummary(list);
 
-  renderReport(yearlyInvoices, "📊 تقرير سنوي");
-}
-
-/* ===== RENDER REPORT ===== */
-function renderReport(list, title) {
-  const box = document.getElementById("reportBox");
-  if (!box) return;
-
-  let totalSales = 0;
-  let totalProfit = 0;
-
-  list.forEach(inv => {
-    totalSales += inv.total;
-    inv.items.forEach(i => {
-      totalProfit += (i.price - (i.cost || 0)) * i.qty;
-    });
-  });
-
-  box.innerHTML = `
-    <div class="report-card">
-      <h3>${title}</h3>
-
-      <p>🧾 عدد الفواتير: <b>${list.length}</b></p>
-      <p>💰 إجمالي المبيعات: <b>${totalSales.toFixed(2)} جنيه</b></p>
-      <p>📈 صافي الربح: <b>${totalProfit.toFixed(2)} جنيه</b></p>
-
-      <hr>
-
-      ${list.map(inv => `
-        <div class="report-item">
-          <span>فاتورة #${inv.no}</span>
-          <span>${formatDate(inv.date)}</span>
-          <span>${inv.total} جنيه</span>
-        </div>
-      `).join("")}
+  let html = `
+    <div class="card">
+      <b>عدد الفواتير:</b> ${s.count}<br>
+      <b>إجمالي المبيعات:</b> ${formatMoney(s.total)}<br>
+      <b>الأرباح:</b> ${formatMoney(s.profit)}
     </div>
   `;
+
+  list.forEach(inv => {
+    html += `
+      <div class="card">
+        <b>فاتورة #${inv.id}</b><br>
+        ${inv.date}<br>
+        الإجمالي: ${formatMoney(inv.total)}
+      </div>
+    `;
+  });
+
+  document.getElementById("reportBox").innerHTML = html;
+}
+
+/* ===== USERS ===== */
+function listUsers() {
+  let html = "";
+  users.forEach(u => {
+    html += `<div class="card">${u.username} - ${u.role}</div>`;
+  });
+  return html;
 }
 
 /* ===== DAILY CLOSE ===== */
 function dailyClose() {
-  if (!confirm("هل تريد قفل اليوم؟")) return;
-
-  localStorage.setItem("dayClosed", getTodayDate());
-  alert("تم قفل اليوم – لا يمكن البيع");
+  const today = new Date().toLocaleDateString("ar-EG");
+  localStorage.setItem("closedDay", today);
+  alert("تم القفل اليومي بنجاح");
 }
 
-/* ===== CHECK DAY CLOSED ===== */
-function isClosed() {
-  return localStorage.getItem("dayClosed") === getTodayDate();
+function isDayClosed() {
+  const today = new Date().toLocaleDateString("ar-EG");
+  return localStorage.getItem("closedDay") === today;
 }
