@@ -1,240 +1,130 @@
-/* ===============================
-   GLOBAL
-================================ */
-:root{
-  --main:#0f172a;
-  --main-dark:#020617;
-  --accent:#22c55e;
-  --danger:#ef4444;
-  --warning:#f59e0b;
-  --bg:#f1f5f9;
-  --card:#ffffff;
-  --border:#e5e7eb;
-}
-
 *{
   box-sizing:border-box;
-  font-family:Tahoma, Arial;
+  font-family: 'Segoe UI', Tahoma;
 }
 
 body{
   margin:0;
-  background:var(--bg);
-  color:#111827;
+  background:#f4f6f8;
+  color:#222;
 }
 
-/* ===============================
-   HEADER
-================================ */
-header{
-  background:linear-gradient(90deg,var(--main-dark),var(--main));
+/* ===== Top Bar ===== */
+.top-bar{
+  height:60px;
+  background:#0d47a1;
   color:#fff;
-  padding:14px;
-  text-align:center;
-  font-size:18px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 15px;
+}
+
+.logo{
+  font-size:20px;
   font-weight:bold;
 }
 
-/* ===============================
-   LAYOUT
-================================ */
-.app{
-  display:grid;
-  grid-template-columns:220px 1fr;
-  min-height:100vh;
-}
-
-@media(max-width:900px){
-  .app{
-    grid-template-columns:1fr;
-  }
-}
-
-/* ===============================
-   SIDEBAR
-================================ */
-.sidebar{
-  background:var(--main-dark);
+.menu-btn{
+  font-size:24px;
+  background:none;
+  border:none;
   color:#fff;
+}
+
+/* ===== Side Menu ===== */
+.side-menu{
+  position:fixed;
+  top:60px;
+  right:-220px;
+  width:220px;
+  height:100%;
+  background:#ffffff;
+  box-shadow:-2px 0 8px rgba(0,0,0,.1);
+  transition:.3s;
   padding:10px;
 }
 
-.sidebar h3{
-  margin:10px 0 20px;
-  text-align:center;
-  font-size:16px;
-}
-
-.sidebar button{
+.side-menu button{
   width:100%;
-  background:none;
-  color:#fff;
-  border:0;
   padding:12px;
-  margin-bottom:6px;
-  border-radius:10px;
-  text-align:right;
-  cursor:pointer;
-  font-size:14px;
+  margin-bottom:10px;
+  border:none;
+  background:#e3f2fd;
+  font-size:16px;
+  border-radius:6px;
 }
 
-.sidebar button:hover{
-  background:#1e293b;
-}
-
-/* ===============================
-   CONTENT
-================================ */
-.content{
-  padding:12px;
-}
-
-.hidden{
+/* ===== Screens ===== */
+.screen{
   display:none;
+  padding:15px;
 }
 
-/* ===============================
-   CASHIER
-================================ */
-.cashier{
+.screen.active{
+  display:block;
+}
+
+/* ===== Cashier ===== */
+.cashier-layout{
   display:grid;
   grid-template-columns:2fr 1fr;
-  gap:12px;
+  gap:15px;
 }
 
-@media(max-width:900px){
-  .cashier{
-    grid-template-columns:1fr;
-  }
+.products-area,
+.invoice-area{
+  background:#fff;
+  border-radius:10px;
+  padding:10px;
 }
 
-/* PRODUCTS GRID */
-.products{
+.products-grid{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
   gap:10px;
 }
 
 .product{
-  background:var(--card);
-  border-radius:14px;
-  padding:12px;
+  background:#e8f5e9;
+  padding:15px;
+  border-radius:8px;
   text-align:center;
-  box-shadow:0 4px 10px rgba(0,0,0,.08);
+  font-size:16px;
   cursor:pointer;
-  transition:.2s;
 }
 
-.product:hover{
-  transform:scale(1.03);
+.product:active{
+  background:#c8e6c9;
 }
 
-.product-name{
-  font-weight:bold;
-  margin-bottom:6px;
+.invoice-items{
+  max-height:300px;
+  overflow:auto;
+  margin-bottom:10px;
 }
 
-.product-price{
-  color:var(--accent);
-  font-size:15px;
+.item{
+  padding:8px;
+  border-bottom:1px dashed #ccc;
 }
 
-/* ===============================
-   INVOICE
-================================ */
-.invoice{
-  background:var(--card);
-  border-radius:14px;
-  padding:10px;
-  box-shadow:0 4px 10px rgba(0,0,0,.08);
+.invoice-footer{
   display:flex;
   flex-direction:column;
-}
-
-.invoice h4{
-  margin:0 0 8px;
-  text-align:center;
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:14px;
-}
-
-th,td{
-  border-bottom:1px solid var(--border);
-  padding:6px;
-  text-align:center;
-}
-
-tfoot td{
-  font-weight:bold;
-  font-size:16px;
-}
-
-/* ===============================
-   BUTTONS
-================================ */
-.actions{
-  display:flex;
   gap:8px;
-  margin-top:10px;
 }
 
-button{
-  border:0;
-  border-radius:10px;
+.total{
+  font-size:18px;
+  font-weight:bold;
+}
+
+.save-btn{
+  background:#2e7d32;
+  color:#fff;
+  border:none;
   padding:12px;
-  cursor:pointer;
-  font-size:14px;
-}
-
-.btn-primary{
-  background:var(--accent);
-  color:#fff;
-}
-
-.btn-danger{
-  background:var(--danger);
-  color:#fff;
-}
-
-.btn-warning{
-  background:var(--warning);
-  color:#fff;
-}
-
-/* ===============================
-   FORMS
-================================ */
-input,select{
-  width:100%;
-  padding:10px;
+  font-size:18px;
   border-radius:8px;
-  border:1px solid var(--border);
-  margin-bottom:8px;
-  font-size:14px;
-}
-
-/* ===============================
-   PRINT
-================================ */
-@media print{
-  body *{
-    visibility:hidden;
-  }
-  .invoice,.invoice *{
-    visibility:visible;
-  }
-  .invoice{
-    position:absolute;
-    left:0;
-    top:0;
-    width:100%;
-    box-shadow:none;
-  }
-  .actions{
-    display:none;
-  }
 }
