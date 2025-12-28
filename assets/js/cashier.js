@@ -1,23 +1,22 @@
 /* ===============================
    CASHIER.JS
-   السلة + الفاتورة + الإجمالي
+   السلة + الفاتورة
 ================================ */
 
 /*
   يعتمد على:
-  - products (Array) من data.js
-  - invoices (Array) من data.js
-  - saveData() من data.js
+  - products, invoices, saveData() من data.js
 */
 
+/* ===== السلة ===== */
 let cart = [];
 
-/* ===== إضافة للسلة ===== */
+/* ===== إضافة صنف للسلة ===== */
 function addToCart(productIndex) {
   const product = products[productIndex];
   if (!product) return;
 
-  const existing = cart.find(item => item.id === product.id);
+  const existing = cart.find(i => i.id === product.id);
 
   if (existing) {
     existing.qty += 1;
@@ -35,40 +34,39 @@ function addToCart(productIndex) {
 
 /* ===== عرض الفاتورة ===== */
 function renderInvoice() {
-  const invoiceBox = document.getElementById("invoiceItems");
+  const container = document.getElementById("invoiceItems");
   const totalBox = document.getElementById("total");
+  if (!container || !totalBox) return;
 
-  if (!invoiceBox || !totalBox) return;
-
-  invoiceBox.innerHTML = "";
-
+  container.innerHTML = "";
   let total = 0;
 
   if (cart.length === 0) {
-    invoiceBox.innerHTML = `<p class="empty">لا توجد أصناف</p>`;
-    totalBox.textContent = "0 ج";
+    container.innerHTML = `<p class="empty">لا توجد أصناف</p>`;
+    totalBox.innerText = "0 ج";
     return;
   }
 
   cart.forEach((item, index) => {
-    total += item.price * item.qty;
+    const lineTotal = item.price * item.qty;
+    total += lineTotal;
 
     const row = document.createElement("div");
     row.className = "invoice-item";
-
     row.innerHTML = `
       <span>${item.name}</span>
       <span>${item.qty} × ${item.price}</span>
-      <button onclick="removeItem(${index})">✖</button>
+      <strong>${lineTotal} ج</strong>
+      <button onclick="removeItem(${index})">✕</button>
     `;
 
-    invoiceBox.appendChild(row);
+    container.appendChild(row);
   });
 
-  totalBox.textContent = total + " ج";
+  totalBox.innerText = total + " ج";
 }
 
-/* ===== حذف صنف ===== */
+/* ===== حذف صنف من السلة ===== */
 function removeItem(index) {
   cart.splice(index, 1);
   renderInvoice();
@@ -76,10 +74,7 @@ function removeItem(index) {
 
 /* ===== تفريغ الفاتورة ===== */
 function clearInvoice() {
-  if (cart.length === 0) return;
-
   if (!confirm("تفريغ الفاتورة؟")) return;
-
   cart = [];
   renderInvoice();
 }
@@ -91,15 +86,12 @@ function saveInvoice() {
     return;
   }
 
-  const total = cart.reduce(
-    (sum, item) => sum + item.price * item.qty,
-    0
-  );
+  const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
 
   const invoice = {
-    id: Date.now(),
+    id: generateId(invoices),
     date: new Date().toLocaleString("ar-EG"),
-    items: [...cart],
+    items: cart,
     total: total
   };
 
@@ -111,8 +103,3 @@ function saveInvoice() {
 
   alert("تم حفظ الفاتورة بنجاح");
 }
-
-/* ===== تحميل أولي ===== */
-document.addEventListener("DOMContentLoaded", () => {
-  renderInvoice();
-});
