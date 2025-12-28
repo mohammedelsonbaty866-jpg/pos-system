@@ -95,3 +95,27 @@ document.addEventListener("DOMContentLoaded", () => {
   renderProducts();
   renderInvoice();
 });
+/* ===== SEARCH PRODUCTS ===== */
+function searchProduct(text) {
+  const grid = document.getElementById("productsGrid");
+  grid.innerHTML = "";
+
+  products
+    .filter(p => p.name.includes(text))
+    .forEach((p, index) => {
+      const div = document.createElement("div");
+      div.className = "product";
+      div.innerHTML = `
+        <b>${p.name}</b>
+        <span>${p.price} ج</span>
+      `;
+      div.onclick = () => addToCart(index);
+      grid.appendChild(div);
+    });
+}
+
+/* ===== CLEAR INVOICE ===== */
+function clearInvoice() {
+  cart = [];
+  renderInvoice();
+}
