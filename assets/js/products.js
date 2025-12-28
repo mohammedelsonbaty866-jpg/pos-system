@@ -1,77 +1,57 @@
-/*********************************
- * PRODUCTS.JS
- * إدارة الأصناف
- *********************************/
+/* ===============================
+   PRODUCTS.JS
+   عرض + بحث + إضافة للسلة
+================================ */
 
-/* ====== عناصر الصفحة ====== */
-const pName   = document.getElementById("productName");
-const pPrice  = document.getElementById("productPrice");
-const pStock  = document.getElementById("productStock");
-const table   = document.getElementById("productsTable");
+/*
+  يعتمد على:
+  - products (Array) من data.js
+  - addToCart(product) من cashier.js
+*/
 
-/* ====== إضافة صنف ====== */
-function addProduct() {
-  const name  = pName.value.trim();
-  const price = Number(pPrice.value);
-  const stock = Number(pStock.value);
+/* ===== عرض المنتجات ===== */
+function renderProducts(list = products) {
+  const grid = document.getElementById("productsGrid");
+  if (!grid) return;
 
-  if (!name || price <= 0 || stock < 0) {
-    alert("أدخل بيانات صحيحة");
+  grid.innerHTML = "";
+
+  if (list.length === 0) {
+    grid.innerHTML = `<p class="empty">لا توجد أصناف</p>`;
     return;
   }
 
-  products.push({
-    name,
-    price,
-    stock
-  });
+  list.forEach((product, index) => {
+    const card = document.createElement("div");
+    card.className = "product-card";
 
-  saveProducts();
-  renderProductsTable();
-
-  pName.value  = "";
-  pPrice.value = "";
-  pStock.value = "";
-}
-
-/* ====== حذف صنف ====== */
-function deleteProduct(index) {
-  if (!confirm("حذف الصنف؟")) return;
-
-  products.splice(index, 1);
-  saveProducts();
-  renderProductsTable();
-}
-
-/* ====== عرض الأصناف ====== */
-function renderProductsTable() {
-  table.innerHTML = "";
-
-  if (products.length === 0) {
-    table.innerHTML = `
-      <tr>
-        <td colspan="5" style="text-align:center">لا توجد أصناف</td>
-      </tr>
+    card.innerHTML = `
+      <h3>${product.name}</h3>
+      <p class="price">${product.price} ج</p>
+      <button onclick="addToCart(${index})">إضافة</button>
     `;
+
+    grid.appendChild(card);
+  });
+}
+
+/* ===== البحث ===== */
+function searchProduct(keyword) {
+  keyword = keyword.trim().toLowerCase();
+
+  if (keyword === "") {
+    renderProducts(products);
     return;
   }
 
-  products.forEach((p, i) => {
-    table.innerHTML += `
-      <tr>
-        <td>${i + 1}</td>
-        <td>${p.name}</td>
-        <td>${p.price} ج</td>
-        <td>${p.stock}</td>
-        <td>
-          <button onclick="deleteProduct(${i})">❌</button>
-        </td>
-      </tr>
-    `;
-  });
+  const filtered = products.filter(p =>
+    p.name.toLowerCase().includes(keyword)
+  );
+
+  renderProducts(filtered);
 }
 
-/* ====== تشغيل أولي ====== */
-if (table) {
-  renderProductsTable();
-}
+/* ===== تحميل تلقائي ===== */
+document.addEventListener("DOMContentLoaded", () => {
+  renderProducts();
+});
