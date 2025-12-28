@@ -1,33 +1,30 @@
-/*********************************
- * DATA.JS
- * مركز البيانات للتطبيق
- *********************************/
+/* ===============================
+   DATA.JS
+   إدارة البيانات والتخزين
+================================ */
 
-/* ====== PRODUCTS ====== */
-let products = JSON.parse(localStorage.getItem("products")) || [];
+/* ===== المنتجات =====
+   id   : رقم فريد
+   name : اسم الصنف
+   price: سعر البيع
+*/
+let products = JSON.parse(localStorage.getItem("products")) || [
+  { id: 1, name: "سكر", price: 20 },
+  { id: 2, name: "أرز", price: 25 },
+  { id: 3, name: "زيت", price: 60 }
+];
 
-/* ====== INVOICES ====== */
+/* ===== الفواتير ===== */
 let invoices = JSON.parse(localStorage.getItem("invoices")) || [];
 
-/* ====== SETTINGS ====== */
-let settings = JSON.parse(localStorage.getItem("settings")) || {
-  shopName: "نظام كاشير"
-};
-
-/* ====== SAVE FUNCTIONS ====== */
-function saveProducts() {
+/* ===== حفظ البيانات ===== */
+function saveData() {
   localStorage.setItem("products", JSON.stringify(products));
-}
-
-function saveInvoices() {
   localStorage.setItem("invoices", JSON.stringify(invoices));
 }
 
-function saveSettings() {
-  localStorage.setItem("settings", JSON.stringify(settings));
-}
-
-/* ====== HELPERS ====== */
-function formatDate() {
-  return new Date().toLocaleString("ar-EG");
+/* ===== توليد ID جديد ===== */
+function generateId(list) {
+  if (list.length === 0) return 1;
+  return Math.max(...list.map(i => i.id)) + 1;
 }
