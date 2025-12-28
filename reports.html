@@ -1,9 +1,34 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>التقارير</title>
+  <link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+
 <h2>📊 التقارير</h2>
 
-<button onclick="dailyReport()">📅 تقرير اليوم</button>
-<button onclick="monthlyReport()">📆 تقرير الشهر</button>
-<button onclick="allReport()">📈 تقرير إجمالي</button>
+<div class="form-box">
+  <button onclick="loadToday()">📅 تقرير اليوم</button>
+  <button onclick="loadAll()">📚 كل الفواتير</button>
+  <button onclick="clearReports()" class="danger">🗑 مسح التقارير</button>
+</div>
 
-<div id="reportResult" style="margin-top:10px"></div>
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>التاريخ</th>
+      <th>عدد الأصناف</th>
+      <th>الإجمالي</th>
+    </tr>
+  </thead>
+  <tbody id="reportsTable"></tbody>
+</table>
+
+<h3>💰 إجمالي المبيعات: <span id="grandTotal">0</span> جنيه</h3>
 
 <script src="assets/js/reports.js"></script>
+</body>
+</html>
