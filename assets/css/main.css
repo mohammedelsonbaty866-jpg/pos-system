@@ -1,0 +1,119 @@
+:root{
+  --main:#0f172a;
+  --accent:#22c55e;
+  --danger:#ef4444;
+  --bg:#f1f5f9;
+  --card:#ffffff;
+  --text:#020617;
+}
+
+*{
+  box-sizing:border-box;
+  font-family: "Tajawal", Arial, sans-serif;
+}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+}
+
+/* ====== HEADERS ====== */
+h2,h3{
+  margin:10px 0;
+}
+
+/* ====== FORMS ====== */
+input, select{
+  width:100%;
+  padding:10px;
+  margin:5px 0;
+  border-radius:10px;
+  border:1px solid #cbd5f5;
+  font-size:14px;
+}
+
+/* ====== BUTTONS ====== */
+button{
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  font-size:14px;
+  cursor:pointer;
+}
+
+button.primary{
+  background:var(--accent);
+  color:#fff;
+}
+
+button.danger{
+  background:var(--danger);
+  color:#fff;
+}
+
+/* ====== CONTAINERS ====== */
+.form-box{
+  background:var(--card);
+  padding:12px;
+  border-radius:14px;
+  margin-bottom:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,.08);
+}
+
+/* ====== TABLE ====== */
+table{
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
+  border-radius:12px;
+  overflow:hidden;
+}
+
+th, td{
+  padding:10px;
+  text-align:center;
+  border-bottom:1px solid #e5e7eb;
+}
+
+th{
+  background:#020617;
+  color:#fff;
+}
+
+/* ====== PRODUCTS GRID ====== */
+.products-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+  gap:10px;
+}
+
+.product-card{
+  background:#fff;
+  padding:10px;
+  border-radius:14px;
+  text-align:center;
+  box-shadow:0 4px 10px rgba(0,0,0,.08);
+}
+
+/* ====== FIXED ACTION BAR ====== */
+.fixed-actions{
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  padding:10px;
+  background:#fff;
+  border-top:1px solid #e5e7eb;
+}
+
+/* ====== TOTAL ====== */
+.total-box{
+  font-size:18px;
+  font-weight:bold;
+  text-align:center;
+  margin:10px 0;
+}
