@@ -2,121 +2,112 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>POS System | نظام كاشير</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>نظام كاشير احترافي</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="assets/css/cashier.css">
+  <link rel="stylesheet" href="assets/css/main.css">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f4f6f8;
+    }
+
+    header {
+      background: #1e293b;
+      color: #fff;
+      padding: 15px;
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    nav {
+      background: #0f172a;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+    }
+
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      padding: 10px 15px;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    nav a:hover {
+      background: #334155;
+    }
+
+    main {
+      padding: 20px;
+      text-align: center;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,.1);
+      cursor: pointer;
+    }
+
+    .card:hover {
+      background: #e5e7eb;
+    }
+  </style>
 </head>
 
 <body>
 
-<!-- ================= HEADER ================= -->
-<header class="pos-header">
-  <div class="logo">🧾 POS</div>
-  <div class="user-info">
-    <span id="username">كاشير</span>
-  </div>
-</header>
+  <header>
+    🧾 نظام كاشير احترافي
+  </header>
 
-<!-- ================= MAIN ================= -->
-<main class="pos-container">
+  <!-- القائمة -->
+  <nav>
+    <a href="index.html">🏠 الرئيسية</a>
+    <a href="cashier.html">💰 الكاشير</a>
+    <a href="products.html">📦 الأصناف</a>
+    <a href="inventory.html">📊 المخزون</a>
+    <a href="returns.html">🔄 المرتجعات</a>
+  </nav>
 
-  <!-- ===== PRODUCTS SECTION ===== -->
-  <section class="products" id="productsGrid">
-    <!-- منتجات تجريبية (هيتم استبدالها ديناميك من JS) -->
-    <div class="product" onclick="addToCart('سكر', 10)">سكر<br><small>10 جنيه</small></div>
-    <div class="product" onclick="addToCart('رز', 12)">رز<br><small>12 جنيه</small></div>
-    <div class="product" onclick="addToCart('زيت', 25)">زيت<br><small>25 جنيه</small></div>
-    <div class="product" onclick="addToCart('مكرونة', 8)">مكرونة<br><small>8 جنيه</small></div>
-  </section>
+  <!-- المحتوى -->
+  <main>
+    <h2>مرحبًا بك 👋</h2>
+    <p>اختر القسم الذي تريد العمل عليه</p>
 
-  <!-- ===== INVOICE SECTION ===== -->
-  <aside class="invoice">
-
-    <!-- عناصر الفاتورة -->
-    <div class="invoice-items" id="invoiceItems">
-      <!-- items -->
-    </div>
-
-    <!-- الإجمالي -->
-    <div class="invoice-total" id="totalBox">
-      الإجمالي: <span id="total">0</span> جنيه
-    </div>
-
-    <!-- أزرار ثابتة -->
-    <div class="invoice-actions">
-      <button class="btn save" onclick="saveInvoice()">💾 حفظ</button>
-      <button class="btn print" onclick="printInvoice()">🖨 طباعة</button>
-    </div>
-
-  </aside>
-
-</main>
-
-<!-- ================= JS ================= -->
-<script>
-/* ====== CART DATA ====== */
-let cart = [];
-let total = 0;
-
-/* ====== ADD TO CART ====== */
-function addToCart(name, price) {
-  cart.push({ name, price });
-  total += price;
-  renderInvoice();
-}
-
-/* ====== RENDER INVOICE ====== */
-function renderInvoice() {
-  const box = document.getElementById("invoiceItems");
-  box.innerHTML = "";
-
-  cart.forEach((item, index) => {
-    box.innerHTML += `
-      <div class="invoice-item">
-        ${item.name} - ${item.price} ج
+    <div class="cards">
+      <div class="card" onclick="location.href='cashier.html'">
+        💰<br>الكاشير
       </div>
-    `;
-  });
 
-  document.getElementById("total").innerText = total;
-}
+      <div class="card" onclick="location.href='products.html'">
+        📦<br>الأصناف
+      </div>
 
-/* ====== SAVE INVOICE ====== */
-function saveInvoice() {
-  if (cart.length === 0) {
-    alert("الفاتورة فاضية");
-    return;
-  }
+      <div class="card" onclick="location.href='inventory.html'">
+        📊<br>المخزون
+      </div>
 
-  const invoices = JSON.parse(localStorage.getItem("invoices") || "[]");
-
-  invoices.push({
-    date: new Date().toLocaleString(),
-    items: cart,
-    total: total
-  });
-
-  localStorage.setItem("invoices", JSON.stringify(invoices));
-
-  cart = [];
-  total = 0;
-  renderInvoice();
-
-  alert("تم حفظ الفاتورة بنجاح");
-}
-
-/* ====== PRINT ====== */
-function printInvoice() {
-  if (cart.length === 0) {
-    alert("لا توجد فاتورة للطباعة");
-    return;
-  }
-  window.print();
-}
- <script src="assets/js/products.js"></script> 
-</script>
+      <div class="card" onclick="location.href='returns.html'">
+        🔄<br>المرتجعات
+      </div>
+    </div>
+  </main>
 
 </body>
 </html>
