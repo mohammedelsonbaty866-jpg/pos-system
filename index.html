@@ -157,46 +157,6 @@ input,select{
 }
 
 </style>
- /* ===== PRINT INVOICE ===== */
-@media print {
- body * {
-   visibility: hidden;
- }
- #printArea, #printArea * {
-   visibility: visible;
- }
- #printArea {
-   position: absolute;
-   top: 0;
-   right: 0;
-   width: 100%;
-   font-family: Tahoma;
-   font-size: 12px;
- }
-}
-
-#printArea{
- display:none;
-}
-
-.print-box{
- border:1px dashed #000;
- padding:8px;
- margin-bottom:6px;
- text-align:center;
-}
-
-.print-items{
- display:grid;
- grid-template-columns:1fr 1fr;
- gap:6px;
-}
-
-.print-item{
- border:1px solid #000;
- padding:6px;
- text-align:center;
-}
 </head>
 <div id="printArea">
  <div class="print-box">
