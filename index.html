@@ -1,238 +1,292 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>POS PRO</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>POS | نظام كاشير احترافي</title>
 
-  <!-- خط -->
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --main:#0f172a;
+  --accent:#22c55e;
+  --danger:#ef4444;
+  --bg:#f1f5f9;
+  --card:#ffffff;
+}
 
-  <style>
-    * {
-      box-sizing: border-box;
-      font-family: 'Cairo', sans-serif;
-    }
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Tahoma, Arial;
+  background:var(--bg);
+  color:#020617;
+}
 
-    body {
-      margin: 0;
-      background: #f4f6f9;
-      height: 100vh;
-      overflow: hidden;
-    }
+/* ===== HEADER ===== */
+header{
+  background:linear-gradient(90deg,#020617,#0f172a);
+  color:#fff;
+  padding:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+header button{
+  background:none;
+  border:none;
+  color:#fff;
+  font-size:22px;
+}
 
-    /* ====== HEADER ====== */
-    header {
-      background: #1e293b;
-      color: #fff;
-      padding: 12px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+/* ===== MENU ===== */
+#menu{
+  position:fixed;
+  right:-240px;
+  top:0;
+  width:220px;
+  height:100%;
+  background:#020617;
+  color:#fff;
+  padding:10px;
+  transition:.3s;
+  z-index:99;
+}
+#menu button{
+  width:100%;
+  background:none;
+  border:none;
+  color:#fff;
+  text-align:right;
+  padding:14px;
+  font-size:15px;
+  border-bottom:1px solid #1e293b;
+}
 
-    header h1 {
-      margin: 0;
-      font-size: 20px;
-    }
+/* ===== SCREENS ===== */
+.screen{display:none;padding:10px}
+.screen.active{display:block}
 
-    /* ====== LAYOUT ====== */
-    .container {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      height: calc(100vh - 60px);
-    }
+/* ===== CASHIER ===== */
+#topBar{
+  display:grid;
+  grid-template-columns:2fr 1fr;
+  gap:8px;
+  margin-bottom:10px;
+}
+#topBar input,#topBar select{
+  padding:12px;
+  border-radius:12px;
+  border:1px solid #cbd5e1;
+}
 
-    /* ====== LEFT (PRODUCTS) ====== */
-    .products {
-      padding: 15px;
-      display: flex;
-      flex-direction: column;
-    }
+/* ===== PRODUCTS GRID ===== */
+#productsGrid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+  gap:10px;
+  margin-bottom:10px;
+}
+.product{
+  background:var(--card);
+  border-radius:14px;
+  padding:10px;
+  text-align:center;
+  box-shadow:0 4px 10px rgba(0,0,0,.08);
+  cursor:pointer;
+}
+.product b{display:block;margin-bottom:6px}
 
-    .categories {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
+/* ===== INVOICE ===== */
+#invoiceBox{
+  background:#fff;
+  border-radius:14px;
+  padding:10px;
+}
+.invoice-items{
+  max-height:200px;
+  overflow:auto;
+  margin-bottom:10px;
+}
+.item{
+  display:flex;
+  justify-content:space-between;
+  padding:6px 0;
+  border-bottom:1px dashed #cbd5e1;
+}
+.summary{
+  border-top:2px solid #e5e7eb;
+  padding-top:10px;
+}
+.summary-row{
+  display:flex;
+  justify-content:space-between;
+  font-size:18px;
+  font-weight:bold;
+  margin-bottom:10px;
+}
+.actions{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:8px;
+}
+.btn{
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  font-size:15px;
+  cursor:pointer;
+}
+.save{background:var(--accent);color:#fff}
+.print{background:#334155;color:#fff}
+.clear{background:var(--danger);color:#fff}
 
-    .categories button {
-      padding: 10px 16px;
-      border: none;
-      border-radius: 6px;
-      background: #334155;
-      color: #fff;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .product-grid {
-      flex: 1;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 12px;
-      overflow-y: auto;
-      padding-right: 5px;
-    }
-
-    .product {
-      background: #fff;
-      border-radius: 10px;
-      padding: 15px;
-      text-align: center;
-      cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,.08);
-    }
-
-    .product h4 {
-      margin: 0 0 8px;
-      font-size: 15px;
-    }
-
-    .product span {
-      color: #16a34a;
-      font-weight: bold;
-    }
-
-    /* ====== RIGHT (INVOICE) ====== */
-    .invoice {
-      background: #fff;
-      border-left: 1px solid #e5e7eb;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .invoice-header {
-      padding: 12px;
-      border-bottom: 1px solid #e5e7eb;
-      font-weight: bold;
-      text-align: center;
-    }
-
-    .invoice-items {
-      flex: 1;
-      overflow-y: auto;
-      padding: 10px;
-    }
-
-    .item {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 8px;
-      font-size: 14px;
-    }
-
-    .invoice-summary {
-      border-top: 1px solid #e5e7eb;
-      padding: 12px;
-    }
-
-    .summary-row {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 6px;
-      font-weight: 600;
-    }
-
-    .actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
-    .actions button {
-      padding: 12px;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .save {
-      background: #0ea5e9;
-      color: #fff;
-    }
-
-    .print {
-      background: #22c55e;
-      color: #fff;
-    }
-
-    .clear {
-      background: #ef4444;
-      color: #fff;
-      grid-column: span 2;
-    }
-  </style>
+/* ===== FORMS ===== */
+input{
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid #cbd5e1;
+  margin-bottom:8px;
+}
+</style>
 </head>
 
 <body>
 
 <header>
-  <h1>نقطة بيع – POS PRO</h1>
-  <div>مستخدم: Admin</div>
+  <span id="shopName">نظام كاشير</span>
+  <button onclick="toggleMenu()">☰</button>
 </header>
 
-<div class="container">
+<div id="menu">
+  <button onclick="showScreen('cashier')">🧾 الكاشير</button>
+  <button onclick="showScreen('products')">📦 الأصناف</button>
+  <button onclick="showScreen('reports')">📊 التقارير</button>
+  <button onclick="showScreen('settings')">⚙️ الإعدادات</button>
+</div>
 
-  <!-- ===== PRODUCTS ===== -->
-  <section class="products">
+<!-- ================= CASHIER ================= -->
+<div id="cashier" class="screen active">
 
-    <div class="categories">
-      <button>مشروبات</button>
-      <button>أغذية</button>
-      <button>حلويات</button>
-      <button>أخرى</button>
-    </div>
+  <div id="topBar">
+    <input id="search" placeholder="بحث / باركود">
+    <select>
+      <option>نقدي</option>
+      <option>آجل</option>
+    </select>
+  </div>
 
-    <div class="product-grid">
-      <div class="product">
-        <h4>بيبسي</h4>
-        <span>10 ج</span>
-      </div>
-      <div class="product">
-        <h4>مياه</h4>
-        <span>5 ج</span>
-      </div>
-      <div class="product">
-        <h4>شيبسي</h4>
-        <span>7 ج</span>
-      </div>
-    </div>
+  <div id="productsGrid"></div>
 
-  </section>
+  <div id="invoiceBox">
+    <div class="invoice-items" id="invoiceItems"></div>
 
-  <!-- ===== INVOICE ===== -->
-  <aside class="invoice">
-
-    <div class="invoice-header">
-      الفاتورة
-    </div>
-
-    <div class="invoice-items">
-      <div class="item">
-        <span>بيبسي × 1</span>
-        <span>10</span>
-      </div>
-    </div>
-
-    <div class="invoice-summary">
+    <div class="summary">
       <div class="summary-row">
         <span>الإجمالي</span>
-        <span>10 ج</span>
+        <span id="total">0 ج</span>
       </div>
 
       <div class="actions">
-        <button class="save">حفظ الفاتورة</button>
-        <button class="print">طباعة</button>
-        <button class="clear">إلغاء</button>
+        <button class="btn save" onclick="saveInvoice()">حفظ</button>
+        <button class="btn print" onclick="printInvoice()">طباعة</button>
+        <button class="btn clear" onclick="clearCart()">مسح</button>
       </div>
     </div>
-
-  </aside>
-
+  </div>
 </div>
-<script src="core.js"></script>
+
+<!-- ================= PRODUCTS ================= -->
+<div id="products" class="screen">
+  <h3>إضافة صنف</h3>
+  <input id="pn" placeholder="اسم الصنف">
+  <input id="pp" placeholder="السعر">
+  <button class="btn save" onclick="addProduct()">حفظ الصنف</button>
+</div>
+
+<!-- ================= REPORTS ================= -->
+<div id="reports" class="screen">
+  <h3>التقارير</h3>
+  <div id="reportBox">قريباً</div>
+</div>
+
+<!-- ================= SETTINGS ================= -->
+<div id="settings" class="screen">
+  <h3>الإعدادات</h3>
+  <input id="shopInput" placeholder="اسم المحل">
+  <button class="btn save" onclick="saveSettings()">حفظ</button>
+</div>
+
+<script>
+let products = JSON.parse(localStorage.products||"[]");
+let cart=[];
+
+/* MENU */
+function toggleMenu(){
+  menu.style.right = menu.style.right=="0px" ? "-240px":"0px";
+}
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  menu.style.right="-240px";
+}
+
+/* PRODUCTS */
+function renderProducts(){
+  productsGrid.innerHTML="";
+  products.forEach(p=>{
+    let d=document.createElement("div");
+    d.className="product";
+    d.innerHTML=`<b>${p.n}</b>${p.p} ج`;
+    d.onclick=()=>addToCart(p);
+    productsGrid.appendChild(d);
+  });
+}
+function addProduct(){
+  products.push({n:pn.value,p:+pp.value});
+  localStorage.products=JSON.stringify(products);
+  pn.value=pp.value="";
+  renderProducts();
+}
+
+/* CART */
+function addToCart(p){
+  cart.push(p);
+  renderInvoice();
+}
+function renderInvoice(){
+  invoiceItems.innerHTML="";
+  let t=0;
+  cart.forEach(i=>{
+    t+=i.p;
+    invoiceItems.innerHTML+=`
+      <div class="item">
+        <span>${i.n}</span>
+        <span>${i.p} ج</span>
+      </div>`;
+  });
+  total.innerText=t+" ج";
+}
+function clearCart(){
+  cart=[];
+  renderInvoice();
+}
+function saveInvoice(){
+  alert("تم حفظ الفاتورة ✔");
+  clearCart();
+}
+function printInvoice(){
+  window.print();
+}
+
+/* SETTINGS */
+function saveSettings(){
+  shopName.innerText=shopInput.value;
+}
+
+/* INIT */
+renderProducts();
+</script>
+
 </body>
 </html>
