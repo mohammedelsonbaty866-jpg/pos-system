@@ -5,56 +5,189 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>POS System</title>
 
-<link rel="stylesheet" href="css/style.css">
+<style>
+:root{
+  --main:#0f172a;
+  --accent:#22c55e;
+  --bg:#f1f5f9;
+  --card:#ffffff;
+  --text:#020617;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Tajawal,Arial;
+  background:var(--bg);
+  color:var(--text);
+}
+
+/* ===== HEADER ===== */
+header{
+  height:56px;
+  background:linear-gradient(90deg,#020617,#0f172a);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 14px;
+}
+
+header b{
+  font-size:18px;
+}
+
+/* ===== LAYOUT ===== */
+#app{
+  display:grid;
+  grid-template-columns:1fr;
+  height:calc(100vh - 56px);
+}
+
+/* ===== SEARCH BAR ===== */
+#searchBar{
+  background:#fff;
+  padding:10px;
+  display:grid;
+  grid-template-columns:2fr 1fr 1fr;
+  gap:8px;
+}
+
+#searchBar input,
+#searchBar select{
+  padding:12px;
+  border-radius:12px;
+  border:1px solid #cbd5e1;
+  font-size:14px;
+}
+
+/* ===== PRODUCTS ===== */
+#products{
+  padding:10px;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(130px,1fr));
+  gap:10px;
+  overflow:auto;
+}
+
+.product{
+  background:var(--card);
+  border-radius:14px;
+  padding:12px;
+  text-align:center;
+  box-shadow:0 4px 12px rgba(0,0,0,.08);
+}
+
+.product b{
+  display:block;
+  margin-bottom:6px;
+}
+
+/* ===== CART ===== */
+#cart{
+  background:#fff;
+  border-top:2px solid #e5e7eb;
+  padding:10px;
+}
+
+#items{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+  gap:8px;
+}
+
+.item{
+  background:#f8fafc;
+  border-radius:10px;
+  padding:8px;
+  text-align:center;
+  font-size:14px;
+}
+
+#total{
+  margin-top:10px;
+  font-size:18px;
+  font-weight:bold;
+  text-align:center;
+}
+
+/* ===== ACTIONS (ثابتة) ===== */
+#actions{
+  position:sticky;
+  bottom:0;
+  background:#fff;
+  padding:10px;
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:8px;
+  border-top:1px solid #e5e7eb;
+}
+
+.btn{
+  padding:14px;
+  border:none;
+  border-radius:14px;
+  font-size:15px;
+  cursor:pointer;
+}
+
+.save{background:var(--accent);color:#fff}
+.print{background:#334155;color:#fff}
+.pay{background:#2563eb;color:#fff}
+
+</style>
 </head>
 
 <body>
 
-<!-- ============ LOGIN SCREEN ============ -->
-<div id="loginScreen" class="login-container active">
-  <div class="login-card">
-    <h1>تسجيل الدخول</h1>
-
-    <input id="username" placeholder="اسم المستخدم">
-    <input id="password" type="password" placeholder="كلمة المرور">
-
-    <button onclick="login()">دخول</button>
-  </div>
-</div>
-
-<!-- ============ APP ============ -->
-<div id="app" class="app">
-
-<header class="app-header">
-  <span>نظام كاشير احترافي</span>
-  <small>POS PRO</small>
+<header>
+  <b>نظام كاشير احترافي</b>
+  <span>POS</span>
 </header>
 
-<div class="app-body">
+<div id="app">
 
-  <!-- المنتجات -->
-  <section class="products" id="products"></section>
+  <!-- SEARCH -->
+  <div id="searchBar">
+    <input placeholder="بحث / باركود">
+    <select>
+      <option>نقدي</option>
+      <option>آجل</option>
+    </select>
+    <select>
+      <option>عميل افتراضي</option>
+    </select>
+  </div>
 
-  <!-- الفاتورة -->
-  <aside class="invoice">
-    <h3>الفاتورة</h3>
+  <!-- PRODUCTS -->
+  <div id="products">
+    <div class="product"><b>سكر</b>25 ج</div>
+    <div class="product"><b>زيت</b>60 ج</div>
+    <div class="product"><b>أرز</b>30 ج</div>
+    <div class="product"><b>مكرونة</b>15 ج</div>
+    <div class="product"><b>لبن</b>20 ج</div>
+    <div class="product"><b>شاي</b>50 ج</div>
+  </div>
 
-    <div id="invoiceItems" class="invoice-items"></div>
-
-    <div class="invoice-actions">
-      <button class="save" onclick="saveInvoice()">حفظ</button>
-      <button class="print" onclick="printInvoice()">طباعة</button>
-      <button class="pay">دفع</button>
+  <!-- CART -->
+  <div id="cart">
+    <div id="items">
+      <div class="item">سكر × 1</div>
+      <div class="item">زيت × 2</div>
     </div>
-  </aside>
+
+    <div id="total">الإجمالي: 145 ج</div>
+
+    <!-- ACTIONS ثابتة -->
+    <div id="actions">
+      <button class="btn save">حفظ</button>
+      <button class="btn print">طباعة</button>
+      <button class="btn pay">دفع</button>
+    </div>
+  </div>
 
 </div>
-</div>
-
-<script src="js/data.js"></script>
-<script src="js/ui.js"></script>
-<script src="js/cashier.js"></script>
-<script src="js/auth.js"></script>
 
 </body>
 </html>
