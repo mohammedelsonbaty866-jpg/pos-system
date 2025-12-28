@@ -81,3 +81,47 @@ function renderProductsTable() {
 document.addEventListener("DOMContentLoaded", () => {
   renderProductsTable();
 });
+let products = JSON.parse(localStorage.getItem("products") || "[]");
+
+function addProduct() {
+  const name = document.getElementById("productName").value.trim();
+  const price = Number(document.getElementById("productPrice").value);
+
+  if (!name || price <= 0) {
+    alert("بيانات غير صحيحة");
+    return;
+  }
+
+  products.push({ id: Date.now(), name, price });
+  localStorage.setItem("products", JSON.stringify(products));
+
+  document.getElementById("productName").value = "";
+  document.getElementById("productPrice").value = "";
+
+  renderProductsTable();
+}
+
+function deleteProduct(id) {
+  products = products.filter(p => p.id !== id);
+  localStorage.setItem("products", JSON.stringify(products));
+  renderProductsTable();
+}
+
+function renderProductsTable() {
+  const table = document.getElementById("productsTable");
+  if (!table) return;
+
+  table.innerHTML = "";
+  products.forEach((p, i) => {
+    table.innerHTML += `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${p.name}</td>
+        <td>${p.price}</td>
+        <td><button onclick="deleteProduct(${p.id})">❌</button></td>
+      </tr>
+    `;
+  });
+}
+
+renderProductsTable();
