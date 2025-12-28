@@ -1,117 +1,123 @@
-/* ================= CASHIER ================= */
+/*********************************
+ * CASHIER.JS
+ * شاشة الكاشير / الفاتورة
+ *********************************/
 
-let cart = [];
+/* ====== عناصر الصفحة ====== */
+const productsGrid   = document.getElementById("productsGrid");
+const invoiceItems   = document.getElementById("invoiceItems");
+const totalEl        = document.getElementById("total");
 
-/* ===== LOAD PRODUCTS ===== */
-function loadProducts() {
-  const products = Storage.get(DB.products);
-  const grid = document.getElementById("productsGrid");
-  if (!grid) return;
+/* ====== البيانات ====== */
+// المنتجات جاية من data.js
+// let products = [...]
 
-  grid.innerHTML = "";
+let cart = [];   // الفاتورة الحالية
 
-  products.forEach((p, i) => {
+/* ====== عرض المنتجات ====== */
+function renderProducts(list = products) {
+  productsGrid.innerHTML = "";
+
+  if (list.length === 0) {
+    productsGrid.innerHTML = "<p>لا توجد منتجات</p>";
+    return;
+  }
+
+  list.forEach((p, index) => {
     const div = document.createElement("div");
-    div.className = "product";
+    div.className = "product-card";
     div.innerHTML = `
-      <b>${p.name}</b>
-      <small>${p.price} ج</small>
+      <strong>${p.name}</strong>
+      <span>${p.price} ج</span>
+      <small>المخزون: ${p.stock}</small>
     `;
-    div.onclick = () => addToCart(i);
-    grid.appendChild(div);
+
+    div.onclick = () => addToCart(index);
+    productsGrid.appendChild(div);
   });
 }
 
-/* ===== ADD TO CART ===== */
-function addToCart(index) {
-  const products = Storage.get(DB.products);
-  const product = products[index];
-
-  if (!product) return;
-
-  const existing = cart.find(i => i.id === index);
-
-  if (existing) {
-    existing.qty++;
-  } else {
-    cart.push({
-      id: index,
-      name: product.name,
-      price: product.price,
-      qty: 1
-    });
+/* ====== البحث ====== */
+function searchProduct(val) {
+  const q = val.trim();
+  if (!q) {
+    renderProducts(products);
+    return;
   }
 
-  renderInvoice();
+  const filtered = products.filter(p =>
+    p.name.includes(q)
+  );
+  renderProducts(filtered);
 }
 
-/* ===== RENDER INVOICE ===== */
-function renderInvoice() {
-  const box = document.getElementById("invoiceItems");
-  const totalBox = document.getElementById("total");
-  if (!box || !totalBox) return;
+/* ====== إضافة للفاتورة ====== */
+function addToCart(index) {
+  const product = products[index];
 
-  box.innerHTML = "";
+  if (product.stock <= 0) {
+    alert("المخزون نفد");
+    return;
+  }
+
+  product.stock--;
+
+  cart.push({
+    name: product.name,
+    price: product.price
+  });
+
+  saveProducts();
+  renderInvoice();
+  renderProducts();
+}
+
+/* ====== عرض الفاتورة ====== */
+function renderInvoice() {
+  invoiceItems.innerHTML = "";
   let total = 0;
 
   cart.forEach((item, i) => {
-    total += item.price * item.qty;
+    total += item.price;
 
-    box.innerHTML += `
-      <div class="item">
-        ${item.name}<br>
-        ${item.qty} × ${item.price}
-        <br>
-        <button onclick="removeItem(${i})">❌</button>
+    invoiceItems.innerHTML += `
+      <div class="invoice-item">
+        <span>${i + 1}. ${item.name}</span>
+        <span>${item.price} ج</span>
       </div>
     `;
   });
 
-  totalBox.innerText = "الإجمالي: " + total + " ج";
+  totalEl.innerText = total + " ج";
 }
 
-/* ===== REMOVE ITEM ===== */
-function removeItem(index) {
-  cart.splice(index, 1);
-  renderInvoice();
-}
-
-/* ===== SAVE INVOICE ===== */
+/* ====== حفظ الفاتورة ====== */
 function saveInvoice() {
   if (cart.length === 0) {
-    alert("لا توجد أصناف");
+    alert("الفاتورة فارغة");
     return;
   }
 
-  const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  let invoices = JSON.parse(localStorage.getItem("invoices") || "[]");
 
-  Storage.add(DB.invoices, {
+  invoices.push({
     date: new Date().toLocaleString(),
     items: cart,
-    total: total
+    total: cart.reduce((s, i) => s + i.price, 0)
   });
 
+  localStorage.setItem("invoices", JSON.stringify(invoices));
+
+  alert("تم حفظ الفاتورة");
+  clearInvoice();
+}
+
+/* ====== تفريغ الفاتورة ====== */
+function clearInvoice() {
   cart = [];
   renderInvoice();
-  alert("تم حفظ الفاتورة");
 }
 
-/* ===== SEARCH ===== */
-function searchProduct(value) {
-  const products = Storage.get(DB.products);
-  const grid = document.getElementById("productsGrid");
-  grid.innerHTML = "";
-
-  products
-    .filter(p => p.name.includes(value))
-    .forEach((p, i) => {
-      const div = document.createElement("div");
-      div.className = "product";
-      div.innerHTML = `<b>${p.name}</b><small>${p.price} ج</small>`;
-      div.onclick = () => addToCart(i);
-      grid.appendChild(div);
-    });
-}
-
-/* ===== INIT ===== */
-document.addEventListener("DOMContentLoaded", loadProducts);
+/* ====== تشغيل أولي ====== */
+renderProducts();
+renderInvoice();
