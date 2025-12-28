@@ -3,62 +3,80 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>POS | نظام كاشير احترافي</title>
-
-<link rel="manifest" href="manifest.json">
+<title>نظام كاشير احترافي</title>
 
 <style>
-/* ========== ROOT ========== */
 :root{
- --primary:#0f172a;
- --secondary:#1e293b;
+ --main:#020617;
  --accent:#22c55e;
  --danger:#ef4444;
  --bg:#f1f5f9;
  --card:#ffffff;
- --border:#e5e7eb;
 }
 
-/* ========== GLOBAL ========== */
 *{box-sizing:border-box}
 body{
  margin:0;
- font-family:"Tajawal",Arial;
+ font-family:Tajawal,Arial;
  background:var(--bg);
  color:#020617;
 }
 
-/* ========== HEADER ========== */
-header{
- height:56px;
- background:linear-gradient(90deg,#020617,#0f172a);
- color:#fff;
+/* ===== LOGIN ===== */
+#login{
  display:flex;
  align-items:center;
- justify-content:space-between;
- padding:0 15px;
+ justify-content:center;
+ height:100vh;
 }
-header b{font-size:18px}
-header button{
- background:none;
+.login-box{
+ background:#fff;
+ padding:20px;
+ width:320px;
+ border-radius:16px;
+ box-shadow:0 10px 25px rgba(0,0,0,.15);
+}
+.login-box h2{text-align:center}
+.login-box input{
+ width:100%;
+ padding:12px;
+ margin:8px 0;
+ border-radius:10px;
+ border:1px solid #cbd5f5;
+}
+.login-box button{
+ width:100%;
+ padding:12px;
  border:none;
+ border-radius:12px;
+ background:var(--accent);
  color:#fff;
- font-size:22px;
+ font-size:16px;
  cursor:pointer;
 }
 
-/* ========== MENU ========== */
+/* ===== HEADER ===== */
+header{
+ background:linear-gradient(90deg,#020617,#0f172a);
+ color:#fff;
+ padding:12px;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+}
+
+/* ===== MENU ===== */
 #menu{
  position:fixed;
+ right:-220px;
  top:0;
- right:-240px;
- width:220px;
+ width:200px;
  height:100%;
  background:#020617;
  color:#fff;
+ padding:10px;
  transition:.3s;
- z-index:10;
- padding-top:60px;
+ z-index:9;
 }
 #menu button{
  width:100%;
@@ -66,188 +84,242 @@ header button{
  border:none;
  color:#fff;
  text-align:right;
- padding:14px;
+ padding:12px;
  font-size:15px;
- cursor:pointer;
-}
-#menu button:hover{background:#1e293b}
-
-/* ========== LAYOUT ========== */
-#app{
- height:calc(100vh - 56px);
- display:grid;
- grid-template-columns:1fr 360px;
 }
 
-/* ========== PRODUCTS ========== */
-#products{
- padding:12px;
- overflow:auto;
-}
-#search{
- width:100%;
- padding:12px;
- border-radius:12px;
- border:1px solid var(--border);
- margin-bottom:10px;
- font-size:14px;
-}
+/* ===== LAYOUT ===== */
+#app{display:none}
+.screen{display:none;padding:10px}
+.screen.active{display:block}
 
+/* ===== PRODUCTS ===== */
 #productsGrid{
  display:grid;
- grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+ grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
  gap:10px;
 }
 .product{
- background:var(--card);
- border-radius:14px;
- padding:12px;
- box-shadow:0 6px 14px rgba(0,0,0,.08);
- cursor:pointer;
- transition:.2s;
- text-align:center;
-}
-.product:hover{transform:scale(1.03)}
-.product b{display:block;margin-bottom:6px}
-.product span{color:#16a34a;font-weight:bold}
-
-/* ========== INVOICE ========== */
-#invoice{
  background:#fff;
- border-right:2px solid var(--border);
- display:flex;
- flex-direction:column;
-}
-#invoice h3{
- margin:0;
- padding:12px;
- border-bottom:1px solid var(--border);
+ border-radius:14px;
+ padding:10px;
  text-align:center;
+ box-shadow:0 4px 10px rgba(0,0,0,.08);
+ cursor:pointer;
 }
 
+/* ===== INVOICE ===== */
 #invoiceItems{
- flex:1;
- overflow:auto;
- padding:10px;
+ display:grid;
+ grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+ gap:8px;
 }
 .item{
  background:#f8fafc;
  border-radius:10px;
- padding:10px;
- margin-bottom:8px;
- display:flex;
- justify-content:space-between;
- font-size:14px;
+ padding:8px;
+ text-align:center;
 }
-
 #total{
- padding:12px;
  font-size:18px;
  font-weight:bold;
+ margin-top:10px;
  text-align:center;
- border-top:1px solid var(--border);
 }
 
-/* ========== ACTIONS ========== */
-#actions{
- display:grid;
- grid-template-columns:1fr 1fr;
- gap:8px;
- padding:10px;
-}
+/* ===== BUTTONS ===== */
 .btn{
- padding:14px;
+ padding:12px;
  border:none;
- border-radius:14px;
+ border-radius:12px;
  font-size:15px;
  cursor:pointer;
 }
 .save{background:var(--accent);color:#fff}
 .print{background:#334155;color:#fff}
-.clear{background:var(--danger);color:#fff}
-
-/* ========== RESPONSIVE ========== */
-@media(max-width:900px){
- #app{grid-template-columns:1fr}
- #invoice{order:-1}
-}
 </style>
 </head>
 
 <body>
 
+<!-- ============ LOGIN ============ -->
+<div id="login">
+ <div class="login-box">
+  <h2>تسجيل الدخول</h2>
+  <input id="lu" placeholder="اسم المستخدم">
+  <input id="lp" type="password" placeholder="كلمة المرور">
+  <button onclick="login()">دخول</button>
+ </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="app">
+
 <header>
- <b>POS SYSTEM</b>
- <button onclick="toggleMenu()">☰</button>
+ <span>نظام كاشير احترافي</span>
+ <div>
+  <button onclick="toggleMenu()">☰</button>
+  <button onclick="logout()">⎋</button>
+ </div>
 </header>
 
 <div id="menu">
- <button>🧾 الكاشير</button>
- <button>📦 الأصناف</button>
- <button>👤 المستخدمين</button>
- <button>📊 التقارير</button>
- <button>⚙️ الإعدادات</button>
+ <button onclick="showScreen('cashier')">🧾 الكاشير</button>
+ <button onclick="showScreen('products')">📦 الأصناف</button>
+ <button onclick="showScreen('customers')">👤 العملاء</button>
+ <button onclick="showScreen('reports')">📊 التقارير</button>
 </div>
 
-<div id="app">
+<!-- ===== CASHIER ===== -->
+<div id="cashier" class="screen active">
+ <div id="productsGrid"></div>
 
- <!-- PRODUCTS -->
- <div id="products">
-  <input id="search" placeholder="بحث بالاسم أو الباركود">
-  <div id="productsGrid"></div>
- </div>
+ <hr>
 
- <!-- INVOICE -->
- <div id="invoice">
-  <h3>الفاتورة</h3>
-  <div id="invoiceItems"></div>
-  <div id="total">الإجمالي: 0</div>
-  <div id="actions">
-   <button class="btn save">حفظ</button>
-   <button class="btn print">طباعة</button>
-   <button class="btn clear">إلغاء</button>
-  </div>
- </div>
+ <div id="invoiceItems"></div>
+ <div id="total">الإجمالي: 0</div>
+
+ <button class="btn save" onclick="saveInvoice()">حفظ</button>
+ <button class="btn print" onclick="printInvoice()">طباعة</button>
+</div>
+
+<!-- ===== PRODUCTS ===== -->
+<div id="products" class="screen">
+ <h3>إضافة صنف</h3>
+ <input id="pn" placeholder="اسم الصنف">
+ <input id="pp" placeholder="السعر">
+ <input id="ps" placeholder="المخزون">
+ <button class="btn save" onclick="addProduct()">حفظ</button>
+</div>
+
+<!-- ===== CUSTOMERS ===== -->
+<div id="customers" class="screen">
+ <h3>العملاء</h3>
+ <input id="cn" placeholder="اسم العميل">
+ <button class="btn save" onclick="addCustomer()">إضافة</button>
+ <div id="customerList"></div>
+</div>
+
+<!-- ===== REPORTS ===== -->
+<div id="reports" class="screen">
+ <h3>📊 التقارير</h3>
+ <div id="reportBox"></div>
+</div>
 
 </div>
 
 <script>
-/* UI ONLY – المنطق هيتقسم في ملفات JS بعد كده */
-
-let menu=document.getElementById("menu");
-function toggleMenu(){
- menu.style.right = menu.style.right=="0px" ? "-240px":"0px";
-}
-
-/* بيانات تجريبية */
-const products=[
- {n:"سكر",p:25},
- {n:"زيت",p:70},
- {n:"أرز",p:30},
- {n:"مكرونة",p:12},
- {n:"شاي",p:55}
+/* ===== USERS ===== */
+const USERS=[
+ {u:"admin",p:"1234",r:"admin"},
+ {u:"cashier",p:"1111",r:"cashier"}
 ];
 
-let grid=document.getElementById("productsGrid");
-let invoice=document.getElementById("invoiceItems");
-let totalBox=document.getElementById("total");
-let total=0;
+function login(){
+ const u=lu.value,p=lp.value;
+ const user=USERS.find(x=>x.u==u && x.p==p);
+ if(!user)return alert("بيانات خاطئة");
+ localStorage.user=JSON.stringify(user);
+ init();
+}
 
-products.forEach(p=>{
- let d=document.createElement("div");
- d.className="product";
- d.innerHTML=`<b>${p.n}</b><span>${p.p} ج</span>`;
- d.onclick=()=>{
-  invoice.innerHTML+=`
-   <div class="item">
-    <span>${p.n}</span>
-    <span>${p.p} ج</span>
-   </div>`;
-  total+=p.p;
-  totalBox.innerText="الإجمالي: "+total;
- };
- grid.appendChild(d);
-});
+function logout(){
+ localStorage.removeItem("user");
+ location.reload();
+}
+
+function init(){
+ const user=JSON.parse(localStorage.user||"null");
+ if(!user)return;
+ login.style.display="none";
+ app.style.display="block";
+
+ if(user.r==="cashier"){
+  document.querySelectorAll("#menu button")[3].style.display="none";
+ }
+}
+
+/* ===== MENU ===== */
+function toggleMenu(){
+ menu.style.right=menu.style.right=="0px"?"-220px":"0px";
+}
+function showScreen(id){
+ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
+ menu.style.right="-220px";
+}
+
+/* ===== DATA ===== */
+let products=JSON.parse(localStorage.products||"[]");
+let customers=JSON.parse(localStorage.customers||"[]");
+let invoices=JSON.parse(localStorage.invoices||"[]");
+let cart=[];
+
+/* ===== PRODUCTS ===== */
+function renderProducts(){
+ productsGrid.innerHTML="";
+ products.forEach(p=>{
+  let d=document.createElement("div");
+  d.className="product";
+  d.innerHTML=`<b>${p.n}</b><br>${p.p} جنيه`;
+  d.onclick=()=>addToCart(p);
+  productsGrid.appendChild(d);
+ });
+}
+function addProduct(){
+ products.push({n:pn.value,p:+pp.value,s:+ps.value});
+ saveAll();renderProducts();
+}
+
+/* ===== CART ===== */
+function addToCart(p){
+ if(p.s<=0)return;
+ cart.push({...p});
+ p.s--;
+ renderInvoice();saveAll();
+}
+function renderInvoice(){
+ invoiceItems.innerHTML="";
+ let t=0;
+ cart.forEach(i=>{
+  t+=i.p;
+  invoiceItems.innerHTML+=`<div class="item">${i.n}<br>${i.p}</div>`;
+ });
+ total.innerText="الإجمالي: "+t;
+}
+
+/* ===== INVOICE ===== */
+function saveInvoice(){
+ invoices.push({date:new Date().toLocaleString(),items:cart});
+ cart=[];renderInvoice();saveAll();
+}
+function printInvoice(){
+ window.print();
+}
+
+/* ===== CUSTOMERS ===== */
+function addCustomer(){
+ customers.push({n:cn.value});
+ saveAll();renderCustomers();
+}
+function renderCustomers(){
+ customerList.innerHTML="";
+ customers.forEach(c=>{
+  customerList.innerHTML+=`<div>${c.n}</div>`;
+ });
+}
+
+/* ===== SAVE ===== */
+function saveAll(){
+ localStorage.products=JSON.stringify(products);
+ localStorage.customers=JSON.stringify(customers);
+ localStorage.invoices=JSON.stringify(invoices);
+}
+
+/* ===== INIT ===== */
+init();
+renderProducts();
+renderCustomers();
 </script>
 
 </body>
