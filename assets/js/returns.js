@@ -37,3 +37,22 @@ function addReturn() {
 
   renderReturns();
 }
+function renderReturns() {
+  const table = document.getElementById("returnsTable");
+  if (!table) return;
+
+  table.innerHTML = "";
+  returns.forEach((r, i) => {
+    table.innerHTML += `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${r.name}</td>
+        <td>${r.qty}</td>
+        <td>${r.reason || "-"}</td>
+        <td>${r.date}</td>
+      </tr>
+    `;
+  });
+}
+
+renderReturns();
