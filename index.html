@@ -3,115 +3,301 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>POS System</title>
+<title>POS Super Market</title>
 
-<link rel="stylesheet" href="style.css">
-<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+ --main:#020617;
+ --accent:#22c55e;
+ --accent2:#0ea5e9;
+ --danger:#ef4444;
+ --bg:#f1f5f9;
+ --card:#ffffff;
+}
+
+*{box-sizing:border-box}
+body{
+ margin:0;
+ font-family:Tajawal,Arial;
+ background:var(--bg);
+ color:#020617;
+}
+
+/* ===== LOGIN ===== */
+#login{
+ height:100vh;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ background:linear-gradient(120deg,#020617,#0f172a);
+}
+.login-box{
+ background:#fff;
+ padding:30px;
+ width:100%;
+ max-width:360px;
+ border-radius:20px;
+ box-shadow:0 10px 40px rgba(0,0,0,.3);
+ text-align:center;
+}
+.login-box h2{margin-bottom:20px}
+.login-box input{
+ width:100%;
+ padding:14px;
+ margin-bottom:12px;
+ border-radius:12px;
+ border:1px solid #cbd5e1;
+ font-size:15px;
+}
+.login-box button{
+ width:100%;
+ padding:14px;
+ border:none;
+ border-radius:14px;
+ background:var(--accent);
+ color:#fff;
+ font-size:16px;
+ cursor:pointer;
+}
+
+/* ===== HEADER ===== */
+header{
+ background:linear-gradient(90deg,#020617,#0f172a);
+ color:#fff;
+ padding:12px 14px;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+}
+header b{font-size:18px}
+header button{
+ background:none;
+ border:none;
+ color:#fff;
+ font-size:24px;
+}
+
+/* ===== MENU ===== */
+#menu{
+ position:fixed;
+ right:-240px;
+ top:0;
+ width:220px;
+ height:100%;
+ background:#020617;
+ color:#fff;
+ padding:14px;
+ transition:.3s;
+ z-index:9;
+}
+#menu button{
+ width:100%;
+ background:none;
+ border:none;
+ color:#fff;
+ text-align:right;
+ padding:14px;
+ font-size:15px;
+ border-bottom:1px solid #1e293b;
+}
+
+/* ===== SCREENS ===== */
+.screen{display:none;padding:12px}
+.screen.active{display:block}
+
+/* ===== TOP BAR ===== */
+#topBar{
+ background:#fff;
+ padding:10px;
+ display:grid;
+ grid-template-columns:2fr 1fr;
+ gap:8px;
+ border-radius:14px;
+ margin-bottom:10px;
+}
+#topBar input,#topBar select{
+ padding:12px;
+ border-radius:12px;
+ border:1px solid #cbd5e1;
+ font-size:14px;
+}
+
+/* ===== PRODUCTS ===== */
+#productsGrid{
+ display:grid;
+ grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+ gap:10px;
+}
+.product{
+ background:var(--card);
+ border-radius:18px;
+ padding:12px;
+ text-align:center;
+ box-shadow:0 6px 20px rgba(0,0,0,.1);
+ cursor:pointer;
+ transition:.2s;
+}
+.product:hover{transform:scale(1.04)}
+.product b{display:block;margin-bottom:6px}
+
+/* ===== INVOICE ===== */
+#invoiceBox{
+ background:#fff;
+ padding:12px;
+ border-radius:16px;
+ margin-top:10px;
+}
+#invoiceItems{
+ display:grid;
+ grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+ gap:8px;
+}
+.item{
+ background:#f8fafc;
+ border-radius:12px;
+ padding:10px;
+ text-align:center;
+}
+#total{
+ margin-top:10px;
+ font-size:20px;
+ font-weight:800;
+ text-align:center;
+}
+
+/* ===== BUTTONS ===== */
+.actions{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:8px;
+ margin-top:10px;
+}
+.btn{
+ padding:14px;
+ border:none;
+ border-radius:14px;
+ font-size:15px;
+ cursor:pointer;
+}
+.save{background:var(--accent);color:#fff}
+.print{background:var(--accent2);color:#fff}
+.danger{background:var(--danger);color:#fff}
+
+/* ===== FORMS ===== */
+input{
+ width:100%;
+ padding:12px;
+ margin-bottom:10px;
+ border-radius:12px;
+ border:1px solid #cbd5e1;
+}
+</style>
 </head>
 
 <body>
 
-<!-- ===== LOGIN ===== -->
-<div id="loginScreen" class="screen active">
-  <div class="login-box">
-    <h2>تسجيل الدخول</h2>
-    <input id="loginUser" placeholder="اسم المستخدم">
-    <input id="loginPass" type="password" placeholder="كلمة المرور">
-    <button onclick="login()">دخول</button>
-    <p id="loginMsg"></p>
-  </div>
+<!-- ========== LOGIN ========== -->
+<div id="login">
+ <div class="login-box">
+  <h2>🔐 تسجيل الدخول</h2>
+  <input id="user" placeholder="اسم المستخدم">
+  <input id="pass" type="password" placeholder="كلمة المرور">
+  <button onclick="login()">دخول</button>
+  <small>نسخة تجارية مدفوعة</small>
+ </div>
 </div>
 
-<!-- ===== APP ===== -->
-<div id="app" class="screen">
+<!-- ========== APP ========== -->
+<div id="app" style="display:none">
 
 <header>
-  <span id="shopName">POS System</span>
-  <button onclick="toggleMenu()">☰</button>
+ <b>POS Super Market</b>
+ <button onclick="toggleMenu()">☰</button>
 </header>
 
-<nav id="menu">
-  <button onclick="showScreen('cashier')">🧾 كاشير</button>
-  <button onclick="showScreen('products')" class="admin">📦 الأصناف</button>
-  <button onclick="showScreen('customers')" class="admin">👤 العملاء</button>
-  <button onclick="showScreen('reports')" class="admin">📊 التقارير</button>
-  <button onclick="showScreen('users')" class="admin">👥 المستخدمين</button>
-  <button onclick="logout()">🚪 خروج</button>
-</nav>
+<div id="menu">
+ <button onclick="show('cashier')">🧾 الكاشير</button>
+ <button onclick="show('products')">📦 الأصناف</button>
+ <button onclick="show('customers')">👤 العملاء</button>
+ <button onclick="show('reports')">📊 التقارير</button>
+ <button onclick="logout()">🚪 خروج</button>
+</div>
 
 <!-- ===== CASHIER ===== -->
-<section id="cashier" class="page active">
-  <div class="top">
-    <input id="search" placeholder="بحث / باركود">
-    <select id="payType">
-      <option value="cash">نقدي</option>
-      <option value="credit">آجل</option>
-    </select>
-    <select id="customer" style="display:none"></select>
+<div id="cashier" class="screen active">
+ <div id="topBar">
+  <input placeholder="بحث / باركود">
+  <select>
+   <option>نقدي</option>
+   <option>آجل</option>
+  </select>
+ </div>
+
+ <div id="productsGrid"></div>
+
+ <div id="invoiceBox">
+  <div id="invoiceItems"></div>
+  <div id="total">الإجمالي: 0 ج</div>
+
+  <div class="actions">
+   <button class="btn save" onclick="saveInvoice()">حفظ</button>
+   <button class="btn print" onclick="printInvoice()">طباعة</button>
   </div>
-
-  <div id="productsGrid"></div>
-
-  <div class="invoice">
-    <div id="invoiceItems"></div>
-    <div id="total">الإجمالي: 0</div>
-
-    <div class="actions">
-      <button onclick="saveInvoice()">حفظ</button>
-      <button onclick="printInvoice()">طباعة</button>
-    </div>
-  </div>
-</section>
+ </div>
+</div>
 
 <!-- ===== PRODUCTS ===== -->
-<section id="products" class="page">
-  <h3>إدارة الأصناف</h3>
-  <input id="pn" placeholder="اسم الصنف">
-  <input id="pp" placeholder="سعر البيع">
-  <input id="pc" placeholder="سعر الشراء">
-  <input id="ps" placeholder="المخزون">
-  <button onclick="addProduct()">حفظ</button>
-  <div id="productList"></div>
-</section>
+<div id="products" class="screen">
+ <h3>📦 إضافة صنف</h3>
+ <input id="pn" placeholder="اسم الصنف">
+ <input id="pp" placeholder="سعر البيع">
+ <input id="pc" placeholder="سعر الشراء">
+ <input id="ps" placeholder="المخزون">
+ <button class="btn save" onclick="addProduct()">حفظ</button>
+</div>
 
 <!-- ===== CUSTOMERS ===== -->
-<section id="customers" class="page">
-  <h3>العملاء (آجل)</h3>
-  <input id="cn" placeholder="اسم العميل">
-  <button onclick="addCustomer()">إضافة</button>
-  <div id="customerList"></div>
-</section>
+<div id="customers" class="screen">
+ <h3>👤 العملاء</h3>
+ <input id="cn" placeholder="اسم العميل">
+ <button class="btn save" onclick="addCustomer()">إضافة</button>
+ <div id="customerList"></div>
+</div>
 
 <!-- ===== REPORTS ===== -->
-<section id="reports" class="page">
-  <h3>التقارير</h3>
-  <div class="cards">
-    <div class="card" id="rSales">0</div>
-    <div class="card" id="rInvoices">0</div>
-    <div class="card" id="rProfit">0</div>
-  </div>
-  <button onclick="dailyReport()">تقرير اليوم</button>
-  <div id="reportBox"></div>
-</section>
-
-<!-- ===== USERS ===== -->
-<section id="users" class="page">
-  <h3>المستخدمين</h3>
-  <input id="un" placeholder="اسم المستخدم">
-  <input id="up" placeholder="كلمة المرور">
-  <select id="ur">
-    <option value="admin">مدير</option>
-    <option value="cashier">كاشير</option>
-  </select>
-  <button onclick="addUser()">إضافة</button>
-  <div id="userList"></div>
-</section>
+<div id="reports" class="screen">
+ <h3>📊 التقارير</h3>
+ <button class="btn save" onclick="dailyReport()">يومي</button>
+ <button class="btn save" onclick="monthlyReport()">شهري</button>
+ <button class="btn save" onclick="yearlyReport()">سنوي</button>
+ <button class="btn danger" onclick="closeDay()">قفل يومي</button>
+ <div id="reportBox"></div>
+</div>
 
 </div>
 
-<script src="auth.js"></script>
-<script src="core.js"></script>
-<script src="reports.js"></script>
+<script src="app.js"></script>
+<script>
+function toggleMenu(){
+ menu.style.right = menu.style.right=="0px" ? "-240px":"0px";
+}
+function show(id){
+ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
+ menu.style.right="-240px";
+}
+function login(){
+ if(user.value && pass.value){
+  login.style.display="none";
+  app.style.display="block";
+ }
+}
+function logout(){
+ location.reload();
+}
+</script>
 
 </body>
 </html>
