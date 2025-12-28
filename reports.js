@@ -1,87 +1,99 @@
-/* =========================
-   REPORTS SYSTEM
-   Commercial POS Version
-========================= */
+/* ===================================
+   REPORTS.JS
+   التقارير + الأرباح + القفل اليومي
+=================================== */
 
-function getToday(){
-  return new Date().toLocaleDateString();
-}
-
-/* ===== DAILY REPORT ===== */
+/* تقرير اليوم */
 function dailyReport(){
-  let today = getToday();
-  let dayInvoices = invoices.filter(i =>
-    i.date.startsWith(today)
+  const today = new Date().toLocaleDateString();
+  let total = 0;
+  let profit = 0;
+
+  const list = invoices.filter(inv =>
+    inv.date.includes(today)
   );
 
-  let total = 0, profit = 0;
-  dayInvoices.forEach(i=>{
-    total += i.total;
-    profit += (i.profit || 0);
+  list.forEach(inv=>{
+    total += inv.total;
+    profit += inv.profit || 0;
   });
 
   reportBox.innerHTML = `
-    <h4>📅 تقرير اليوم</h4>
-    <p>عدد الفواتير: ${dayInvoices.length}</p>
-    <p>إجمالي المبيعات: ${total}</p>
-    <p>الأرباح: ${profit}</p>
+    <div class="card">
+      <h4>📅 تقرير اليوم</h4>
+      <p>عدد الفواتير: ${list.length}</p>
+      <p>إجمالي المبيعات: ${total} جنيه</p>
+      <p>الأرباح: ${profit} جنيه</p>
+    </div>
   `;
 }
 
-/* ===== MONTHLY REPORT ===== */
+/* تقرير شهري */
 function monthlyReport(){
-  let m = new Date().getMonth();
-  let y = new Date().getFullYear();
+  const month = new Date().getMonth()+1;
+  const year = new Date().getFullYear();
+  let total = 0;
+  let profit = 0;
 
-  let list = invoices.filter(i=>{
-    let d=new Date(i.date);
-    return d.getMonth()==m && d.getFullYear()==y;
+  const list = invoices.filter(inv=>{
+    const d = new Date(inv.date);
+    return d.getMonth()+1===month && d.getFullYear()===year;
   });
 
-  let total=0,profit=0;
-  list.forEach(i=>{
-    total+=i.total;
-    profit+=(i.profit||0);
+  list.forEach(inv=>{
+    total += inv.total;
+    profit += inv.profit || 0;
   });
 
-  reportBox.innerHTML=`
-   <h4>📆 تقرير الشهر</h4>
-   <p>عدد الفواتير: ${list.length}</p>
-   <p>إجمالي المبيعات: ${total}</p>
-   <p>الأرباح: ${profit}</p>
+  reportBox.innerHTML = `
+    <div class="card">
+      <h4>📆 تقرير شهري</h4>
+      <p>عدد الفواتير: ${list.length}</p>
+      <p>إجمالي المبيعات: ${total} جنيه</p>
+      <p>الأرباح: ${profit} جنيه</p>
+    </div>
   `;
 }
 
-/* ===== YEARLY REPORT ===== */
+/* تقرير سنوي */
 function yearlyReport(){
-  let y = new Date().getFullYear();
-  let list = invoices.filter(i=>{
-    new Date(i.date).getFullYear()==y;
+  const year = new Date().getFullYear();
+  let total = 0;
+  let profit = 0;
+
+  const list = invoices.filter(inv=>{
+    return new Date(inv.date).getFullYear()===year;
   });
 
-  let total=0,profit=0;
-  list.forEach(i=>{
-    total+=i.total;
-    profit+=(i.profit||0);
+  list.forEach(inv=>{
+    total += inv.total;
+    profit += inv.profit || 0;
   });
 
-  reportBox.innerHTML=`
-   <h4>📊 تقرير سنوي</h4>
-   <p>عدد الفواتير: ${list.length}</p>
-   <p>إجمالي المبيعات: ${total}</p>
-   <p>الأرباح: ${profit}</p>
+  reportBox.innerHTML = `
+    <div class="card">
+      <h4>📊 تقرير سنوي</h4>
+      <p>عدد الفواتير: ${list.length}</p>
+      <p>إجمالي المبيعات: ${total} جنيه</p>
+      <p>الأرباح: ${profit} جنيه</p>
+    </div>
   `;
 }
 
-/* ===== DAILY CLOSE ===== */
+/* ===== قفل يومي ===== */
 function dailyClose(){
-  let today = getToday();
-  localStorage["close-"+today]="true";
-  alert("تم القفل اليومي");
+  const today = new Date().toLocaleDateString();
+  if(localStorage.closedDay === today){
+    alert("تم قفل اليوم بالفعل");
+    return;
+  }
+
+  dailyReport();
+  localStorage.closedDay = today;
+  alert("تم القفل اليومي بنجاح");
 }
 
-/* ===== CHECK CLOSE ===== */
+/* ===== تحقق من القفل ===== */
 function isClosed(){
-  let today = getToday();
-  return localStorage["close-"+today]=="true";
+  return localStorage.closedDay === new Date().toLocaleDateString();
 }
