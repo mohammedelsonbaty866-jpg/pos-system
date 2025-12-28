@@ -28,3 +28,19 @@ function generateId(list) {
   if (list.length === 0) return 1;
   return Math.max(...list.map(i => i.id)) + 1;
 }
+let users = JSON.parse(localStorage.getItem("users")) || [
+  {
+    id:1,
+    username:"admin",
+    password:"1234",
+    role:"admin"
+  },
+  {
+    id:2,
+    username:"cashier",
+    password:"1234",
+    role:"cashier"
+  }
+];
+
+localStorage.setItem("users", JSON.stringify(users));
