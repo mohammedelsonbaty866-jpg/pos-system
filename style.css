@@ -1,236 +1,102 @@
-:root{
-  --bg:#0b1220;
-  --panel:#111827;
-  --card:#1f2933;
-  --border:#2b3440;
-  --text:#e5e7eb;
-  --muted:#9ca3af;
-  --accent:#22c55e;
-  --danger:#ef4444;
-  --warning:#f59e0b;
-}
-
-/* ===== RESET ===== */
 *{
   box-sizing:border-box;
-  font-family: "Tajawal", Arial, sans-serif;
-}
-body{
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
+  font-family:Tajawal,Arial;
 }
 
-/* ===== SCREENS ===== */
+body{
+  margin:0;
+  background:#f1f5f9;
+}
+
+/* ===== Screens ===== */
 .screen{display:none}
 .screen.active{display:block}
 
 /* ===== LOGIN ===== */
 #loginScreen{
-  min-height:100vh;
+  height:100vh;
   display:flex;
-  align-items:center;
+  flex-direction:column;
   justify-content:center;
+  gap:10px;
+  padding:20px;
 }
-.login-box{
-  background:var(--panel);
-  padding:24px;
-  width:320px;
-  border-radius:16px;
-  box-shadow:0 20px 40px rgba(0,0,0,.4);
-}
-.login-box h2{
-  margin:0 0 16px;
-  text-align:center;
-}
-.login-box input{
-  width:100%;
-  padding:12px;
-  margin-bottom:10px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  background:#0f172a;
-  color:var(--text);
-}
-.login-box button{
-  width:100%;
-  padding:12px;
-  border:none;
+#loginScreen input,button{
+  padding:14px;
   border-radius:12px;
-  background:var(--accent);
-  color:#022c22;
-  font-size:16px;
-  cursor:pointer;
+  border:1px solid #ccc;
 }
 
 /* ===== HEADER ===== */
 header{
-  background:linear-gradient(90deg,#020617,#0f172a);
-  padding:14px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  font-size:18px;
-}
-header button{
-  background:none;
-  border:none;
-  color:#fff;
-  font-size:22px;
-}
-
-/* ===== MENU ===== */
-#menu{
-  position:fixed;
-  top:0;
-  right:-220px;
-  width:200px;
-  height:100%;
   background:#020617;
-  padding:10px;
-  transition:.3s;
-  z-index:99;
-}
-#menu button{
-  width:100%;
-  padding:12px;
-  background:none;
-  border:none;
   color:#fff;
-  text-align:right;
-  font-size:15px;
+  padding:15px;
+  text-align:center;
 }
 
-/* ===== PAGES ===== */
-.page{
-  padding:10px;
-}
-.page h3{
-  margin-top:0;
-}
-
-/* ===== CASHIER ===== */
-.top{
+/* ===== MAIN ===== */
+main{
   display:grid;
-  grid-template-columns:2fr 1fr 1fr;
-  gap:8px;
-  margin-bottom:10px;
-}
-.top input,
-.top select{
-  padding:10px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  background:#0f172a;
-  color:var(--text);
+  grid-template-columns:2fr 1fr;
+  height:calc(100vh - 60px);
 }
 
-/* ===== PRODUCTS GRID ===== */
-#productsGrid{
+/* ===== PRODUCTS ===== */
+#products{
+  padding:10px;
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
   gap:10px;
-  margin-bottom:10px;
+  overflow:auto;
 }
 .product{
-  background:var(--card);
+  background:#fff;
   padding:12px;
   border-radius:14px;
   text-align:center;
   cursor:pointer;
-  box-shadow:0 6px 14px rgba(0,0,0,.35);
-}
-.product b{
-  display:block;
-  margin-bottom:6px;
+  box-shadow:0 4px 10px rgba(0,0,0,.1);
 }
 
 /* ===== INVOICE ===== */
-.invoice{
-  background:var(--panel);
-  padding:10px;
-  border-radius:16px;
+#invoice{
+  background:#fff;
+  display:flex;
+  flex-direction:column;
 }
+
 #invoiceItems{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
-  gap:8px;
+  flex:1;
+  overflow:auto;
+  padding:10px;
 }
+
 .item{
-  background:#0f172a;
+  background:#f8fafc;
+  margin-bottom:6px;
   padding:8px;
   border-radius:10px;
-  text-align:center;
-}
-#total{
-  margin:10px 0;
-  font-size:18px;
-  font-weight:bold;
-  text-align:center;
 }
 
-/* ===== ACTIONS ===== */
-.actions{
+/* ===== FIXED ACTIONS ===== */
+#invoiceActions{
+  position:sticky;
+  bottom:0;
+  background:#fff;
   display:grid;
-  grid-template-columns:1fr 1fr;
+  grid-template-columns:1fr 1fr 1fr;
   gap:8px;
-}
-.actions button{
-  padding:12px;
-  border:none;
-  border-radius:12px;
-  font-size:15px;
-  cursor:pointer;
-}
-.actions button:first-child{
-  background:var(--accent);
-  color:#022c22;
-}
-.actions button:last-child{
-  background:#334155;
-  color:#fff;
+  padding:10px;
+  border-top:2px solid #e5e7eb;
 }
 
-/* ===== FORMS ===== */
-input, select{
-  width:100%;
-  padding:10px;
-  margin-bottom:8px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  background:#0f172a;
-  color:var(--text);
-}
+.save{background:#22c55e;color:#fff}
+.print{background:#334155;color:#fff}
+.pay{background:#ef4444;color:#fff}
+
 button{
-  padding:10px;
   border:none;
   border-radius:12px;
-  background:var(--accent);
-  color:#022c22;
-  cursor:pointer;
-}
-
-/* ===== LISTS ===== */
-#productList div,
-#customerList div,
-#userList div{
-  background:var(--card);
-  padding:10px;
-  border-radius:12px;
-  margin-bottom:6px;
-}
-
-/* ===== REPORTS ===== */
-.cards{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:8px;
-  margin-bottom:10px;
-}
-.card{
-  background:var(--card);
-  padding:16px;
-  border-radius:14px;
-  text-align:center;
-  font-size:18px;
+  font-size:16px;
 }
