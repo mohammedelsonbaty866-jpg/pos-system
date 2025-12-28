@@ -1,191 +1,236 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>POS System</title>
+  <meta charset="UTF-8">
+  <title>POS PRO</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<style>
-:root{
-  --main:#0f172a;
-  --accent:#22c55e;
-  --bg:#f1f5f9;
-  --card:#ffffff;
-  --text:#020617;
-}
+  <!-- خط -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
 
-*{box-sizing:border-box}
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Cairo', sans-serif;
+    }
 
-body{
-  margin:0;
-  font-family:Tajawal,Arial;
-  background:var(--bg);
-  color:var(--text);
-}
+    body {
+      margin: 0;
+      background: #f4f6f9;
+      height: 100vh;
+      overflow: hidden;
+    }
 
-/* ===== HEADER ===== */
-header{
-  height:56px;
-  background:linear-gradient(90deg,#020617,#0f172a);
-  color:#fff;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 14px;
-}
+    /* ====== HEADER ====== */
+    header {
+      background: #1e293b;
+      color: #fff;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-header b{
-  font-size:18px;
-}
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+    }
 
-/* ===== LAYOUT ===== */
-#app{
-  display:grid;
-  grid-template-columns:1fr;
-  height:calc(100vh - 56px);
-}
+    /* ====== LAYOUT ====== */
+    .container {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      height: calc(100vh - 60px);
+    }
 
-/* ===== SEARCH BAR ===== */
-#searchBar{
-  background:#fff;
-  padding:10px;
-  display:grid;
-  grid-template-columns:2fr 1fr 1fr;
-  gap:8px;
-}
+    /* ====== LEFT (PRODUCTS) ====== */
+    .products {
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+    }
 
-#searchBar input,
-#searchBar select{
-  padding:12px;
-  border-radius:12px;
-  border:1px solid #cbd5e1;
-  font-size:14px;
-}
+    .categories {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
 
-/* ===== PRODUCTS ===== */
-#products{
-  padding:10px;
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(130px,1fr));
-  gap:10px;
-  overflow:auto;
-}
+    .categories button {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      background: #334155;
+      color: #fff;
+      cursor: pointer;
+      font-weight: 600;
+    }
 
-.product{
-  background:var(--card);
-  border-radius:14px;
-  padding:12px;
-  text-align:center;
-  box-shadow:0 4px 12px rgba(0,0,0,.08);
-}
+    .product-grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
 
-.product b{
-  display:block;
-  margin-bottom:6px;
-}
+    .product {
+      background: #fff;
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,.08);
+    }
 
-/* ===== CART ===== */
-#cart{
-  background:#fff;
-  border-top:2px solid #e5e7eb;
-  padding:10px;
-}
+    .product h4 {
+      margin: 0 0 8px;
+      font-size: 15px;
+    }
 
-#items{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
-  gap:8px;
-}
+    .product span {
+      color: #16a34a;
+      font-weight: bold;
+    }
 
-.item{
-  background:#f8fafc;
-  border-radius:10px;
-  padding:8px;
-  text-align:center;
-  font-size:14px;
-}
+    /* ====== RIGHT (INVOICE) ====== */
+    .invoice {
+      background: #fff;
+      border-left: 1px solid #e5e7eb;
+      display: flex;
+      flex-direction: column;
+    }
 
-#total{
-  margin-top:10px;
-  font-size:18px;
-  font-weight:bold;
-  text-align:center;
-}
+    .invoice-header {
+      padding: 12px;
+      border-bottom: 1px solid #e5e7eb;
+      font-weight: bold;
+      text-align: center;
+    }
 
-/* ===== ACTIONS (ثابتة) ===== */
-#actions{
-  position:sticky;
-  bottom:0;
-  background:#fff;
-  padding:10px;
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr;
-  gap:8px;
-  border-top:1px solid #e5e7eb;
-}
+    .invoice-items {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+    }
 
-.btn{
-  padding:14px;
-  border:none;
-  border-radius:14px;
-  font-size:15px;
-  cursor:pointer;
-}
+    .item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
 
-.save{background:var(--accent);color:#fff}
-.print{background:#334155;color:#fff}
-.pay{background:#2563eb;color:#fff}
+    .invoice-summary {
+      border-top: 1px solid #e5e7eb;
+      padding: 12px;
+    }
 
-</style>
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .actions button {
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .save {
+      background: #0ea5e9;
+      color: #fff;
+    }
+
+    .print {
+      background: #22c55e;
+      color: #fff;
+    }
+
+    .clear {
+      background: #ef4444;
+      color: #fff;
+      grid-column: span 2;
+    }
+  </style>
 </head>
 
 <body>
 
 <header>
-  <b>نظام كاشير احترافي</b>
-  <span>POS</span>
+  <h1>نقطة بيع – POS PRO</h1>
+  <div>مستخدم: Admin</div>
 </header>
 
-<div id="app">
+<div class="container">
 
-  <!-- SEARCH -->
-  <div id="searchBar">
-    <input placeholder="بحث / باركود">
-    <select>
-      <option>نقدي</option>
-      <option>آجل</option>
-    </select>
-    <select>
-      <option>عميل افتراضي</option>
-    </select>
-  </div>
+  <!-- ===== PRODUCTS ===== -->
+  <section class="products">
 
-  <!-- PRODUCTS -->
-  <div id="products">
-    <div class="product"><b>سكر</b>25 ج</div>
-    <div class="product"><b>زيت</b>60 ج</div>
-    <div class="product"><b>أرز</b>30 ج</div>
-    <div class="product"><b>مكرونة</b>15 ج</div>
-    <div class="product"><b>لبن</b>20 ج</div>
-    <div class="product"><b>شاي</b>50 ج</div>
-  </div>
-
-  <!-- CART -->
-  <div id="cart">
-    <div id="items">
-      <div class="item">سكر × 1</div>
-      <div class="item">زيت × 2</div>
+    <div class="categories">
+      <button>مشروبات</button>
+      <button>أغذية</button>
+      <button>حلويات</button>
+      <button>أخرى</button>
     </div>
 
-    <div id="total">الإجمالي: 145 ج</div>
-
-    <!-- ACTIONS ثابتة -->
-    <div id="actions">
-      <button class="btn save">حفظ</button>
-      <button class="btn print">طباعة</button>
-      <button class="btn pay">دفع</button>
+    <div class="product-grid">
+      <div class="product">
+        <h4>بيبسي</h4>
+        <span>10 ج</span>
+      </div>
+      <div class="product">
+        <h4>مياه</h4>
+        <span>5 ج</span>
+      </div>
+      <div class="product">
+        <h4>شيبسي</h4>
+        <span>7 ج</span>
+      </div>
     </div>
-  </div>
+
+  </section>
+
+  <!-- ===== INVOICE ===== -->
+  <aside class="invoice">
+
+    <div class="invoice-header">
+      الفاتورة
+    </div>
+
+    <div class="invoice-items">
+      <div class="item">
+        <span>بيبسي × 1</span>
+        <span>10</span>
+      </div>
+    </div>
+
+    <div class="invoice-summary">
+      <div class="summary-row">
+        <span>الإجمالي</span>
+        <span>10 ج</span>
+      </div>
+
+      <div class="actions">
+        <button class="save">حفظ الفاتورة</button>
+        <button class="print">طباعة</button>
+        <button class="clear">إلغاء</button>
+      </div>
+    </div>
+
+  </aside>
 
 </div>
 
