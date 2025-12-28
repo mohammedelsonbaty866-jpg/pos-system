@@ -1,32 +1,135 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>إدارة الأصناف</title>
-  <link rel="stylesheet" href="assets/css/main.css">
+<meta charset="UTF-8">
+<title>POS | إدارة الأصناف</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- CSS -->
+<link rel="stylesheet" href="assets/css/style.css">
 </head>
+
 <body>
 
-<h2>📦 إدارة الأصناف</h2>
+<!-- ===== HEADER ===== -->
+<header class="top-bar">
+  <h1>إدارة الأصناف</h1>
+  <nav>
+    <a href="index.html">الكاشير</a>
+    <a href="products.html" class="active">الأصناف</a>
+    <a href="inventory.html">المخزون</a>
+    <a href="returns.html">المرتجعات</a>
+    <a href="reports.html">التقارير</a>
+  </nav>
+</header>
 
-<div class="form-box">
-  <input id="productName" placeholder="اسم الصنف">
-  <input id="productPrice" type="number" placeholder="السعر">
-  <button onclick="addProduct()">➕ إضافة</button>
-</div>
+<!-- ===== MAIN ===== -->
+<main class="products-layout">
 
-<table>
-  <thead>
-    <tr>
-      <th>#</th>
-      <th>الصنف</th>
-      <th>السعر</th>
-      <th>حذف</th>
-    </tr>
-  </thead>
-  <tbody id="productsTable"></tbody>
-</table>
+  <!-- إضافة صنف -->
+  <section class="form-card">
+    <h2>إضافة صنف جديد</h2>
 
-<script src="assets/js/products.js"></script>
+    <input id="productName" type="text" placeholder="اسم الصنف">
+    <input id="productPrice" type="number" placeholder="سعر البيع">
+
+    <button class="btn-save" onclick="addProduct()">حفظ الصنف</button>
+  </section>
+
+  <!-- جدول الأصناف -->
+  <section class="table-card">
+    <h2>قائمة الأصناف</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>اسم الصنف</th>
+          <th>السعر</th>
+          <th>حذف</th>
+        </tr>
+      </thead>
+      <tbody id="productsTable"></tbody>
+    </table>
+  </section>
+
+</main>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  إدارة الأصناف – POS System
+</footer>
+
+<!-- ===== JS ===== -->
+<script src="assets/js/data.js"></script>
+
+<script>
+/* ===============================
+   PRODUCTS PAGE LOGIC
+================================ */
+
+/* ===== عرض الأصناف ===== */
+function renderProductsTable() {
+  const table = document.getElementById("productsTable");
+  table.innerHTML = "";
+
+  if (products.length === 0) {
+    table.innerHTML = `
+      <tr>
+        <td colspan="4" style="text-align:center">لا توجد أصناف</td>
+      </tr>
+    `;
+    return;
+  }
+
+  products.forEach((p, index) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${index + 1}</td>
+      <td>${p.name}</td>
+      <td>${p.price} ج</td>
+      <td>
+        <button class="btn-delete" onclick="deleteProduct(${index})">حذف</button>
+      </td>
+    `;
+    table.appendChild(row);
+  });
+}
+
+/* ===== إضافة صنف ===== */
+function addProduct() {
+  const name = document.getElementById("productName").value.trim();
+  const price = Number(document.getElementById("productPrice").value);
+
+  if (!name || price <= 0) {
+    alert("أدخل اسم وسعر صحيح");
+    return;
+  }
+
+  products.push({
+    id: generateId(products),
+    name: name,
+    price: price
+  });
+
+  saveData();
+  renderProductsTable();
+
+  document.getElementById("productName").value = "";
+  document.getElementById("productPrice").value = "";
+}
+
+/* ===== حذف صنف ===== */
+function deleteProduct(index) {
+  if (!confirm("حذف الصنف؟")) return;
+  products.splice(index, 1);
+  saveData();
+  renderProductsTable();
+}
+
+/* ===== تحميل ===== */
+document.addEventListener("DOMContentLoaded", renderProductsTable);
+</script>
+
 </body>
 </html>
