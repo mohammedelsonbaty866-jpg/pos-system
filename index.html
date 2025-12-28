@@ -10,35 +10,45 @@
 
 <body>
 
-<!-- ===== LOGIN ===== -->
-<div id="loginScreen" class="screen active">
-  <h2>تسجيل الدخول</h2>
-  <input id="username" placeholder="اسم المستخدم">
-  <input id="password" type="password" placeholder="كلمة المرور">
-  <button onclick="login()">دخول</button>
+<!-- ============ LOGIN SCREEN ============ -->
+<div id="loginScreen" class="login-container active">
+  <div class="login-card">
+    <h1>تسجيل الدخول</h1>
+
+    <input id="username" placeholder="اسم المستخدم">
+    <input id="password" type="password" placeholder="كلمة المرور">
+
+    <button onclick="login()">دخول</button>
+  </div>
 </div>
 
-<!-- ===== APP ===== -->
-<div id="app" class="screen">
+<!-- ============ APP ============ -->
+<div id="app" class="app">
 
-<header>
-  <b>نظام كاشير احترافي</b>
+<header class="app-header">
+  <span>نظام كاشير احترافي</span>
+  <small>POS PRO</small>
 </header>
 
-<main>
-  <section id="products"></section>
+<div class="app-body">
 
-  <section id="invoice">
-    <div id="invoiceItems"></div>
+  <!-- المنتجات -->
+  <section class="products" id="products"></section>
 
-    <div id="invoiceActions">
+  <!-- الفاتورة -->
+  <aside class="invoice">
+    <h3>الفاتورة</h3>
+
+    <div id="invoiceItems" class="invoice-items"></div>
+
+    <div class="invoice-actions">
       <button class="save" onclick="saveInvoice()">حفظ</button>
       <button class="print" onclick="printInvoice()">طباعة</button>
       <button class="pay">دفع</button>
     </div>
-  </section>
-</main>
+  </aside>
 
+</div>
 </div>
 
 <script src="js/data.js"></script>
