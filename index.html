@@ -3,324 +3,48 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>نظام كاشير احترافي</title>
+<title>POS System</title>
 
-<style>
-:root{
- --main:#020617;
- --accent:#22c55e;
- --danger:#ef4444;
- --bg:#f1f5f9;
- --card:#ffffff;
-}
-
-*{box-sizing:border-box}
-body{
- margin:0;
- font-family:Tajawal,Arial;
- background:var(--bg);
- color:#020617;
-}
-
-/* ===== LOGIN ===== */
-#login{
- display:flex;
- align-items:center;
- justify-content:center;
- height:100vh;
-}
-.login-box{
- background:#fff;
- padding:20px;
- width:320px;
- border-radius:16px;
- box-shadow:0 10px 25px rgba(0,0,0,.15);
-}
-.login-box h2{text-align:center}
-.login-box input{
- width:100%;
- padding:12px;
- margin:8px 0;
- border-radius:10px;
- border:1px solid #cbd5f5;
-}
-.login-box button{
- width:100%;
- padding:12px;
- border:none;
- border-radius:12px;
- background:var(--accent);
- color:#fff;
- font-size:16px;
- cursor:pointer;
-}
-
-/* ===== HEADER ===== */
-header{
- background:linear-gradient(90deg,#020617,#0f172a);
- color:#fff;
- padding:12px;
- display:flex;
- justify-content:space-between;
- align-items:center;
-}
-
-/* ===== MENU ===== */
-#menu{
- position:fixed;
- right:-220px;
- top:0;
- width:200px;
- height:100%;
- background:#020617;
- color:#fff;
- padding:10px;
- transition:.3s;
- z-index:9;
-}
-#menu button{
- width:100%;
- background:none;
- border:none;
- color:#fff;
- text-align:right;
- padding:12px;
- font-size:15px;
-}
-
-/* ===== LAYOUT ===== */
-#app{display:none}
-.screen{display:none;padding:10px}
-.screen.active{display:block}
-
-/* ===== PRODUCTS ===== */
-#productsGrid{
- display:grid;
- grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
- gap:10px;
-}
-.product{
- background:#fff;
- border-radius:14px;
- padding:10px;
- text-align:center;
- box-shadow:0 4px 10px rgba(0,0,0,.08);
- cursor:pointer;
-}
-
-/* ===== INVOICE ===== */
-#invoiceItems{
- display:grid;
- grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
- gap:8px;
-}
-.item{
- background:#f8fafc;
- border-radius:10px;
- padding:8px;
- text-align:center;
-}
-#total{
- font-size:18px;
- font-weight:bold;
- margin-top:10px;
- text-align:center;
-}
-
-/* ===== BUTTONS ===== */
-.btn{
- padding:12px;
- border:none;
- border-radius:12px;
- font-size:15px;
- cursor:pointer;
-}
-.save{background:var(--accent);color:#fff}
-.print{background:#334155;color:#fff}
-</style>
+<link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-<!-- ============ LOGIN ============ -->
-<div id="login">
- <div class="login-box">
+<!-- ===== LOGIN ===== -->
+<div id="loginScreen" class="screen active">
   <h2>تسجيل الدخول</h2>
-  <input id="lu" placeholder="اسم المستخدم">
-  <input id="lp" type="password" placeholder="كلمة المرور">
+  <input id="username" placeholder="اسم المستخدم">
+  <input id="password" type="password" placeholder="كلمة المرور">
   <button onclick="login()">دخول</button>
- </div>
 </div>
 
-<!-- ============ APP ============ -->
-<div id="app">
+<!-- ===== APP ===== -->
+<div id="app" class="screen">
 
 <header>
- <span>نظام كاشير احترافي</span>
- <div>
-  <button onclick="toggleMenu()">☰</button>
-  <button onclick="logout()">⎋</button>
- </div>
+  <b>نظام كاشير احترافي</b>
 </header>
 
-<div id="menu">
- <button onclick="showScreen('cashier')">🧾 الكاشير</button>
- <button onclick="showScreen('products')">📦 الأصناف</button>
- <button onclick="showScreen('customers')">👤 العملاء</button>
- <button onclick="showScreen('reports')">📊 التقارير</button>
-</div>
+<main>
+  <section id="products"></section>
 
-<!-- ===== CASHIER ===== -->
-<div id="cashier" class="screen active">
- <div id="productsGrid"></div>
+  <section id="invoice">
+    <div id="invoiceItems"></div>
 
- <hr>
-
- <div id="invoiceItems"></div>
- <div id="total">الإجمالي: 0</div>
-
- <button class="btn save" onclick="saveInvoice()">حفظ</button>
- <button class="btn print" onclick="printInvoice()">طباعة</button>
-</div>
-
-<!-- ===== PRODUCTS ===== -->
-<div id="products" class="screen">
- <h3>إضافة صنف</h3>
- <input id="pn" placeholder="اسم الصنف">
- <input id="pp" placeholder="السعر">
- <input id="ps" placeholder="المخزون">
- <button class="btn save" onclick="addProduct()">حفظ</button>
-</div>
-
-<!-- ===== CUSTOMERS ===== -->
-<div id="customers" class="screen">
- <h3>العملاء</h3>
- <input id="cn" placeholder="اسم العميل">
- <button class="btn save" onclick="addCustomer()">إضافة</button>
- <div id="customerList"></div>
-</div>
-
-<!-- ===== REPORTS ===== -->
-<div id="reports" class="screen">
- <h3>📊 التقارير</h3>
- <div id="reportBox"></div>
-</div>
+    <div id="invoiceActions">
+      <button class="save" onclick="saveInvoice()">حفظ</button>
+      <button class="print" onclick="printInvoice()">طباعة</button>
+      <button class="pay">دفع</button>
+    </div>
+  </section>
+</main>
 
 </div>
 
-<script>
-/* ===== USERS ===== */
-const USERS=[
- {u:"admin",p:"1234",r:"admin"},
- {u:"cashier",p:"1111",r:"cashier"}
-];
-
-function login(){
- const u=lu.value,p=lp.value;
- const user=USERS.find(x=>x.u==u && x.p==p);
- if(!user)return alert("بيانات خاطئة");
- localStorage.user=JSON.stringify(user);
- init();
-}
-
-function logout(){
- localStorage.removeItem("user");
- location.reload();
-}
-
-function init(){
- const user=JSON.parse(localStorage.user||"null");
- if(!user)return;
- login.style.display="none";
- app.style.display="block";
-
- if(user.r==="cashier"){
-  document.querySelectorAll("#menu button")[3].style.display="none";
- }
-}
-
-/* ===== MENU ===== */
-function toggleMenu(){
- menu.style.right=menu.style.right=="0px"?"-220px":"0px";
-}
-function showScreen(id){
- document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
- document.getElementById(id).classList.add("active");
- menu.style.right="-220px";
-}
-
-/* ===== DATA ===== */
-let products=JSON.parse(localStorage.products||"[]");
-let customers=JSON.parse(localStorage.customers||"[]");
-let invoices=JSON.parse(localStorage.invoices||"[]");
-let cart=[];
-
-/* ===== PRODUCTS ===== */
-function renderProducts(){
- productsGrid.innerHTML="";
- products.forEach(p=>{
-  let d=document.createElement("div");
-  d.className="product";
-  d.innerHTML=`<b>${p.n}</b><br>${p.p} جنيه`;
-  d.onclick=()=>addToCart(p);
-  productsGrid.appendChild(d);
- });
-}
-function addProduct(){
- products.push({n:pn.value,p:+pp.value,s:+ps.value});
- saveAll();renderProducts();
-}
-
-/* ===== CART ===== */
-function addToCart(p){
- if(p.s<=0)return;
- cart.push({...p});
- p.s--;
- renderInvoice();saveAll();
-}
-function renderInvoice(){
- invoiceItems.innerHTML="";
- let t=0;
- cart.forEach(i=>{
-  t+=i.p;
-  invoiceItems.innerHTML+=`<div class="item">${i.n}<br>${i.p}</div>`;
- });
- total.innerText="الإجمالي: "+t;
-}
-
-/* ===== INVOICE ===== */
-function saveInvoice(){
- invoices.push({date:new Date().toLocaleString(),items:cart});
- cart=[];renderInvoice();saveAll();
-}
-function printInvoice(){
- window.print();
-}
-
-/* ===== CUSTOMERS ===== */
-function addCustomer(){
- customers.push({n:cn.value});
- saveAll();renderCustomers();
-}
-function renderCustomers(){
- customerList.innerHTML="";
- customers.forEach(c=>{
-  customerList.innerHTML+=`<div>${c.n}</div>`;
- });
-}
-
-/* ===== SAVE ===== */
-function saveAll(){
- localStorage.products=JSON.stringify(products);
- localStorage.customers=JSON.stringify(customers);
- localStorage.invoices=JSON.stringify(invoices);
-}
-
-/* ===== INIT ===== */
-init();
-renderProducts();
-renderCustomers();
-</script>
+<script src="js/data.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/cashier.js"></script>
+<script src="js/auth.js"></script>
 
 </body>
 </html>
