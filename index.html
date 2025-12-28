@@ -1,113 +1,214 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>نظام كاشير احترافي</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نظام كاشير</title>
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f1f5f9;
+}
 
-  <!-- CSS -->
-  <link rel="stylesheet" href="assets/css/main.css">
+header{
+  background:#020617;
+  color:#fff;
+  padding:12px;
+  text-align:center;
+  font-size:18px;
+}
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background: #f4f6f8;
-    }
+.top-bar{
+  padding:10px;
+  background:#fff;
+}
 
-    header {
-      background: #1e293b;
-      color: #fff;
-      padding: 15px;
-      text-align: center;
-      font-size: 20px;
-      font-weight: bold;
-    }
+.top-bar input{
+  width:100%;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
 
-    nav {
-      background: #0f172a;
-      display: flex;
-      justify-content: space-around;
-      padding: 10px 0;
-    }
+/* PRODUCTS */
+#productsGrid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+  gap:10px;
+  padding:10px;
+}
 
-    nav a {
-      color: #fff;
-      text-decoration: none;
-      padding: 10px 15px;
-      border-radius: 6px;
-      font-size: 14px;
-    }
+.product{
+  background:#fff;
+  border-radius:12px;
+  padding:10px;
+  text-align:center;
+  box-shadow:0 4px 8px rgba(0,0,0,.1);
+  cursor:pointer;
+}
 
-    nav a:hover {
-      background: #334155;
-    }
+/* INVOICE */
+.invoice-box{
+  background:#fff;
+  padding:10px;
+  border-top:2px solid #ddd;
+}
 
-    main {
-      padding: 20px;
-      text-align: center;
-    }
+#invoiceItems{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(100px,1fr));
+  gap:8px;
+}
 
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 15px;
-      margin-top: 20px;
-    }
+.item{
+  background:#e5e7eb;
+  padding:8px;
+  border-radius:8px;
+  text-align:center;
+}
 
-    .card {
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 5px rgba(0,0,0,.1);
-      cursor: pointer;
-    }
+#total{
+  margin-top:10px;
+  font-size:18px;
+  text-align:center;
+}
 
-    .card:hover {
-      background: #e5e7eb;
-    }
-  </style>
+button{
+  width:100%;
+  margin-top:10px;
+  padding:12px;
+  background:#22c55e;
+  color:#fff;
+  border:none;
+  border-radius:10px;
+  font-size:16px;
+  cursor:pointer;
+}
+
+/* ADD PRODUCT */
+.add-box{
+  padding:10px;
+  background:#fff;
+  margin:10px;
+  border-radius:12px;
+}
+
+.add-box input{
+  width:100%;
+  padding:10px;
+  margin-bottom:6px;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+</style>
 </head>
 
 <body>
 
-  <header>
-    🧾 نظام كاشير احترافي
-  </header>
+<header>نظام كاشير</header>
 
-  <!-- القائمة -->
-  <nav>
-    <a href="index.html">🏠 الرئيسية</a>
-    <a href="cashier.html">💰 الكاشير</a>
-    <a href="products.html">📦 الأصناف</a>
-    <a href="inventory.html">📊 المخزون</a>
-    <a href="returns.html">🔄 المرتجعات</a>
-  </nav>
+<!-- ===== ADD PRODUCT ===== -->
+<div class="add-box">
+  <h3>إضافة صنف</h3>
+  <input id="pName" placeholder="اسم الصنف">
+  <input id="pPrice" type="number" placeholder="السعر">
+  <input id="pStock" type="number" placeholder="المخزون">
+  <button onclick="addProduct()">حفظ الصنف</button>
+</div>
 
-  <!-- المحتوى -->
-  <main>
-    <h2>مرحبًا بك 👋</h2>
-    <p>اختر القسم الذي تريد العمل عليه</p>
+<!-- ===== CASHIER ===== -->
+<div class="top-bar">
+  <input placeholder="بحث عن صنف" oninput="searchProduct(this.value)">
+</div>
 
-    <div class="cards">
-      <div class="card" onclick="location.href='cashier.html'">
-        💰<br>الكاشير
-      </div>
+<div id="productsGrid"></div>
 
-      <div class="card" onclick="location.href='products.html'">
-        📦<br>الأصناف
-      </div>
+<div class="invoice-box">
+  <h3>الفاتورة</h3>
+  <div id="invoiceItems"></div>
+  <div id="total">الإجمالي: 0 ج</div>
+  <button onclick="saveInvoice()">حفظ الفاتورة</button>
+</div>
 
-      <div class="card" onclick="location.href='inventory.html'">
-        📊<br>المخزون
-      </div>
+<script>
+/* ===== DATA ===== */
+let products = JSON.parse(localStorage.products || "[]");
+let cart = [];
 
-      <div class="card" onclick="location.href='returns.html'">
-        🔄<br>المرتجعات
-      </div>
-    </div>
-  </main>
+/* ===== SAVE ===== */
+function saveProducts(){
+  localStorage.products = JSON.stringify(products);
+}
+
+/* ===== ADD PRODUCT ===== */
+function addProduct(){
+  const n = pName.value.trim();
+  const p = +pPrice.value;
+  const s = +pStock.value;
+
+  if(!n || !p) return alert("أدخل البيانات");
+
+  products.push({n,p,s});
+  saveProducts();
+  renderProducts();
+  pName.value = pPrice.value = pStock.value = "";
+}
+
+/* ===== RENDER PRODUCTS ===== */
+function renderProducts(list = products){
+  productsGrid.innerHTML = "";
+  list.forEach((pr,i)=>{
+    const d = document.createElement("div");
+    d.className="product";
+    d.innerHTML = `<b>${pr.n}</b><br>${pr.p} ج`;
+    d.onclick = ()=>addToCart(i);
+    productsGrid.appendChild(d);
+  });
+}
+
+/* ===== SEARCH ===== */
+function searchProduct(val){
+  renderProducts(
+    products.filter(p=>p.n.includes(val))
+  );
+}
+
+/* ===== CART ===== */
+function addToCart(index){
+  if(products[index].s <= 0) return alert("نفد المخزون");
+
+  cart.push({...products[index]});
+  products[index].s--;
+  saveProducts();
+  renderInvoice();
+  renderProducts();
+}
+
+function renderInvoice(){
+  invoiceItems.innerHTML="";
+  let total = 0;
+  cart.forEach(i=>{
+    total += i.p;
+    invoiceItems.innerHTML += `
+      <div class="item">${i.n}<br>${i.p} ج</div>
+    `;
+  });
+  document.getElementById("total").innerText = "الإجمالي: " + total + " ج";
+}
+
+/* ===== SAVE INVOICE ===== */
+function saveInvoice(){
+  if(cart.length==0) return;
+  cart=[];
+  renderInvoice();
+  alert("تم حفظ الفاتورة");
+}
+
+/* ===== INIT ===== */
+renderProducts();
+</script>
 
 </body>
 </html>
