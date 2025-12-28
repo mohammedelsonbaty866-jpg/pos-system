@@ -1,218 +1,64 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>نظام كاشير</title>
+  <meta charset="UTF-8">
+  <title>نظام كاشير احترافي</title>
 
-<style>
-body{
-  margin:0;
-  font-family:Arial;
-  background:#f1f5f9;
-}
+  <!-- تنسيق أساسي -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-header{
-  background:#020617;
-  color:#fff;
-  padding:12px;
-  text-align:center;
-  font-size:18px;
-}
-
-.top-bar{
-  padding:10px;
-  background:#fff;
-}
-
-.top-bar input{
-  width:100%;
-  padding:10px;
-  border-radius:8px;
-  border:1px solid #ccc;
-}
-
-/* PRODUCTS */
-#productsGrid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
-  gap:10px;
-  padding:10px;
-}
-
-.product{
-  background:#fff;
-  border-radius:12px;
-  padding:10px;
-  text-align:center;
-  box-shadow:0 4px 8px rgba(0,0,0,.1);
-  cursor:pointer;
-}
-
-/* INVOICE */
-.invoice-box{
-  background:#fff;
-  padding:10px;
-  border-top:2px solid #ddd;
-}
-
-#invoiceItems{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(100px,1fr));
-  gap:8px;
-}
-
-.item{
-  background:#e5e7eb;
-  padding:8px;
-  border-radius:8px;
-  text-align:center;
-}
-
-#total{
-  margin-top:10px;
-  font-size:18px;
-  text-align:center;
-}
-
-button{
-  width:100%;
-  margin-top:10px;
-  padding:12px;
-  background:#22c55e;
-  color:#fff;
-  border:none;
-  border-radius:10px;
-  font-size:16px;
-  cursor:pointer;
-}
-
-/* ADD PRODUCT */
-.add-box{
-  padding:10px;
-  background:#fff;
-  margin:10px;
-  border-radius:12px;
-}
-
-.add-box input{
-  width:100%;
-  padding:10px;
-  margin-bottom:6px;
-  border-radius:8px;
-  border:1px solid #ccc;
-}
-</style>
+  <!-- ملف CSS -->
+  <link rel="stylesheet" href="assets/css/style.css">
 </head>
 
 <body>
 
-<header>نظام كاشير</header>
+  <!-- ===== الهيدر ===== -->
+  <header>
+    <h1>نظام الكاشير</h1>
+    <nav>
+      <a href="index.html">الكاشير</a>
+      <a href="products.html">الأصناف</a>
+      <a href="inventory.html">المخزون</a>
+      <a href="returns.html">المرتجعات</a>
+      <a href="reports.html">التقارير</a>
+    </nav>
+  </header>
 
-<!-- ===== ADD PRODUCT ===== -->
-<div class="add-box">
-  <h3>إضافة صنف</h3>
-  <input id="pName" placeholder="اسم الصنف">
-  <input id="pPrice" type="number" placeholder="السعر">
-  <input id="pStock" type="number" placeholder="المخزون">
-  <button onclick="addProduct()">حفظ الصنف</button>
-</div>
+  <!-- ===== المحتوى ===== -->
+  <main>
 
-<!-- ===== CASHIER ===== -->
-<div class="top-bar">
-  <input placeholder="بحث عن صنف" oninput="searchProduct(this.value)">
-</div>
+    <!-- المنتجات -->
+    <section>
+      <h2>المنتجات</h2>
+      <div id="productsGrid"></div>
+    </section>
 
-<div id="productsGrid"></div>
+    <hr>
 
-<div class="invoice-box">
-  <h3>الفاتورة</h3>
-  <div id="invoiceItems"></div>
-  <div id="total">الإجمالي: 0 ج</div>
-  <button onclick="saveInvoice()">حفظ الفاتورة</button>
-</div>
+    <!-- الفاتورة -->
+    <section>
+      <h2>الفاتورة</h2>
 
-<script>
-if(!localStorage.currentUser){
-  location.href="login.html";
-}
-</script>
-/* ===== DATA ===== */
-let products = JSON.parse(localStorage.products || "[]");
-let cart = [];
+      <div id="invoiceItems"></div>
 
-/* ===== SAVE ===== */
-function saveProducts(){
-  localStorage.products = JSON.stringify(products);
-}
+      <h3 id="total">الإجمالي: 0 ج</h3>
 
-/* ===== ADD PRODUCT ===== */
-function addProduct(){
-  const n = pName.value.trim();
-  const p = +pPrice.value;
-  const s = +pStock.value;
+      <button onclick="saveInvoice()">حفظ الفاتورة</button>
+      <button onclick="clearInvoice()">تفريغ</button>
+    </section>
 
-  if(!n || !p) return alert("أدخل البيانات");
+  </main>
 
-  products.push({n,p,s});
-  saveProducts();
-  renderProducts();
-  pName.value = pPrice.value = pStock.value = "";
-}
+  <!-- ===== الفوتر ===== -->
+  <footer>
+    <p>© نظام كاشير احترافي</p>
+  </footer>
 
-/* ===== RENDER PRODUCTS ===== */
-function renderProducts(list = products){
-  productsGrid.innerHTML = "";
-  list.forEach((pr,i)=>{
-    const d = document.createElement("div");
-    d.className="product";
-    d.innerHTML = `<b>${pr.n}</b><br>${pr.p} ج`;
-    d.onclick = ()=>addToCart(i);
-    productsGrid.appendChild(d);
-  });
-}
-
-/* ===== SEARCH ===== */
-function searchProduct(val){
-  renderProducts(
-    products.filter(p=>p.n.includes(val))
-  );
-}
-
-/* ===== CART ===== */
-function addToCart(index){
-  if(products[index].s <= 0) return alert("نفد المخزون");
-
-  cart.push({...products[index]});
-  products[index].s--;
-  saveProducts();
-  renderInvoice();
-  renderProducts();
-}
-
-function renderInvoice(){
-  invoiceItems.innerHTML="";
-  let total = 0;
-  cart.forEach(i=>{
-    total += i.p;
-    invoiceItems.innerHTML += `
-      <div class="item">${i.n}<br>${i.p} ج</div>
-    `;
-  });
-  document.getElementById("total").innerText = "الإجمالي: " + total + " ج";
-}
-
-/* ===== SAVE INVOICE ===== */
-function saveInvoice(){
-  if(cart.length==0) return;
-  cart=[];
-  renderInvoice();
-  alert("تم حفظ الفاتورة");
-}
-
-/* ===== INIT ===== */
-renderProducts();
-</script>
+  <!-- ===== ملفات JavaScript ===== -->
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/products.js"></script>
+  <script src="assets/js/cashier.js"></script>
 
 </body>
 </html>
