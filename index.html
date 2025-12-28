@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>POS | شاشة الكاشير</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>POS | شاشة الكاشير</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- CSS -->
-<link rel="stylesheet" href="assets/css/style.css">
+  <!-- CSS -->
+  <link rel="stylesheet" href="assets/css/style.css">
 </head>
 
 <body>
@@ -26,23 +26,29 @@
 <!-- ===== MAIN ===== -->
 <main class="pos-layout">
 
-  <!-- المنتجات -->
+  <!-- ===== PRODUCTS PANEL ===== -->
   <section class="products-panel">
     <h2>المنتجات</h2>
-    <input 
-      type="text" 
-      placeholder="بحث عن صنف..." 
+
+    <input
+      type="text"
+      placeholder="بحث عن صنف..."
+      id="searchInput"
       onkeyup="searchProduct(this.value)"
     >
 
-    <div id="productsGrid"></div>
+    <div id="productsGrid">
+      <!-- يتم ملؤه من products.js -->
+    </div>
   </section>
 
-  <!-- الفاتورة -->
+  <!-- ===== INVOICE PANEL ===== -->
   <section class="invoice-panel">
     <h2>الفاتورة</h2>
 
-    <div id="invoiceItems"></div>
+    <div id="invoiceItems">
+      <!-- يتم ملؤه من cashier.js -->
+    </div>
 
     <div class="total-box">
       <span>الإجمالي:</span>
@@ -59,10 +65,10 @@
 
 <!-- ===== FOOTER ===== -->
 <footer>
-  نظام كاشير احترافي
+  نظام كاشير احترافي ©
 </footer>
 
-<!-- ===== JS ===== -->
+<!-- ===== JS (بالترتيب الصحيح) ===== -->
 <script src="assets/js/data.js"></script>
 <script src="assets/js/products.js"></script>
 <script src="assets/js/cashier.js"></script>
