@@ -3,231 +3,294 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>POS System</title>
+<title>POS PRO</title>
 
 <style>
 :root{
-  --main:#0f172a;
+  --main:#020617;
   --accent:#22c55e;
+  --danger:#ef4444;
   --bg:#f1f5f9;
   --card:#ffffff;
 }
-
 *{box-sizing:border-box}
+body{margin:0;font-family:Tahoma;background:var(--bg)}
+header{background:var(--main);color:#fff;padding:14px;text-align:center;font-size:18px}
 
-body{
-  margin:0;
-  font-family:Tahoma,Arial;
-  background:var(--bg);
+/* ===== LOGIN ===== */
+#login{
+  height:100vh;display:flex;align-items:center;justify-content:center;
 }
-
-/* ===== HEADER ===== */
-header{
-  background:var(--main);
-  color:#fff;
-  padding:12px;
-  text-align:center;
-  font-size:18px;
-  position:sticky;
-  top:0;
-  z-index:10;
+.login-box{
+  background:#fff;padding:20px;border-radius:16px;
+  width:100%;max-width:320px;
+  box-shadow:0 10px 30px rgba(0,0,0,.15)
 }
+.login-box h3{text-align:center;margin-bottom:15px}
+.login-box input{
+  width:100%;padding:12px;margin-bottom:10px;
+  border-radius:10px;border:1px solid #cbd5e1;font-size:15px
+}
+.login-box button{
+  width:100%;padding:12px;border:none;border-radius:12px;
+  background:var(--accent);color:#fff;font-size:16px
+}
+.error{color:var(--danger);text-align:center;margin-top:8px}
 
-/* ===== TOP BAR ===== */
-#topBar{
+/* ===== APP ===== */
+#app{display:none}
+
+/* NAV */
+nav{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr 1fr;
+  gap:6px;
+  padding:8px;
+  background:#fff;
+}
+nav button{
+  padding:12px;border:none;border-radius:10px;font-size:14px;
+  background:#e5e7eb;cursor:pointer
+}
+nav button.active{background:var(--accent);color:#fff}
+
+/* TOP */
+#top{
   display:grid;
   grid-template-columns:2fr 1fr 1fr;
   gap:8px;
   padding:10px;
   background:#fff;
 }
-
-#topBar input,
-#topBar button{
-  padding:12px;
-  border-radius:10px;
-  border:1px solid #cbd5f5;
-  font-size:15px;
+#top input,#top button{
+  padding:12px;border-radius:10px;border:1px solid #cbd5e1;font-size:15px
 }
+#top button{background:var(--accent);color:#fff;border:none}
 
-#topBar button{
-  background:var(--accent);
-  color:#fff;
-  border:none;
-}
-
-/* ===== PRODUCTS ===== */
+/* PRODUCTS */
 #products{
   padding:10px;
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
   gap:10px;
 }
-
 .product{
   background:var(--card);
   border-radius:14px;
   padding:12px;
-  text-align:center;
   box-shadow:0 4px 10px rgba(0,0,0,.08);
   cursor:pointer;
 }
 
-.product b{
-  display:block;
-  margin-bottom:6px;
+/* INVOICE */
+#invoice{
+  background:#fff;padding:10px;border-top:2px solid #e5e7eb;
+  position:sticky;bottom:0;
 }
-
-/* ===== INVOICE ===== */
-#invoiceBox{
-  background:#fff;
-  border-top:2px solid #e5e7eb;
-  padding:10px;
-  position:sticky;
-  bottom:0;
-}
-
-#items{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
-  gap:8px;
-}
-
-.item{
-  background:#f8fafc;
-  border-radius:10px;
-  padding:8px;
-  text-align:center;
-  font-size:14px;
-}
-
-#total{
-  margin-top:8px;
-  font-size:18px;
-  font-weight:bold;
-  text-align:center;
-}
-
-/* ===== ACTIONS ===== */
-#actions{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-  margin-top:8px;
-}
-
-#actions button{
-  padding:14px;
-  border:none;
-  border-radius:12px;
-  font-size:16px;
-  cursor:pointer;
-}
-
+#items{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+.item{background:#f8fafc;padding:8px;border-radius:10px;text-align:center}
+#summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px;font-weight:bold}
+#actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
 .save{background:var(--accent);color:#fff}
-.print{background:#334155;color:#fff}
+.clear{background:var(--danger);color:#fff}
+
+/* SCREENS */
+.screen{display:none}
+.screen.active{display:block}
+
+/* REPORTS */
+.report{
+  background:#fff;border-radius:14px;padding:14px;margin:10px;
+  box-shadow:0 4px 10px rgba(0,0,0,.08)
+}
 </style>
 </head>
 
 <body>
 
-<header>نظام كاشير</header>
-
-<div id="topBar">
-  <input id="search" placeholder="بحث عن صنف">
-  <button onclick="addProductPrompt()">إضافة صنف</button>
-  <button onclick="clearCart()">مسح</button>
-</div>
-
-<div id="products"></div>
-
-<div id="invoiceBox">
-  <div id="items"></div>
-  <div id="total">الإجمالي: 0</div>
-
-  <div id="actions">
-    <button class="save" onclick="saveInvoice()">حفظ</button>
-    <button class="print" onclick="printInvoice()">طباعة</button>
+<!-- ===== LOGIN ===== -->
+<div id="login">
+  <div class="login-box">
+    <h3>تسجيل الدخول</h3>
+    <input id="user" placeholder="اسم المستخدم">
+    <input id="pass" type="password" placeholder="كلمة المرور">
+    <button onclick="login()">دخول</button>
+    <div id="err" class="error"></div>
   </div>
 </div>
 
+<!-- ===== APP ===== -->
+<div id="app">
+
+<header>
+  نظام كاشير احترافي
+  <button style="float:left;background:none;border:none;color:#fff"
+    onclick="logout()">خروج</button>
+</header>
+
+<nav>
+  <button class="active" onclick="show('cashier',this)">الكاشير</button>
+  <button id="repBtn" onclick="show('reports',this)">التقارير</button>
+  <button id="setBtn" onclick="show('settings',this)">الإعدادات</button>
+  <button onclick="logout()">خروج</button>
+</nav>
+
+<!-- CASHIER -->
+<div id="cashier" class="screen active">
+  <div id="top">
+    <input placeholder="بحث">
+    <button onclick="addProduct()">➕ صنف</button>
+    <button onclick="saveInvoice()">حفظ</button>
+  </div>
+  <div id="products"></div>
+  <div id="invoice">
+    <div id="items"></div>
+    <div id="summary">
+      <div id="total">إجمالي: 0</div>
+      <div id="cost">تكلفة: 0</div>
+      <div id="profit">ربح: 0</div>
+    </div>
+  </div>
+</div>
+
+<!-- REPORTS -->
+<div id="reports" class="screen">
+  <div class="report">
+    <h3>📊 تقرير عام</h3>
+    <div id="rSales">المبيعات: 0</div>
+    <div id="rProfit">الأرباح: 0</div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div id="settings" class="screen">
+  <div class="report">
+    <h3>⚙️ إعدادات</h3>
+    <button class="clear" onclick="resetAll()">مسح كل البيانات</button>
+  </div>
+</div>
+
+</div>
+
 <script>
-/* ===== DATA ===== */
-let products = JSON.parse(localStorage.products || "[]");
-let invoices = JSON.parse(localStorage.invoices || "[]");
-let cart = [];
+/* ===== USERS ===== */
+const users=[
+  {u:"admin",p:"1234",role:"admin"},
+  {u:"cashier",p:"1234",role:"cashier"}
+];
+
+/* ===== STORAGE ===== */
+let products=JSON.parse(localStorage.products||"[]");
+let invoices=JSON.parse(localStorage.invoices||"[]");
+let cart=[];
+let currentUser=JSON.parse(localStorage.user||"null");
+
+/* ===== LOGIN ===== */
+function login(){
+  let u=user.value,p=pass.value;
+  let found=users.find(x=>x.u===u && x.p===p);
+  if(!found){err.innerText="بيانات غير صحيحة";return;}
+  localStorage.user=JSON.stringify(found);
+  location.reload();
+}
+function logout(){
+  localStorage.removeItem("user");
+  location.reload();
+}
+
+/* ===== INIT ===== */
+if(currentUser){
+  loginDiv.style.display="none";
+  app.style.display="block";
+  if(currentUser.role!=="admin"){
+    repBtn.style.display="none";
+    setBtn.style.display="none";
+  }
+}else{
+  app.style.display="none";
+}
+
+/* ===== NAV ===== */
+function show(id,btn){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+}
 
 /* ===== PRODUCTS ===== */
+if(products.length===0){
+  products.push({n:"مياه",sell:5,buy:3,qty:50});
+  saveAll();
+}
+const prodDiv=document.getElementById("products");
 function renderProducts(){
-  productsDiv.innerHTML="";
-  products.forEach(p=>{
+  prodDiv.innerHTML="";
+  products.forEach((p,i)=>{
     let d=document.createElement("div");
     d.className="product";
-    d.innerHTML=`<b>${p.n}</b>${p.p} جنيه`;
-    d.onclick=()=>addToCart(p);
-    productsDiv.appendChild(d);
+    d.innerHTML=`${p.n}<br>بيع: ${p.sell}`;
+    d.onclick=()=>addToCart(i);
+    prodDiv.appendChild(d);
   });
 }
-
-function addProductPrompt(){
-  let n=prompt("اسم الصنف");
-  let p=+prompt("السعر");
-  if(!n||!p) return;
-  products.push({n,p});
-  saveAll();
-  renderProducts();
-}
+renderProducts();
 
 /* ===== CART ===== */
-function addToCart(p){
-  cart.push(p);
-  renderInvoice();
+function addToCart(i){
+  if(products[i].qty<=0)return;
+  cart.push(products[i]);
+  products[i].qty--;
+  renderInvoice();saveAll();
 }
-
 function renderInvoice(){
   items.innerHTML="";
-  let total=0;
+  let t=0,c=0;
   cart.forEach(i=>{
-    total+=i.p;
-    items.innerHTML+=`<div class="item">${i.n}<br>${i.p}</div>`;
+    t+=i.sell;c+=i.buy;
+    items.innerHTML+=`<div class="item">${i.n}</div>`;
   });
-  document.getElementById("total").innerText="الإجمالي: "+total;
-}
-
-function clearCart(){
-  cart=[];
-  renderInvoice();
+  total.innerText="إجمالي: "+t;
+  cost.innerText="تكلفة: "+c;
+  profit.innerText="ربح: "+(t-c);
 }
 
 /* ===== SAVE ===== */
 function saveInvoice(){
-  if(cart.length===0) return alert("الفاتورة فارغة");
-  invoices.push({
-    date:new Date().toLocaleString(),
-    items:cart,
-    total:cart.reduce((a,i)=>a+i.p,0)
-  });
-  cart=[];
-  saveAll();
-  renderInvoice();
-  alert("تم الحفظ");
+  if(cart.length===0)return;
+  let t=0,c=0;
+  cart.forEach(i=>{t+=i.sell;c+=i.buy});
+  invoices.push({total:t,profit:t-c});
+  cart=[];renderInvoice();saveAll();calcReports();
 }
 
-/* ===== PRINT ===== */
-function printInvoice(){
-  window.print();
+/* ===== REPORT ===== */
+function calcReports(){
+  let s=0,p=0;
+  invoices.forEach(i=>{s+=i.total;p+=i.profit});
+  rSales.innerText="المبيعات: "+s;
+  rProfit.innerText="الأرباح: "+p;
+}
+calcReports();
+
+/* ===== ADD ===== */
+function addProduct(){
+  let n=prompt("اسم"); if(!n)return;
+  let sell=+prompt("بيع"),buy=+prompt("شراء"),qty=+prompt("كمية");
+  products.push({n,sell,buy,qty});
+  saveAll();renderProducts();
 }
 
-/* ===== STORAGE ===== */
+/* ===== RESET ===== */
+function resetAll(){
+  if(confirm("مسح كل شيء؟")){
+    localStorage.clear();location.reload();
+  }
+}
 function saveAll(){
   localStorage.products=JSON.stringify(products);
   localStorage.invoices=JSON.stringify(invoices);
 }
-
-/* ===== INIT ===== */
-const productsDiv=document.getElementById("products");
-const items=document.getElementById("items");
-renderProducts();
 </script>
 
 </body>
