@@ -1,76 +1,26 @@
-/* ===============================
-   AUTH SYSTEM - POS PRO
-================================ */
+/*************************************************
+ * AUTH SYSTEM
+ * تسجيل دخول + إنشاء حساب
+ * ربط برقم الهاتف
+ *************************************************/
 
-/*
-LocalStorage Structure:
+// عناصر الصفحة
+const phoneInput = document.getElementById("phone");
+const passwordInput = document.getElementById("password");
+const msg = document.getElementById("msg");
 
-users = [
-  {
-    shopName: "",
-    phone: "",
-    password: ""
-  }
-]
+// جلب المستخدمين
+let users = JSON.parse(localStorage.getItem("users")) || [];
 
-currentUser = {
-  phone: ""
-}
-*/
-
-// ===== GET DATA =====
-let users = JSON.parse(localStorage.getItem("users") || "[]");
-let currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
-
-// ===== REGISTER =====
-function register() {
-  const shopName = document.getElementById("shopName")?.value.trim();
-  const phone = document.getElementById("phone")?.value.trim();
-  const password = document.getElementById("password")?.value.trim();
-  const errorBox = document.getElementById("errorMsg");
-
-  if (!shopName || !phone || !password) {
-    errorBox.innerText = "جميع الحقول مطلوبة";
-    return;
-  }
-
-  // منع التكرار
-  const exists = users.find(u => u.phone === phone);
-  if (exists) {
-    errorBox.innerText = "رقم الهاتف مسجل بالفعل";
-    return;
-  }
-
-  // إنشاء الحساب
-  const user = {
-    shopName,
-    phone,
-    password
-  };
-
-  users.push(user);
-  localStorage.setItem("users", JSON.stringify(users));
-
-  // تسجيل دخول تلقائي
-  localStorage.setItem("currentUser", JSON.stringify({ phone }));
-
-  // حفظ اسم المتجر في الإعدادات
-  localStorage.setItem(
-    "settings",
-    JSON.stringify({ shopName })
-  );
-
-  window.location.href = "index.html";
-}
-
-// ===== LOGIN =====
+// =====================
+// تسجيل الدخول
+// =====================
 function login() {
-  const phone = document.getElementById("phone")?.value.trim();
-  const password = document.getElementById("password")?.value.trim();
-  const errorBox = document.getElementById("errorMsg");
+  const phone = phoneInput.value.trim();
+  const password = passwordInput.value.trim();
 
   if (!phone || !password) {
-    errorBox.innerText = "أدخل رقم الهاتف وكلمة المرور";
+    showMsg("❌ أدخل رقم الهاتف وكلمة المرور");
     return;
   }
 
@@ -79,37 +29,62 @@ function login() {
   );
 
   if (!user) {
-    errorBox.innerText = "بيانات الدخول غير صحيحة";
+    showMsg("❌ بيانات الدخول غير صحيحة");
     return;
   }
 
-  localStorage.setItem(
-    "currentUser",
-    JSON.stringify({ phone })
-  );
+  // حفظ المستخدم الحالي
+  localStorage.setItem("currentUser", JSON.stringify(user));
 
-  window.location.href = "index.html";
+  showMsg("✅ تم تسجيل الدخول");
+
+  setTimeout(() => {
+    window.location.href = "index.html";
+  }, 800);
 }
 
-// ===== LOGOUT =====
-function logout() {
-  localStorage.removeItem("currentUser");
-  window.location.href = "login.html";
-}
+// =====================
+// إنشاء حساب جديد
+// =====================
+function register() {
+  const phone = phoneInput.value.trim();
+  const password = passwordInput.value.trim();
 
-// ===== AUTH GUARD =====
-function requireAuth() {
-  const user = JSON.parse(localStorage.getItem("currentUser"));
-
-  if (!user) {
-    window.location.href = "login.html";
+  if (!phone || !password) {
+    showMsg("❌ أدخل رقم الهاتف وكلمة المرور");
+    return;
   }
+
+  const exists = users.find(u => u.phone === phone);
+  if (exists) {
+    showMsg("❌ هذا الرقم مسجل بالفعل");
+    return;
+  }
+
+  const newUser = {
+    id: Date.now(),
+    phone: phone,
+    password: password,
+    role: "owner",       // صاحب الحساب
+    createdAt: new Date().toLocaleString()
+  };
+
+  users.push(newUser);
+  localStorage.setItem("users", JSON.stringify(users));
+
+  // تسجيل دخول تلقائي
+  localStorage.setItem("currentUser", JSON.stringify(newUser));
+
+  showMsg("✅ تم إنشاء الحساب");
+
+  setTimeout(() => {
+    window.location.href = "index.html";
+  }, 800);
 }
 
-// ===== GET CURRENT USER =====
-function getCurrentUser() {
-  const session = JSON.parse(localStorage.getItem("currentUser"));
-  if (!session) return null;
-
-  return users.find(u => u.phone === session.phone);
+// =====================
+// رسائل
+// =====================
+function showMsg(text) {
+  msg.innerText = text;
 }
