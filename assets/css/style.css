@@ -214,3 +214,46 @@ footer {
     gap: 6px;
   }
 }
+.settings-btn {
+  background: #444;
+  padding: 6px 10px;
+  border-radius: 6px;
+  color: #fff;
+}
+
+.settings-page {
+  padding: 15px;
+}
+
+.card {
+  background: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+}
+
+.card input {
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0;
+}
+
+.card button {
+  padding: 10px;
+  width: 100%;
+  background: #2d89ef;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+}
+
+.card ul {
+  list-style: none;
+  padding: 0;
+}
+
+.card li {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+}
