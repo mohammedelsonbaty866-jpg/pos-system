@@ -1,29 +1,18 @@
-// auth-guard.js
+/***********************
+ * AUTH GUARD
+ * يمنع الدخول بدون تسجيل
+ ***********************/
+
 (function () {
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
+  // لو مفيش مستخدم مسجل
   if (!currentUser) {
-    // لو مفيش مستخدم مسجل
     window.location.href = "login.html";
     return;
   }
 
-  // تحديد الصلاحيات حسب الصفحة
-  const page = window.location.pathname.split("/").pop();
-
-  // صفحات مسموح بها للمالك فقط
-  const ownerOnlyPages = [
-    "settings.html",
-    "reports.html",
-    "cashiers.html"
-  ];
-
-  // لو كاشير وحاول يدخل صفحة مالك
-  if (
-    currentUser.role === "cashier" &&
-    ownerOnlyPages.includes(page)
-  ) {
-    alert("غير مسموح بالدخول لهذه الصفحة");
-    window.location.href = "index.html";
-  }
+  // التحقق من الصلاحيات (لو احتجنا مستقبلاً)
+  window.USER_ROLE = currentUser.role; // owner | cashier
+  window.USER_NAME = currentUser.name || "صاحب المتجر";
 })();
