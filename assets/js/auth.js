@@ -1,27 +1,35 @@
-/* ================================
-   AUTH SYSTEM (Register & Login)
-================================ */
+/* ===============================
+   AUTH SYSTEM | POS PRO
+   =============================== */
 
-// جلب المستخدمين
+/* ===== HELPERS ===== */
 function getUsers() {
-  return getData("users", []);
+  return JSON.parse(localStorage.getItem("pos_users")) || [];
 }
 
-// حفظ المستخدمين
 function saveUsers(users) {
-  setData("users", users);
+  localStorage.setItem("pos_users", JSON.stringify(users));
 }
 
-/* ================================
-   Register
-================================ */
+function setCurrentUser(user) {
+  localStorage.setItem("pos_current_user", JSON.stringify(user));
+}
 
-function registerUser() {
-  const phone = document.getElementById("phone").value.trim();
-  const password = document.getElementById("password").value.trim();
+function getCurrentUser() {
+  return JSON.parse(localStorage.getItem("pos_current_user"));
+}
 
-  if (!phone || !password) {
-    alert("من فضلك أدخل رقم الهاتف وكلمة المرور");
+/* ===== REGISTER ===== */
+function register() {
+  const name = document.getElementById("registerName").value.trim();
+  const phone = document.getElementById("registerPhone").value.trim();
+  const password = document.getElementById("registerPassword").value.trim();
+  const errorBox = document.getElementById("registerError");
+
+  errorBox.innerText = "";
+
+  if (!name || !phone || !password) {
+    errorBox.innerText = "جميع الحقول مطلوبة";
     return;
   }
 
@@ -29,16 +37,17 @@ function registerUser() {
 
   const exists = users.find(u => u.phone === phone);
   if (exists) {
-    alert("رقم الهاتف مسجل بالفعل");
+    errorBox.innerText = "رقم الهاتف مسجل بالفعل";
     return;
   }
 
   const newUser = {
     id: Date.now(),
+    name,
     phone,
     password,
-    role: "owner",     // صاحب الحساب
-    cashiers: []       // الكاشيرز لاحقاً
+    role: "owner", // صاحب النظام
+    createdAt: new Date().toISOString()
   };
 
   users.push(newUser);
@@ -48,22 +57,27 @@ function registerUser() {
   window.location.href = "index.html";
 }
 
-/* ================================
-   Login
-================================ */
+/* ===== LOGIN ===== */
+function login() {
+  const phone = document.getElementById("loginPhone").value.trim();
+  const password = document.getElementById("loginPassword").value.trim();
+  const errorBox = document.getElementById("loginError");
 
-function loginUser() {
-  const phone = document.getElementById("phone").value.trim();
-  const password = document.getElementById("password").value.trim();
+  errorBox.innerText = "";
 
-  let users = getUsers();
+  if (!phone || !password) {
+    errorBox.innerText = "أدخل رقم الهاتف وكلمة المرور";
+    return;
+  }
+
+  const users = getUsers();
 
   const user = users.find(
     u => u.phone === phone && u.password === password
   );
 
   if (!user) {
-    alert("بيانات الدخول غير صحيحة");
+    errorBox.innerText = "بيانات الدخول غير صحيحة";
     return;
   }
 
@@ -71,11 +85,8 @@ function loginUser() {
   window.location.href = "index.html";
 }
 
-/* ================================
-   Logout
-================================ */
-
+/* ===== LOGOUT ===== */
 function logout() {
-  clearCurrentUser();
+  localStorage.removeItem("pos_current_user");
   window.location.href = "login.html";
 }
