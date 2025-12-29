@@ -36,3 +36,34 @@ function handleBarcode(code) {
     alert("❌ باركود غير موجود");
   }
 }
+let barcodeTimer = null;
+
+function handleBarcodeInput(e) {
+  clearTimeout(barcodeTimer);
+
+  barcodeTimer = setTimeout(() => {
+    const val = e.target.value.trim();
+    if (!val) return;
+
+    // حاول بالباركود
+    let product = products.find(p => p.barcode === val);
+
+    // لو مش لاقي، ابحث بالاسم
+    if (!product) {
+      product = products.find(p =>
+        p.name.toLowerCase().includes(val.toLowerCase())
+      );
+    }
+
+    if (product) {
+      addToCart(product);
+      playBeep();
+      e.target.value = "";
+    }
+  }, 150);
+}
+
+function playBeep() {
+  const sound = document.getElementById("beepSound");
+  if (sound) sound.play();
+}
