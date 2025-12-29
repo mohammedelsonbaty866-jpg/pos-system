@@ -1,40 +1,17 @@
-function login() {
-  const username = document.getElementById("username").value.trim();
-  const password = document.getElementById("password").value.trim();
-  const error = document.getElementById("error");
-const user = JSON.parse(localStorage.getItem("currentUser"));
-if (!user) {
-  location.href = "login.html";
-}
-  if (!username || !password) {
-    error.innerText = "ادخل اسم المستخدم وكلمة المرور";
-    return;
+/* ================================
+   AUTH GUARD
+   يمنع الدخول بدون تسجيل
+================================ */
+
+(function () {
+  const user = JSON.parse(localStorage.getItem("currentUser"));
+
+  // الصفحات المسموح فتحها بدون تسجيل
+  const publicPages = ["login.html", "register.html"];
+
+  const currentPage = window.location.pathname.split("/").pop();
+
+  if (!user && !publicPages.includes(currentPage)) {
+    window.location.href = "login.html";
   }
-
-  const user = users.find(
-    u => u.username === username && u.password === password
-  );
-
-  if (!user) {
-    error.innerText = "بيانات الدخول غير صحيحة";
-    return;
-  }
-// منع الدخول بدون تفعيل
-if (typeof isActivated === "function") {
-  if (!isActivated()) {
-    location.href = "activate.html";
-  }
-}
-  localStorage.session = JSON.stringify({
-    username: user.username,
-    role: user.role,
-    loginAt: Date.now()
-  });
-
-  window.location.href = "index.html";
-}
-const session = localStorage.session;
-
-if (!session) {
-  window.location.href = "login.html";
-}
+})();
