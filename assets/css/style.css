@@ -1,0 +1,114 @@
+body {
+  margin: 0;
+  font-family: "Segoe UI", Tahoma;
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+/* ===== HEADER ===== */
+.top-bar {
+  background: #020617;
+  color: #fff;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.top-bar nav a {
+  color: #cbd5f5;
+  margin: 0 10px;
+  text-decoration: none;
+  font-size: 14px;
+}
+.top-bar nav a.active {
+  color: #22c55e;
+  font-weight: bold;
+}
+
+/* ===== LAYOUT ===== */
+.pos-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  height: calc(100vh - 60px);
+}
+
+/* ===== PRODUCTS ===== */
+.products-panel {
+  padding: 15px;
+  overflow-y: auto;
+}
+
+.products-panel input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 12px;
+}
+
+#productsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px,1fr));
+  gap: 12px;
+}
+
+.product-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0,0,0,.08);
+  cursor: pointer;
+  transition: .2s;
+}
+.product-card:hover {
+  transform: scale(1.05);
+}
+
+/* ===== INVOICE ===== */
+.invoice-panel {
+  background: #fff;
+  border-left: 2px solid #e5e7eb;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+#invoiceItems {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.invoice-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px dashed #ddd;
+}
+
+.total-box {
+  font-size: 18px;
+  margin: 10px 0;
+  text-align: center;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-save {
+  flex: 1;
+  background: #22c55e;
+  color: #fff;
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+}
+.btn-clear {
+  flex: 1;
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+}
