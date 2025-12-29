@@ -1,25 +1,39 @@
-/* ===============================
+/* ================================
    AUTH SYSTEM | POS PRO
-   =============================== */
+   تسجيل حساب - تسجيل دخول - حماية
+================================ */
 
-/* ===== HELPERS ===== */
+// ===== Helpers =====
 function getUsers() {
-  return JSON.parse(localStorage.getItem("users") || "[]");
+  return JSON.parse(localStorage.getItem("pos_users") || "[]");
 }
 
 function saveUsers(users) {
-  localStorage.setItem("users", JSON.stringify(users));
+  localStorage.setItem("pos_users", JSON.stringify(users));
 }
 
-/* ===== REGISTER ===== */
+function setSession(user) {
+  localStorage.setItem("pos_session", JSON.stringify(user));
+}
+
+function getSession() {
+  return JSON.parse(localStorage.getItem("pos_session"));
+}
+
+function logout() {
+  localStorage.removeItem("pos_session");
+  window.location.href = "login.html";
+}
+
+// ===== Register =====
 function register() {
-  const shopName = document.getElementById("shopName").value.trim();
+  const name = document.getElementById("name").value.trim();
   const phone = document.getElementById("phone").value.trim();
   const password = document.getElementById("password").value;
-  const confirm = document.getElementById("confirmPassword").value;
+  const confirm = document.getElementById("confirm").value;
 
-  if (!shopName || !phone || !password || !confirm) {
-    alert("من فضلك أكمل جميع البيانات");
+  if (!name || !phone || !password || !confirm) {
+    alert("من فضلك املأ جميع الحقول");
     return;
   }
 
@@ -35,24 +49,23 @@ function register() {
     return;
   }
 
-  const newUser = {
+  const user = {
     id: Date.now(),
-    shopName,
+    name,
     phone,
     password,
-    role: "owner",
-    cashiers: []
+    role: "owner",   // صاحب النظام
+    createdAt: new Date().toISOString()
   };
 
-  users.push(newUser);
+  users.push(user);
   saveUsers(users);
 
-  localStorage.setItem("currentUser", JSON.stringify(newUser));
-
-  window.location.href = "index.html";
+  alert("تم إنشاء الحساب بنجاح");
+  window.location.href = "login.html";
 }
 
-/* ===== LOGIN ===== */
+// ===== Login =====
 function login() {
   const phone = document.getElementById("phone").value.trim();
   const password = document.getElementById("password").value;
@@ -72,21 +85,32 @@ function login() {
     return;
   }
 
-  localStorage.setItem("currentUser", JSON.stringify(user));
+  setSession({
+    id: user.id,
+    name: user.name,
+    phone: user.phone,
+    role: user.role
+  });
+
   window.location.href = "index.html";
 }
 
-/* ===== LOGOUT ===== */
-function logout() {
-  localStorage.removeItem("currentUser");
-  window.location.href = "login.html";
-}
+// ===== Auth Guard =====
+(function authGuard() {
+  const protectedPages = [
+    "index.html",
+    "products.html",
+    "inventory.html",
+    "returns.html",
+    "reports.html",
+    "settings.html"
+  ];
 
-/* ===== AUTH GUARD ===== */
-function authGuard() {
-  const user = localStorage.getItem("currentUser");
+  const page = location.pathname.split("/").pop();
 
-  if (!user) {
-    window.location.href = "login.html";
+  if (protectedPages.includes(page)) {
+    if (!getSession()) {
+      window.location.href = "login.html";
+    }
   }
-}
+})();
