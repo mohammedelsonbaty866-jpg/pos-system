@@ -3,9 +3,11 @@
 let invoice = [];
 const beep = new Audio("assets/sounds/beep.mp3");
 
-function addToInvoice(productId) {
-  const product = products.find(p => p.id === productId);
-  if (!product) return;
+function playBeep() {
+  if (localStorage.getItem("barcodeSound") !== "off") {
+    beep.play();
+  }
+}
 
   invoice.push(product);
   beep.play();
