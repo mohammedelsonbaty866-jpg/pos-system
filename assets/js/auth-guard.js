@@ -19,7 +19,12 @@ if (!user) {
     error.innerText = "بيانات الدخول غير صحيحة";
     return;
   }
-
+// منع الدخول بدون تفعيل
+if (typeof isActivated === "function") {
+  if (!isActivated()) {
+    location.href = "activate.html";
+  }
+}
   localStorage.session = JSON.stringify({
     username: user.username,
     role: user.role,
