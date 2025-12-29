@@ -1,64 +1,83 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>POS PRO | الكاشير</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>نقطة البيع | الكاشير</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link rel="stylesheet" href="assets/css/style.css">
+  <!-- CSS -->
+  <link rel="stylesheet" href="assets/css/style.css">
 </head>
 
 <body>
 
-<!-- حماية الصفحة -->
+<!-- 🔐 حماية الصفحة -->
 <script src="assets/js/auth-guard.js"></script>
 
+<!-- ===== HEADER ===== -->
 <header class="top-bar">
-  <h1>نظام نقاط بيع</h1>
+  <div class="logo">POS PRO</div>
+
   <nav>
     <a href="index.html" class="active">الكاشير</a>
     <a href="products.html">الأصناف</a>
     <a href="reports.html">التقارير</a>
-    <a href="settings.html" class="settings-btn">⚙ الإعدادات</a>
+    <a href="settings.html">الإعدادات</a>
   </nav>
+
+  <button class="logout-btn" onclick="logout()">خروج</button>
 </header>
 
-<main class="pos">
+<!-- ===== MAIN ===== -->
+<main class="pos-layout">
 
-  <!-- المنتجات -->
-  <section class="products">
-    <h3>المنتجات</h3>
-    <div id="productsGrid"></div>
+  <!-- ===== المنتجات ===== -->
+  <section class="products-panel">
+    <h2>المنتجات</h2>
+
+    <input
+      type="text"
+      id="searchInput"
+      placeholder="بحث بالاسم أو الباركود"
+      onkeyup="searchProduct(this.value)"
+    >
+
+    <div id="productsGrid" class="products-grid"></div>
   </section>
 
-  <!-- الفاتورة -->
-  <section class="invoice">
-    <h3>الفاتورة</h3>
+  <!-- ===== الفاتورة ===== -->
+  <section class="invoice-panel">
+    <h2>الفاتورة</h2>
 
-    <div id="invoiceItems"></div>
+    <div id="invoiceItems" class="invoice-items"></div>
 
-    <div class="total">
-      الإجمالي: <span id="total">0.00</span> ج
+    <div class="total-box">
+      <span>الإجمالي</span>
+      <strong id="total">0 ج</strong>
     </div>
 
-    <div class="buttons">
-      <button class="save" onclick="saveInvoice()">حفظ</button>
-      <button class="print">طباعة</button>
-      <button class="pay">دفع</button>
-      <button class="clear" onclick="clearInvoice()">تفريغ</button>
+    <div class="actions">
+      <button class="btn-save" onclick="saveInvoice()">حفظ</button>
+      <button class="btn-clear" onclick="clearInvoice()">تفريغ</button>
     </div>
   </section>
 
 </main>
 
-<footer>
-  نسخة برو • الباركود مفعل 🔊
-</footer>
+<!-- ===== صوت الباركود ===== -->
+<audio id="beepSound" src="assets/sounds/beep.mp3" preload="auto"></audio>
 
+<!-- ===== JS ===== -->
 <script src="assets/js/data.js"></script>
 <script src="assets/js/products.js"></script>
 <script src="assets/js/cashier.js"></script>
-<script src="assets/js/barcode.js"></script>
+
+<script>
+  function logout() {
+    localStorage.removeItem("currentUser");
+    window.location.href = "login.html";
+  }
+</script>
 
 </body>
 </html>
