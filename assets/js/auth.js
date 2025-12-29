@@ -1,71 +1,74 @@
-/* ================================
-   AUTH SYSTEM - POS PRO
-================================ */
+/* ===============================
+   AUTH SYSTEM | POS PRO
+   =============================== */
 
-// تخزين المستخدمين
+/* ===== HELPERS ===== */
 function getUsers() {
-  return JSON.parse(localStorage.getItem("users")) || [];
+  return JSON.parse(localStorage.getItem("users") || "[]");
 }
 
 function saveUsers(users) {
   localStorage.setItem("users", JSON.stringify(users));
 }
 
-// ================================
-// إنشاء حساب جديد
-// ================================
+/* ===== REGISTER ===== */
 function register() {
-  const name = document.getElementById("name")?.value.trim();
-  const phone = document.getElementById("phone")?.value.trim();
-  const error = document.getElementById("error");
+  const shopName = document.getElementById("shopName").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const password = document.getElementById("password").value;
+  const confirm = document.getElementById("confirmPassword").value;
 
-  if (!name || !phone) {
-    error.innerText = "جميع الحقول مطلوبة";
+  if (!shopName || !phone || !password || !confirm) {
+    alert("من فضلك أكمل جميع البيانات");
+    return;
+  }
+
+  if (password !== confirm) {
+    alert("كلمتا المرور غير متطابقتين");
     return;
   }
 
   let users = getUsers();
 
-  const exists = users.find(u => u.phone === phone);
-  if (exists) {
-    error.innerText = "رقم الهاتف مسجل بالفعل";
+  if (users.find(u => u.phone === phone)) {
+    alert("رقم الهاتف مسجل بالفعل");
     return;
   }
 
-  const user = {
+  const newUser = {
     id: Date.now(),
-    name,
+    shopName,
     phone,
-    role: "owner",      // صاحب الحساب
-    cashiers: [],       // الكاشير هيضافوا لاحقًا
-    createdAt: new Date().toISOString()
+    password,
+    role: "owner",
+    cashiers: []
   };
 
-  users.push(user);
+  users.push(newUser);
   saveUsers(users);
 
-  localStorage.setItem("currentUser", JSON.stringify(user));
+  localStorage.setItem("currentUser", JSON.stringify(newUser));
 
   window.location.href = "index.html";
 }
 
-// ================================
-// تسجيل الدخول
-// ================================
+/* ===== LOGIN ===== */
 function login() {
-  const phone = document.getElementById("phone")?.value.trim();
-  const error = document.getElementById("error");
+  const phone = document.getElementById("phone").value.trim();
+  const password = document.getElementById("password").value;
 
-  if (!phone) {
-    error.innerText = "ادخل رقم الهاتف";
+  if (!phone || !password) {
+    alert("أدخل رقم الهاتف وكلمة المرور");
     return;
   }
 
   const users = getUsers();
-  const user = users.find(u => u.phone === phone);
+  const user = users.find(
+    u => u.phone === phone && u.password === password
+  );
 
   if (!user) {
-    error.innerText = "لا يوجد حساب بهذا الرقم";
+    alert("بيانات الدخول غير صحيحة");
     return;
   }
 
@@ -73,24 +76,17 @@ function login() {
   window.location.href = "index.html";
 }
 
-// ================================
-// تسجيل الخروج
-// ================================
+/* ===== LOGOUT ===== */
 function logout() {
   localStorage.removeItem("currentUser");
   window.location.href = "login.html";
 }
 
-// ================================
-// حماية الصفحات
-// ================================
+/* ===== AUTH GUARD ===== */
 function authGuard() {
-  const user = JSON.parse(localStorage.getItem("currentUser"));
+  const user = localStorage.getItem("currentUser");
 
   if (!user) {
     window.location.href = "login.html";
   }
 }
-
-// تشغيل الحماية تلقائيًا
-authGuard();
