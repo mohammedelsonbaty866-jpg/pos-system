@@ -2,47 +2,55 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>إنشاء حساب | POS</title>
+  <title>إنشاء حساب | نظام الكاشير</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- CSS -->
+  <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/auth.css">
 </head>
 
 <body class="auth-page">
 
-  <div class="auth-box">
-    <h2>إنشاء حساب جديد</h2>
+  <div class="auth-container">
+    <h1>إنشاء حساب جديد</h1>
 
     <input 
       type="text" 
-      id="registerName" 
-      placeholder="اسم صاحب النظام"
+      id="storeName"
+      placeholder="اسم المتجر"
     >
 
     <input 
-      type="tel" 
-      id="registerPhone" 
+      type="text" 
+      id="phone"
       placeholder="رقم الهاتف"
     >
 
     <input 
       type="password" 
-      id="registerPassword" 
+      id="password"
       placeholder="كلمة المرور"
     >
 
-    <button onclick="register()">إنشاء الحساب</button>
+    <input 
+      type="password" 
+      id="confirmPassword"
+      placeholder="تأكيد كلمة المرور"
+    >
+
+    <button onclick="register()">تسجيل</button>
 
     <p class="auth-link">
       لديك حساب بالفعل؟
       <a href="login.html">تسجيل الدخول</a>
     </p>
 
-    <div id="registerError" class="error"></div>
+    <p id="errorMsg" class="error"></p>
   </div>
 
   <!-- JS -->
   <script src="assets/js/auth.js"></script>
+
 </body>
 </html>
