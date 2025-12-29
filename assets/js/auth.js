@@ -1,102 +1,36 @@
-/* ================================
-   AUTH SYSTEM (REGISTER + LOGIN)
-   ================================ */
+function login() {
+  const phone = document.getElementById("phone").value.trim();
+  const error = document.getElementById("error");
 
-/* ===== HELPERS ===== */
-function getUsers() {
-  return JSON.parse(localStorage.getItem("users") || "[]");
-}
+  if (!phone) {
+    error.innerText = "أدخل رقم الهاتف";
+    return;
+  }
 
-function saveUsers(users) {
-  localStorage.setItem("users", JSON.stringify(users));
-}
+  const store = JSON.parse(localStorage.getItem("store"));
+  const cashiers = JSON.parse(localStorage.getItem("cashiers")) || [];
 
-function setSession(user) {
-  localStorage.setItem("currentUser", JSON.stringify(user));
-}
-
-function getSession() {
-  return JSON.parse(localStorage.getItem("currentUser"));
-}
-
-/* ================================
-   REGISTER
-   ================================ */
-const registerForm = document.getElementById("registerForm");
-
-if (registerForm) {
-  registerForm.addEventListener("submit", function (e) {
-    e.preventDefault();
-
-    const name = document.getElementById("name").value.trim();
-    const phone = document.getElementById("phone").value.trim();
-    const password = document.getElementById("password").value;
-
-    if (!name || !phone || !password) {
-      alert("من فضلك أكمل جميع البيانات");
-      return;
-    }
-
-    let users = getUsers();
-
-    // منع تكرار رقم الهاتف
-    const exists = users.find(u => u.phone === phone);
-    if (exists) {
-      alert("رقم الهاتف مسجل بالفعل");
-      return;
-    }
-
-    const newUser = {
-      id: Date.now(),
-      name,
-      phone,
-      password,
-      cashiers: [], // الكاشير اللي هيضيفهم صاحب الحساب
-      createdAt: new Date().toISOString()
-    };
-
-    users.push(newUser);
-    saveUsers(users);
-
-    // تسجيل دخول تلقائي
-    setSession(newUser);
-
+  // صاحب المتجر
+  if (store && store.phone === phone) {
+    localStorage.setItem("currentUser", JSON.stringify({
+      role: "owner",
+      phone
+    }));
     window.location.href = "index.html";
-  });
-}
+    return;
+  }
 
-/* ================================
-   LOGIN
-   ================================ */
-const loginForm = document.getElementById("loginForm");
-
-if (loginForm) {
-  loginForm.addEventListener("submit", function (e) {
-    e.preventDefault();
-
-    const phone = document.getElementById("phone").value.trim();
-    const password = document.getElementById("password").value;
-
-    let users = getUsers();
-
-    const user = users.find(
-      u => u.phone === phone && u.password === password
-    );
-
-    if (!user) {
-      alert("بيانات الدخول غير صحيحة");
-      return;
-    }
-
-    setSession(user);
+  // كاشير
+  const cashier = cashiers.find(c => c.phone === phone);
+  if (cashier) {
+    localStorage.setItem("currentUser", JSON.stringify({
+      role: "cashier",
+      name: cashier.name,
+      phone
+    }));
     window.location.href = "index.html";
-  });
-}
+    return;
+  }
 
-/* ================================
-   LOGOUT
-   ================================ */
-function logout() {
-  localStorage.removeItem("currentUser");
-  window.location.href = "login.html";
+  error.innerText = "رقم الهاتف غير مسجل";
 }
