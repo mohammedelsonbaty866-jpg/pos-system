@@ -6,6 +6,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet" href="assets/css/style.css">
+  <div class="barcode-box">
+  <input
+    id="barcodeInput"
+    type="text"
+    placeholder="باركود / اسم الصنف"
+    onkeyup="handleBarcodeInput(event)"
+    autofocus
+  >
+  <audio id="beepSound" src="assets/sounds/beep.mp3" preload="auto"></audio>
+</div>
 </head>
 
 <body>
