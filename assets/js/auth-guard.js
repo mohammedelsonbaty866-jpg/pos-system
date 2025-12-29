@@ -1,14 +1,27 @@
-/* ===============================
-   AUTH GUARD
-   =============================== */
+/*************************************************
+ * AUTH GUARD
+ * حماية الصفحات (لا تفتح إلا بعد تسجيل الدخول)
+ *************************************************/
 
-const SESSION_KEY = "pos_current_user";
+// المستخدم الحالي
+const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
-/* ===== التحقق من تسجيل الدخول ===== */
-(function authGuard() {
-  const session = localStorage.getItem(SESSION_KEY);
+// لو مفيش تسجيل دخول
+if (!currentUser) {
+  window.location.href = "login.html";
+}
 
-  if (!session) {
-    window.location.href = "login.html";
-  }
-})();
+// =====================
+// دوال مساعدة
+// =====================
+
+// تسجيل خروج
+function logout() {
+  localStorage.removeItem("currentUser");
+  window.location.href = "login.html";
+}
+
+// جلب المستخدم الحالي
+function getCurrentUser() {
+  return currentUser;
+}
