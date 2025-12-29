@@ -1,37 +1,81 @@
-function register() {
-  const u = registerUsername.value.trim();
-  const p = registerPassword.value.trim();
-  const msg = authMsg;
+/* ================================
+   AUTH SYSTEM (Register & Login)
+================================ */
 
-  if (!u || !p) {
-    msg.innerText = "❌ أكمل البيانات";
-    return;
-  }
-
-  const users = getUsers();
-  if (users.find(x => x.username === u)) {
-    msg.innerText = "❌ المستخدم موجود";
-    return;
-  }
-
-  users.push({ username: u, password: p });
-  saveUsers(users);
-  msg.innerText = "✅ تم إنشاء الحساب";
+// جلب المستخدمين
+function getUsers() {
+  return getData("users", []);
 }
 
-function login() {
-  const u = loginUsername.value.trim();
-  const p = loginPassword.value.trim();
-  const msg = authMsg;
+// حفظ المستخدمين
+function saveUsers(users) {
+  setData("users", users);
+}
 
-  const users = getUsers();
-  const user = users.find(x => x.username === u && x.password === p);
+/* ================================
+   Register
+================================ */
 
-  if (!user) {
-    msg.innerText = "❌ بيانات خاطئة";
+function registerUser() {
+  const phone = document.getElementById("phone").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  if (!phone || !password) {
+    alert("من فضلك أدخل رقم الهاتف وكلمة المرور");
     return;
   }
 
-  localStorage.setItem("currentUser", JSON.stringify(user));
-  location.href = "index.html";
+  let users = getUsers();
+
+  const exists = users.find(u => u.phone === phone);
+  if (exists) {
+    alert("رقم الهاتف مسجل بالفعل");
+    return;
+  }
+
+  const newUser = {
+    id: Date.now(),
+    phone,
+    password,
+    role: "owner",     // صاحب الحساب
+    cashiers: []       // الكاشيرز لاحقاً
+  };
+
+  users.push(newUser);
+  saveUsers(users);
+  setCurrentUser(newUser);
+
+  window.location.href = "index.html";
+}
+
+/* ================================
+   Login
+================================ */
+
+function loginUser() {
+  const phone = document.getElementById("phone").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  let users = getUsers();
+
+  const user = users.find(
+    u => u.phone === phone && u.password === password
+  );
+
+  if (!user) {
+    alert("بيانات الدخول غير صحيحة");
+    return;
+  }
+
+  setCurrentUser(user);
+  window.location.href = "index.html";
+}
+
+/* ================================
+   Logout
+================================ */
+
+function logout() {
+  clearCurrentUser();
+  window.location.href = "login.html";
 }
