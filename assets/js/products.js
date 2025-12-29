@@ -1,109 +1,46 @@
-/************************
- * PRODUCTS MODULE
- * إدارة الأصناف + البحث
- ************************/
+// ===== PRODUCTS =====
 
-/*
-  شكل الصنف:
-  {
-    id: Number,
-    name: String,
-    price: Number,
-    barcode: String,
-    stock: Number
-  }
-*/
+function addProduct() {
+  const name = document.getElementById("productName").value.trim();
+  const price = Number(document.getElementById("productPrice").value);
+  const barcode = document.getElementById("productBarcode").value.trim();
 
-let products = JSON.parse(localStorage.getItem("products")) || [];
-
-/* ===== حفظ ===== */
-function saveProducts() {
-  localStorage.setItem("products", JSON.stringify(products));
-}
-
-/* ===== إضافة صنف ===== */
-function addProduct(name, price, barcode, stock = 0) {
   if (!name || !price) {
-    alert("اسم الصنف والسعر مطلوبين");
+    alert("أكمل البيانات");
     return;
   }
 
-  const exists = products.find(p => p.barcode === barcode && barcode);
-  if (exists) {
-    alert("الباركود مستخدم بالفعل");
-    return;
-  }
-
-  const product = {
+  products.push({
     id: Date.now(),
-    name: name.trim(),
-    price: Number(price),
-    barcode: barcode ? barcode.trim() : "",
-    stock: Number(stock)
-  };
+    name,
+    price,
+    barcode
+  });
 
-  products.push(product);
   saveProducts();
   renderProducts();
+  clearInputs();
 }
 
-/* ===== عرض الأصناف ===== */
-function renderProducts(list = products) {
+function renderProducts() {
   const grid = document.getElementById("productsGrid");
   if (!grid) return;
 
   grid.innerHTML = "";
-
-  if (list.length === 0) {
-    grid.innerHTML = "<p style='text-align:center'>لا توجد أصناف</p>";
-    return;
-  }
-
-  list.forEach(p => {
-    const div = document.createElement("div");
-    div.className = "product";
-    div.innerHTML = `
-      <b>${p.name}</b>
-      <small>${p.price} ج</small>
+  products.forEach(p => {
+    grid.innerHTML += `
+      <div class="product-card" onclick="addToInvoice(${p.id})">
+        <strong>${p.name}</strong>
+        <span>${p.price} ج</span>
+      </div>
     `;
-    div.onclick = () => addToCart(p.id);
-    grid.appendChild(div);
   });
 }
 
-/* ===== البحث بالاسم أو الباركود ===== */
-function searchProduct(keyword) {
-  keyword = keyword.trim();
-
-  if (!keyword) {
-    renderProducts(products);
-    return;
-  }
-
-  const result = products.filter(p =>
-    p.name.includes(keyword) ||
-    (p.barcode && p.barcode === keyword)
-  );
-
-  renderProducts(result);
+function clearInputs() {
+  document.getElementById("productName").value = "";
+  document.getElementById("productPrice").value = "";
+  document.getElementById("productBarcode").value = "";
 }
 
-/* ===== جلب صنف بالـ ID ===== */
-function getProductById(id) {
-  return products.find(p => p.id === id);
-}
-
-/* ===== تحديث المخزون ===== */
-function updateStock(productId, qty) {
-  const product = getProductById(productId);
-  if (!product) return;
-
-  product.stock -= qty;
-  if (product.stock < 0) product.stock = 0;
-  saveProducts();
-}
-
-/* ===== تهيئة ===== */
-document.addEventListener("DOMContentLoaded", () => {
-  renderProducts();
-});
+renderProducts();
