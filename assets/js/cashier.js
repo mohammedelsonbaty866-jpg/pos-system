@@ -81,3 +81,11 @@ function applyDiscount(val) {
   discount = +val;
   calculateTotal();
 }
+function openSettings() {
+  window.location.href = "settings.html";
+}
+
+function logout() {
+  localStorage.removeItem("loggedUser");
+  window.location.href = "login.html";
+}
