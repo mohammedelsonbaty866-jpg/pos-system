@@ -1,22 +1,83 @@
-let products = [
-  { id: 1, name: "شيبسي", price: 5 },
-  { id: 2, name: "بيبسي", price: 10 },
-  { id: 3, name: "مياه", price: 6 }
-];
+/*************************************************
+ * PRODUCTS MODULE
+ * إدارة الأصناف + البحث + الباركود
+ *************************************************/
 
-function renderProducts(list = products) {
-  productsGrid.innerHTML = "";
-  list.forEach(p => {
-    const div = document.createElement("div");
-    div.className = "product";
-    div.innerText = `${p.name} - ${p.price}ج`;
-    div.onclick = () => addToInvoice(p);
-    productsGrid.appendChild(div);
+let products = getProducts();
+
+// ===============================
+// عرض المنتجات
+// ===============================
+function renderProducts(filter = "") {
+  const grid = document.getElementById("productsGrid");
+  if (!grid) return;
+
+  grid.innerHTML = "";
+
+  products
+    .filter(p =>
+      p.name.includes(filter) ||
+      p.barcode.includes(filter)
+    )
+    .forEach((product, index) => {
+      const card = document.createElement("div");
+      card.className = "product-card";
+      card.innerHTML = `
+        <strong>${product.name}</strong>
+        <small>${product.price} ${getSettings().currency}</small>
+      `;
+      card.onclick = () => addToInvoice(product.barcode);
+      grid.appendChild(card);
+    });
+}
+
+// ===============================
+// إضافة صنف جديد
+// ===============================
+function addProduct(name, price, barcode) {
+  if (!name || !price) {
+    alert("من فضلك أدخل اسم وسعر الصنف");
+    return;
+  }
+
+  products.push({
+    id: Date.now(),
+    name,
+    price: Number(price),
+    barcode: barcode || "",
+    stock: 0
   });
+
+  saveProducts(products);
+  renderProducts();
 }
 
-function searchProduct(v) {
-  renderProducts(products.filter(p => p.name.includes(v)));
+// ===============================
+// البحث بالاسم أو الباركود
+// ===============================
+function searchProduct(value) {
+  renderProducts(value.trim());
 }
 
-renderProducts();
+// ===============================
+// صوت الباركود
+// ===============================
+const barcodeSound = new Audio("assets/sounds/beep.mp3");
+
+// ===============================
+// إضافة للفاتورة
+// ===============================
+function addToInvoice(barcode) {
+  const product = products.find(p => p.barcode === barcode);
+  if (!product) return;
+
+  barcodeSound.play();
+  addItemToInvoice(product);
+}
+
+// ===============================
+// تحديث المنتجات عند التحميل
+// ===============================
+document.addEventListener("DOMContentLoaded", () => {
+  renderProducts();
+});
