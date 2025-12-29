@@ -25,3 +25,8 @@ function login() {
 
   window.location.href = "index.html";
 }
+const session = localStorage.session;
+
+if (!session) {
+  window.location.href = "login.html";
+}
