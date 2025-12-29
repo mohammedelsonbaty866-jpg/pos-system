@@ -9,38 +9,39 @@
   <link rel="stylesheet" href="assets/css/auth.css">
 </head>
 
-<body class="auth-body">
+<body>
 
-  <div class="auth-container">
+<div class="auth-container">
 
-    <h1>نظام نقاط بيع</h1>
-    <p class="subtitle">تسجيل الدخول / إنشاء حساب</p>
+  <h1>تسجيل الدخول</h1>
 
-    <!-- رقم الهاتف -->
+  <form id="loginForm">
     <input 
       type="tel" 
       id="phone" 
       placeholder="رقم الهاتف"
-      autocomplete="off"
+      required
     >
 
-    <!-- كلمة المرور -->
     <input 
       type="password" 
       id="password" 
       placeholder="كلمة المرور"
+      required
     >
 
-    <!-- أزرار -->
-    <button onclick="login()">تسجيل دخول</button>
-    <button class="secondary" onclick="register()">إنشاء حساب جديد</button>
+    <button type="submit">دخول</button>
+  </form>
 
-    <p id="msg"></p>
+  <p class="switch">
+    ليس لديك حساب؟
+    <a href="register.html">إنشاء حساب</a>
+  </p>
 
-  </div>
+</div>
 
-  <!-- JS -->
-  <script src="assets/js/auth.js"></script>
+<!-- JS -->
+<script src="assets/js/auth.js"></script>
 
 </body>
 </html>
