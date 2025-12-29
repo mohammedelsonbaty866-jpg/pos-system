@@ -1,119 +1,115 @@
-/* ================================
+/* ===============================
    AUTH SYSTEM - POS PRO
 ================================ */
 
-// LocalStorage Keys
-const USERS_KEY = "pos_users";
-const SESSION_KEY = "pos_session";
+/*
+LocalStorage Structure:
 
-/* ================================
-   HELPERS
-================================ */
-function getUsers() {
-  return JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+users = [
+  {
+    shopName: "",
+    phone: "",
+    password: ""
+  }
+]
+
+currentUser = {
+  phone: ""
 }
+*/
 
-function saveUsers(users) {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
-}
+// ===== GET DATA =====
+let users = JSON.parse(localStorage.getItem("users") || "[]");
+let currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
 
-function setSession(user) {
-  localStorage.setItem(SESSION_KEY, JSON.stringify(user));
-}
-
-function getSession() {
-  return JSON.parse(localStorage.getItem(SESSION_KEY));
-}
-
-function clearSession() {
-  localStorage.removeItem(SESSION_KEY);
-}
-
-/* ================================
-   REGISTER
-================================ */
+// ===== REGISTER =====
 function register() {
-  const storeName = document.getElementById("storeName")?.value.trim();
+  const shopName = document.getElementById("shopName")?.value.trim();
   const phone = document.getElementById("phone")?.value.trim();
-  const password = document.getElementById("password")?.value;
-  const confirm = document.getElementById("confirmPassword")?.value;
-  const error = document.getElementById("errorMsg");
+  const password = document.getElementById("password")?.value.trim();
+  const errorBox = document.getElementById("errorMsg");
 
-  if (!storeName || !phone || !password || !confirm) {
-    error.innerText = "جميع الحقول مطلوبة";
+  if (!shopName || !phone || !password) {
+    errorBox.innerText = "جميع الحقول مطلوبة";
     return;
   }
 
-  if (password !== confirm) {
-    error.innerText = "كلمة المرور غير متطابقة";
+  // منع التكرار
+  const exists = users.find(u => u.phone === phone);
+  if (exists) {
+    errorBox.innerText = "رقم الهاتف مسجل بالفعل";
     return;
   }
 
-  let users = getUsers();
-
-  if (users.find(u => u.phone === phone)) {
-    error.innerText = "رقم الهاتف مسجل بالفعل";
-    return;
-  }
-
-  const newUser = {
-    id: Date.now(),
-    storeName,
+  // إنشاء الحساب
+  const user = {
+    shopName,
     phone,
-    password,
-    role: "owner",
-    cashiers: [],
-    createdAt: new Date().toISOString()
+    password
   };
 
-  users.push(newUser);
-  saveUsers(users);
-  setSession(newUser);
+  users.push(user);
+  localStorage.setItem("users", JSON.stringify(users));
+
+  // تسجيل دخول تلقائي
+  localStorage.setItem("currentUser", JSON.stringify({ phone }));
+
+  // حفظ اسم المتجر في الإعدادات
+  localStorage.setItem(
+    "settings",
+    JSON.stringify({ shopName })
+  );
 
   window.location.href = "index.html";
 }
 
-/* ================================
-   LOGIN
-================================ */
+// ===== LOGIN =====
 function login() {
   const phone = document.getElementById("phone")?.value.trim();
-  const password = document.getElementById("password")?.value;
-  const error = document.getElementById("errorMsg");
+  const password = document.getElementById("password")?.value.trim();
+  const errorBox = document.getElementById("errorMsg");
 
   if (!phone || !password) {
-    error.innerText = "أدخل رقم الهاتف وكلمة المرور";
+    errorBox.innerText = "أدخل رقم الهاتف وكلمة المرور";
     return;
   }
 
-  const users = getUsers();
   const user = users.find(
     u => u.phone === phone && u.password === password
   );
 
   if (!user) {
-    error.innerText = "بيانات الدخول غير صحيحة";
+    errorBox.innerText = "بيانات الدخول غير صحيحة";
     return;
   }
 
-  setSession(user);
+  localStorage.setItem(
+    "currentUser",
+    JSON.stringify({ phone })
+  );
+
   window.location.href = "index.html";
 }
 
-/* ================================
-   AUTH GUARD
-================================ */
+// ===== LOGOUT =====
+function logout() {
+  localStorage.removeItem("currentUser");
+  window.location.href = "login.html";
+}
+
+// ===== AUTH GUARD =====
 function requireAuth() {
-  const session = getSession();
-  if (!session) {
+  const user = JSON.parse(localStorage.getItem("currentUser"));
+
+  if (!user) {
     window.location.href = "login.html";
   }
 }
 
-/* ================================
-   LOGOUT
-================================ */
-function logout() {
-  clearSession();
-  window.location.href = "login.html";
+// ===== GET CURRENT USER =====
+function getCurrentUser() {
+  const session = JSON.parse(localStorage.getItem("currentUser"));
+  if (!session) return null;
+
+  return users.find(u => u.phone === session.phone);
 }
