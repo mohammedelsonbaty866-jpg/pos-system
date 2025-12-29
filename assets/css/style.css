@@ -364,3 +364,47 @@ body {
     flex-direction: column;
   }
 }
+.settings-layout {
+  padding: 15px;
+  display: grid;
+  gap: 15px;
+}
+
+.card {
+  background: #fff;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.card h2 {
+  margin-bottom: 10px;
+}
+
+.card input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.card ul {
+  list-style: none;
+  padding: 0;
+}
+
+.card li {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.btn {
+  padding: 10px;
+  border: none;
+  background: #2196f3;
+  color: #fff;
+  border-radius: 6px;
+}
+
+.btn.danger {
+  background: #f44336;
+}
