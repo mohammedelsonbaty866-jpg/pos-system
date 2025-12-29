@@ -1,56 +1,35 @@
-// مصفوفة لتخزين المرتجعات
-let returns = JSON.parse(localStorage.getItem("returns")) || [];
+const invoices = JSON.parse(localStorage.getItem("invoices")) || [];
+let currentInvoice = null;
 
-// عند فتح الصفحة
-document.addEventListener("DOMContentLoaded", renderReturns);
+function loadInvoice() {
+  const no = document.getElementById("invoiceNo").value;
+  currentInvoice = invoices.find(i => i.no == no);
 
-// إضافة مرتجع جديد
-function addReturn() {
-  const name = document.getElementById("returnName").value.trim();
-  const qty = document.getElementById("returnQty").value;
-  const reason = document.getElementById("returnReason").value.trim();
+  if (!currentInvoice) return alert("الفاتورة غير موجودة");
 
-  if (name === "" || qty === "" || reason === "") {
-    alert("من فضلك اكمل كل البيانات");
-    return;
-  }
-
-  const newReturn = {
-    id: Date.now(),
-    name,
-    qty,
-    reason,
-    date: new Date().toLocaleString("ar-EG")
-  };
-
-  returns.push(newReturn);
-  localStorage.setItem("returns", JSON.stringify(returns));
-
-  clearInputs();
-  renderReturns();
-}
-
-// عرض المرتجعات في الجدول
-function renderReturns() {
-  const table = document.getElementById("returnsTable");
-  table.innerHTML = "";
-
-  returns.forEach((item, index) => {
-    table.innerHTML += `
-      <tr>
-        <td>${index + 1}</td>
-        <td>${item.name}</td>
-        <td>${item.qty}</td>
-        <td>${item.reason}</td>
-        <td>${item.date}</td>
-      </tr>
-    `;
+  let html = `<h3>إجمالي: ${currentInvoice.total} ج</h3><ul>`;
+  currentInvoice.items.forEach((it, idx) => {
+    html += `
+      <li>
+        ${it.name} - ${it.qty}
+        <input type="number" min="0" max="${it.qty}" value="${it.qty}" id="r${idx}">
+      </li>`;
   });
+  html += `</ul>`;
+  document.getElementById("invoiceDetails").innerHTML = html;
 }
 
-// مسح الحقول
-function clearInputs() {
-  document.getElementById("returnName").value = "";
-  document.getElementById("returnQty").value = "";
-  document.getElementById("returnReason").value = "";
+function processReturn() {
+  if (!currentInvoice) return;
+
+  let refund = 0;
+  currentInvoice.items.forEach((it, idx) => {
+    const qty = +document.getElementById("r"+idx).value;
+    refund += qty * it.price;
+    it.qty -= qty;
+  });
+
+  currentInvoice.total -= refund;
+  localStorage.setItem("invoices", JSON.stringify(invoices));
+  alert("تم المرتجع بقيمة " + refund + " ج");
 }
