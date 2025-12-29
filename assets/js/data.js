@@ -1,98 +1,79 @@
-/*************************************************
- * DATA LAYER
- * إدارة البيانات – LocalStorage
- *************************************************/
+/* =====================================
+   LOCAL DATABASE (LocalStorage)
+   Users - Products - Invoices - Settings
+   ===================================== */
 
-// ===============================
-// مفاتيح التخزين
-// ===============================
-const STORAGE_KEYS = {
-  USERS: "pos_users",
-  CURRENT_USER: "currentUser",
-  PRODUCTS: "pos_products",
-  INVOICES: "pos_invoices",
-  SETTINGS: "pos_settings"
-};
-
-// ===============================
-// أدوات عامة
-// ===============================
-function getData(key, defaultValue = []) {
-  return JSON.parse(localStorage.getItem(key)) || defaultValue;
+/* ---------- USERS ---------- */
+// users: [{id, phone, password, role}]
+if (!localStorage.getItem("users")) {
+  localStorage.setItem("users", JSON.stringify([]));
 }
 
-function setData(key, value) {
-  localStorage.setItem(key, JSON.stringify(value));
-}
-
-// ===============================
-// المستخدمين
-// ===============================
-function getUsers() {
-  return getData(STORAGE_KEYS.USERS);
-}
-
-function saveUsers(users) {
-  setData(STORAGE_KEYS.USERS, users);
-}
-
+// current logged user
 function getCurrentUser() {
-  return JSON.parse(localStorage.getItem(STORAGE_KEYS.CURRENT_USER));
+  return JSON.parse(localStorage.getItem("currentUser"));
 }
 
-// ===============================
-// المنتجات
-// ===============================
+/* ---------- PRODUCTS ---------- */
+// products: [{id, name, price, barcode}]
+if (!localStorage.getItem("products")) {
+  localStorage.setItem("products", JSON.stringify([]));
+}
+
 function getProducts() {
-  return getData(STORAGE_KEYS.PRODUCTS);
+  return JSON.parse(localStorage.getItem("products")) || [];
 }
 
 function saveProducts(products) {
-  setData(STORAGE_KEYS.PRODUCTS, products);
+  localStorage.setItem("products", JSON.stringify(products));
 }
 
-// ===============================
-// الفواتير
-// ===============================
+/* ---------- INVOICES ---------- */
+// invoices: [{id, date, items, total, cashier}]
+if (!localStorage.getItem("invoices")) {
+  localStorage.setItem("invoices", JSON.stringify([]));
+}
+
 function getInvoices() {
-  return getData(STORAGE_KEYS.INVOICES);
+  return JSON.parse(localStorage.getItem("invoices")) || [];
 }
 
 function saveInvoices(invoices) {
-  setData(STORAGE_KEYS.INVOICES, invoices);
+  localStorage.setItem("invoices", JSON.stringify(invoices));
 }
 
-// ===============================
-// الإعدادات
-// ===============================
+/* ---------- SETTINGS ---------- */
+// settings: {storeName, barcodeSound}
+if (!localStorage.getItem("settings")) {
+  localStorage.setItem(
+    "settings",
+    JSON.stringify({
+      storeName: "متجري",
+      barcodeSound: true
+    })
+  );
+}
+
 function getSettings() {
-  return getData(STORAGE_KEYS.SETTINGS, {
-    shopName: "نظام نقاط بيع",
-    currency: "ج"
-  });
+  return JSON.parse(localStorage.getItem("settings"));
 }
 
 function saveSettings(settings) {
-  setData(STORAGE_KEYS.SETTINGS, settings);
+  localStorage.setItem("settings", JSON.stringify(settings));
 }
 
-// ===============================
-// تهيئة أول مرة
-// ===============================
-(function initStorage() {
-  if (!localStorage.getItem(STORAGE_KEYS.PRODUCTS)) {
-    saveProducts([]);
-  }
+/* ---------- HELPERS ---------- */
+function generateID(prefix = "") {
+  return prefix + Date.now();
+}
 
-  if (!localStorage.getItem(STORAGE_KEYS.INVOICES)) {
-    saveInvoices([]);
-  }
+/* ---------- BARCODE SOUND ---------- */
+const barcodeAudio = new Audio("assets/sounds/beep.mp3");
 
-  if (!localStorage.getItem(STORAGE_KEYS.USERS)) {
-    saveUsers([]);
+function playBarcodeSound() {
+  const settings = getSettings();
+  if (settings.barcodeSound) {
+    barcodeAudio.currentTime = 0;
+    barcodeAudio.play();
   }
-
-  if (!localStorage.getItem(STORAGE_KEYS.SETTINGS)) {
-    saveSettings(getSettings());
-  }
-})();
+}
