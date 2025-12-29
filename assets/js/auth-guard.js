@@ -1,21 +1,27 @@
-/* ================================
-   AUTH GUARD - POS PRO
-================================ */
+// ===============================
+// AUTH GUARD - POS PRO
+// ===============================
 
-(function () {
-  const currentUser = localStorage.getItem("currentUser");
+// الصفحات المسموح فتحها بدون تسجيل
+const publicPages = [
+  'login.html',
+  'register.html'
+];
 
-  // الصفحات المسموح فتحها بدون تسجيل
-  const publicPages = [
-    "login.html",
-    "register.html"
-  ];
+// اسم الصفحة الحالية
+const currentPage = window.location.pathname.split('/').pop();
 
-  const currentPage = window.location.pathname.split("/").pop();
+// قراءة المستخدم الحالي
+const currentUser = JSON.parse(localStorage.getItem('currentUser'));
 
-  // لو الصفحة مش عامة ومفيش مستخدم
-  if (!currentUser && !publicPages.includes(currentPage)) {
-    window.location.href = "login.html";
+// لو الصفحة محمية ومفيش تسجيل دخول → تحويل لصفحة الدخول
+if (!publicPages.includes(currentPage)) {
+  if (!currentUser) {
+    window.location.href = 'login.html';
   }
+}
 
-})();
+// منع فتح login أو register لو المستخدم مسجل دخول
+if (publicPages.includes(currentPage) && currentUser) {
+  window.location.href = 'index.html';
+}
