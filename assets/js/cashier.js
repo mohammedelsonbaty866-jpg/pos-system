@@ -63,3 +63,20 @@ document.addEventListener("keydown", e => {
     barcodeBuffer += e.key;
   }
 });
+let cart = [];
+let discount = 0;
+let vat = 0.14; // 14%
+
+function calculateTotal() {
+  let subtotal = cart.reduce((a,i)=>a + i.price*i.qty,0);
+  let vatValue = subtotal * vat;
+  let final = subtotal + vatValue - discount;
+
+  document.getElementById("total").innerText =
+    `الإجمالي: ${final.toFixed(2)} ج`;
+}
+
+function applyDiscount(val) {
+  discount = +val;
+  calculateTotal();
+}
