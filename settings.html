@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>الإعدادات</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body>
+
+<header class="top-bar">
+  <h1>الإعدادات</h1>
+  <nav>
+    <a href="index.html">الكاشير</a>
+    <a href="settings.html" class="active">الإعدادات</a>
+  </nav>
+</header>
+
+<main class="settings-page">
+
+  <section class="card">
+    <h2>بيانات المتجر</h2>
+    <input id="storeName" placeholder="اسم المتجر">
+    <input id="storePhone" placeholder="رقم الهاتف">
+    <button onclick="saveStore()">حفظ</button>
+  </section>
+
+  <section class="card">
+    <h2>إدارة الكاشير</h2>
+    <input id="cashierName" placeholder="اسم الكاشير">
+    <input id="cashierPhone" placeholder="رقم الهاتف">
+    <button onclick="addCashier()">إضافة كاشير</button>
+
+    <ul id="cashiersList"></ul>
+  </section>
+
+</main>
+
+<script src="assets/js/settings.js"></script>
+</body>
+</html>
