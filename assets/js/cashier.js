@@ -1,29 +1,34 @@
-/* =====================================
-   CASHIER / INVOICE LOGIC
-   Add items - Barcode - Total - Save
-   ===================================== */
+/************************
+ * CASHIER MODULE
+ * الفاتورة والكاشير
+ ************************/
 
-let invoice = [];
+let cart = [];
 
-/* ---------- INIT ---------- */
-document.addEventListener("DOMContentLoaded", () => {
-  renderProductsGrid();
-  setupBarcodeScanner();
-  renderInvoice();
-});
+/*
+  شكل عنصر الفاتورة:
+  {
+    id,
+    name,
+    price,
+    qty
+  }
+*/
 
-/* ---------- ADD TO INVOICE ---------- */
-function addToInvoice(productId) {
-  const products = getProducts();
-  const product = products.find(p => p.id === productId);
+/* ===== إضافة صنف للفاتورة ===== */
+function addToCart(productId) {
+  const product = getProductById(productId);
   if (!product) return;
 
-  const existing = invoice.find(item => item.id === productId);
+  // صوت الباركود
+  playBeep();
 
-  if (existing) {
-    existing.qty += 1;
+  const item = cart.find(i => i.id === productId);
+
+  if (item) {
+    item.qty += 1;
   } else {
-    invoice.push({
+    cart.push({
       id: product.id,
       name: product.name,
       price: product.price,
@@ -31,126 +36,81 @@ function addToInvoice(productId) {
     });
   }
 
-  playBeep();
   renderInvoice();
 }
 
-/* ---------- REMOVE ITEM ---------- */
-function removeFromInvoice(id) {
-  invoice = invoice.filter(item => item.id !== id);
-  renderInvoice();
-}
-
-/* ---------- CHANGE QTY ---------- */
-function changeQty(id, delta) {
-  const item = invoice.find(i => i.id === id);
-  if (!item) return;
-
-  item.qty += delta;
-  if (item.qty <= 0) {
-    removeFromInvoice(id);
-    return;
-  }
-
-  renderInvoice();
-}
-
-/* ---------- RENDER INVOICE ---------- */
+/* ===== عرض الفاتورة ===== */
 function renderInvoice() {
-  const container = document.getElementById("invoiceItems");
-  const totalEl = document.getElementById("total");
+  const box = document.getElementById("invoiceItems");
+  const totalBox = document.getElementById("total");
 
-  if (!container || !totalEl) return;
+  if (!box || !totalBox) return;
 
-  container.innerHTML = "";
+  box.innerHTML = "";
   let total = 0;
 
-  invoice.forEach(item => {
+  cart.forEach((item, index) => {
+    total += item.price * item.qty;
+
     const row = document.createElement("div");
-    row.className = "invoice-row";
-
-    const lineTotal = item.price * item.qty;
-    total += lineTotal;
-
+    row.className = "invoice-item";
     row.innerHTML = `
       <span>${item.name}</span>
-      <div class="qty-controls">
-        <button onclick="changeQty('${item.id}', -1)">-</button>
-        <strong>${item.qty}</strong>
-        <button onclick="changeQty('${item.id}', 1)">+</button>
-      </div>
-      <span>${lineTotal} ج</span>
-      <button onclick="removeFromInvoice('${item.id}')">✕</button>
+      <span>${item.qty} × ${item.price}</span>
+      <span>${item.qty * item.price} ج</span>
+      <button onclick="removeItem(${index})">✖</button>
     `;
-
-    container.appendChild(row);
+    box.appendChild(row);
   });
 
-  totalEl.textContent = total + " ج";
+  totalBox.innerText = total + " ج";
 }
 
-/* ---------- CLEAR ---------- */
-function clearInvoice() {
-  if (!invoice.length) return;
-  if (!confirm("تفريغ الفاتورة؟")) return;
-  invoice = [];
+/* ===== حذف صنف ===== */
+function removeItem(index) {
+  cart.splice(index, 1);
   renderInvoice();
 }
 
-/* ---------- SAVE INVOICE ---------- */
+/* ===== تفريغ الفاتورة ===== */
+function clearInvoice() {
+  if (!confirm("تفريغ الفاتورة؟")) return;
+  cart = [];
+  renderInvoice();
+}
+
+/* ===== حفظ الفاتورة ===== */
 function saveInvoice() {
-  if (!invoice.length) {
+  if (cart.length === 0) {
     alert("الفاتورة فارغة");
     return;
   }
 
-  const invoices = getInvoices();
-  invoices.push({
-    id: generateID("INV"),
-    date: new Date().toISOString(),
-    items: invoice,
-    total: invoice.reduce((s, i) => s + i.price * i.qty, 0)
-  });
+  const invoices = JSON.parse(localStorage.getItem("invoices")) || [];
 
-  saveInvoices(invoices);
-  invoice = [];
+  const invoice = {
+    id: Date.now(),
+    date: new Date().toLocaleString(),
+    items: cart,
+    total: cart.reduce((s, i) => s + i.price * i.qty, 0)
+  };
+
+  invoices.push(invoice);
+  localStorage.setItem("invoices", JSON.stringify(invoices));
+
+  // خصم من المخزون
+  cart.forEach(i => updateStock(i.id, i.qty));
+
+  cart = [];
   renderInvoice();
-  alert("تم حفظ الفاتورة");
+
+  alert("تم حفظ الفاتورة بنجاح");
 }
 
-/* ---------- BARCODE SUPPORT ---------- */
-let barcodeBuffer = "";
-let barcodeTimer = null;
-
-function setupBarcodeScanner() {
-  document.addEventListener("keydown", e => {
-    if (barcodeTimer) clearTimeout(barcodeTimer);
-
-    if (e.key === "Enter") {
-      handleBarcode(barcodeBuffer);
-      barcodeBuffer = "";
-      return;
-    }
-
-    if (e.key.length === 1) {
-      barcodeBuffer += e.key;
-    }
-
-    barcodeTimer = setTimeout(() => {
-      barcodeBuffer = "";
-    }, 300);
-  });
-}
-
-function handleBarcode(code) {
-  const product = findProductByBarcode(code);
-  if (product) {
-    addToInvoice(product.id);
-  }
-}
-
-/* ---------- SOUND ---------- */
+/* ===== صوت الباركود ===== */
 function playBeep() {
-  const audio = new Audio("assets/sounds/beep.mp3");
+  const audio = new Audio(
+    "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQgAAAAA"
+  );
   audio.play();
 }
