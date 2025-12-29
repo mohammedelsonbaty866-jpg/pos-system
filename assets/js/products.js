@@ -1,14 +1,11 @@
-// ===== PRODUCTS =====
+let products = JSON.parse(localStorage.getItem("products")) || [];
 
 function addProduct() {
-  const name = document.getElementById("productName").value.trim();
-  const price = Number(document.getElementById("productPrice").value);
-  const barcode = document.getElementById("productBarcode").value.trim();
+  const name = document.getElementById("productName").value;
+  const price = +document.getElementById("productPrice").value;
+  const barcode = document.getElementById("productBarcode").value;
 
-  if (!name || !price) {
-    alert("أكمل البيانات");
-    return;
-  }
+  if (!name || !price) return alert("أكمل البيانات");
 
   products.push({
     id: Date.now(),
@@ -19,7 +16,6 @@ function addProduct() {
 
   saveProducts();
   renderProducts();
-  clearInputs();
 }
 
 function renderProducts() {
@@ -28,19 +24,14 @@ function renderProducts() {
 
   grid.innerHTML = "";
   products.forEach(p => {
-    grid.innerHTML += `
-      <div class="product-card" onclick="addToInvoice(${p.id})">
-        <strong>${p.name}</strong>
-        <span>${p.price} ج</span>
-      </div>
-    `;
+    const d = document.createElement("div");
+    d.className = "product-card";
+    d.innerHTML = `<b>${p.name}</b><span>${p.price} ج</span>`;
+    d.onclick = () => addToCart(p);
+    grid.appendChild(d);
   });
 }
 
-function clearInputs() {
-  document.getElementById("productName").value = "";
-  document.getElementById("productPrice").value = "";
-  document.getElementById("productBarcode").value = "";
+function saveProducts() {
+  localStorage.setItem("products", JSON.stringify(products));
 }
-
-renderProducts();
