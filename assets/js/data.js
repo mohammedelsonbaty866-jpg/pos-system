@@ -1,24 +1,58 @@
-/* =====================================
-   LOCAL DATABASE (LocalStorage)
-   Users - Products - Invoices - Settings
-   ===================================== */
+/***********************
+ * DATA INITIALIZATION
+ ***********************/
 
-/* ---------- USERS ---------- */
-// users: [{id, phone, password, role}]
-if (!localStorage.getItem("users")) {
-  localStorage.setItem("users", JSON.stringify([]));
+// إنشاء المتجر (صاحب البرنامج) لو مش موجود
+if (!localStorage.getItem("store")) {
+  localStorage.setItem(
+    "store",
+    JSON.stringify({
+      name: "متجري",
+      phone: "01000000000" // رقم صاحب المتجر
+    })
+  );
 }
 
-// current logged user
-function getCurrentUser() {
-  return JSON.parse(localStorage.getItem("currentUser"));
+// إنشاء الكاشيرين (فارغة مبدئياً)
+if (!localStorage.getItem("cashiers")) {
+  localStorage.setItem("cashiers", JSON.stringify([]));
 }
 
-/* ---------- PRODUCTS ---------- */
-// products: [{id, name, price, barcode}]
+// إنشاء المنتجات الافتراضية
 if (!localStorage.getItem("products")) {
-  localStorage.setItem("products", JSON.stringify([]));
+  localStorage.setItem(
+    "products",
+    JSON.stringify([
+      {
+        id: 1,
+        name: "مياه معدنية",
+        price: 5,
+        barcode: "111111"
+      },
+      {
+        id: 2,
+        name: "بيبسي",
+        price: 10,
+        barcode: "222222"
+      },
+      {
+        id: 3,
+        name: "شيبسي",
+        price: 7,
+        barcode: "333333"
+      }
+    ])
+  );
 }
+
+// إنشاء الفواتير
+if (!localStorage.getItem("invoices")) {
+  localStorage.setItem("invoices", JSON.stringify([]));
+}
+
+/***********************
+ * HELPERS
+ ***********************/
 
 function getProducts() {
   return JSON.parse(localStorage.getItem("products")) || [];
@@ -26,12 +60,6 @@ function getProducts() {
 
 function saveProducts(products) {
   localStorage.setItem("products", JSON.stringify(products));
-}
-
-/* ---------- INVOICES ---------- */
-// invoices: [{id, date, items, total, cashier}]
-if (!localStorage.getItem("invoices")) {
-  localStorage.setItem("invoices", JSON.stringify([]));
 }
 
 function getInvoices() {
@@ -42,38 +70,6 @@ function saveInvoices(invoices) {
   localStorage.setItem("invoices", JSON.stringify(invoices));
 }
 
-/* ---------- SETTINGS ---------- */
-// settings: {storeName, barcodeSound}
-if (!localStorage.getItem("settings")) {
-  localStorage.setItem(
-    "settings",
-    JSON.stringify({
-      storeName: "متجري",
-      barcodeSound: true
-    })
-  );
-}
-
-function getSettings() {
-  return JSON.parse(localStorage.getItem("settings"));
-}
-
-function saveSettings(settings) {
-  localStorage.setItem("settings", JSON.stringify(settings));
-}
-
-/* ---------- HELPERS ---------- */
-function generateID(prefix = "") {
-  return prefix + Date.now();
-}
-
-/* ---------- BARCODE SOUND ---------- */
-const barcodeAudio = new Audio("assets/sounds/beep.mp3");
-
-function playBarcodeSound() {
-  const settings = getSettings();
-  if (settings.barcodeSound) {
-    barcodeAudio.currentTime = 0;
-    barcodeAudio.play();
-  }
+function getCurrentUser() {
+  return JSON.parse(localStorage.getItem("currentUser"));
 }
