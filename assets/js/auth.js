@@ -1,49 +1,34 @@
-/* ================================
-   AUTH SYSTEM | POS PRO
-   تسجيل حساب - تسجيل دخول - حماية
+/* ==============================
+   AUTH SYSTEM - POS PRO
 ================================ */
 
-// ===== Helpers =====
+const USERS_KEY = "pos_users";
+const SESSION_KEY = "pos_session";
+
+/* ===== LOAD USERS ===== */
 function getUsers() {
-  return JSON.parse(localStorage.getItem("pos_users") || "[]");
+  return JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
 }
 
+/* ===== SAVE USERS ===== */
 function saveUsers(users) {
-  localStorage.setItem("pos_users", JSON.stringify(users));
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
 }
 
-function setSession(user) {
-  localStorage.setItem("pos_session", JSON.stringify(user));
-}
-
-function getSession() {
-  return JSON.parse(localStorage.getItem("pos_session"));
-}
-
-function logout() {
-  localStorage.removeItem("pos_session");
-  window.location.href = "login.html";
-}
-
-// ===== Register =====
+/* ===== REGISTER ===== */
 function register() {
-  const name = document.getElementById("name").value.trim();
-  const phone = document.getElementById("phone").value.trim();
-  const password = document.getElementById("password").value;
-  const confirm = document.getElementById("confirm").value;
+  const name = document.getElementById("regName").value.trim();
+  const phone = document.getElementById("regPhone").value.trim();
+  const password = document.getElementById("regPassword").value;
 
-  if (!name || !phone || !password || !confirm) {
+  if (!name || !phone || !password) {
     alert("من فضلك املأ جميع الحقول");
-    return;
-  }
-
-  if (password !== confirm) {
-    alert("كلمتا المرور غير متطابقتين");
     return;
   }
 
   let users = getUsers();
 
+  // منع تكرار رقم الهاتف
   if (users.find(u => u.phone === phone)) {
     alert("رقم الهاتف مسجل بالفعل");
     return;
@@ -54,21 +39,23 @@ function register() {
     name,
     phone,
     password,
-    role: "owner",   // صاحب النظام
     createdAt: new Date().toISOString()
   };
 
   users.push(user);
   saveUsers(users);
 
+  // تسجيل دخول تلقائي
+  localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+
   alert("تم إنشاء الحساب بنجاح");
-  window.location.href = "login.html";
+  window.location.href = "index.html";
 }
 
-// ===== Login =====
+/* ===== LOGIN ===== */
 function login() {
-  const phone = document.getElementById("phone").value.trim();
-  const password = document.getElementById("password").value;
+  const phone = document.getElementById("loginPhone").value.trim();
+  const password = document.getElementById("loginPassword").value;
 
   if (!phone || !password) {
     alert("أدخل رقم الهاتف وكلمة المرور");
@@ -76,41 +63,32 @@ function login() {
   }
 
   const users = getUsers();
-  const user = users.find(
-    u => u.phone === phone && u.password === password
-  );
+  const user = users.find(u => u.phone === phone && u.password === password);
 
   if (!user) {
     alert("بيانات الدخول غير صحيحة");
     return;
   }
 
-  setSession({
-    id: user.id,
-    name: user.name,
-    phone: user.phone,
-    role: user.role
-  });
-
+  localStorage.setItem(SESSION_KEY, JSON.stringify(user));
   window.location.href = "index.html";
 }
 
-// ===== Auth Guard =====
-(function authGuard() {
-  const protectedPages = [
-    "index.html",
-    "products.html",
-    "inventory.html",
-    "returns.html",
-    "reports.html",
-    "settings.html"
-  ];
+/* ===== LOGOUT ===== */
+function logout() {
+  localStorage.removeItem(SESSION_KEY);
+  window.location.href = "login.html";
+}
 
-  const page = location.pathname.split("/").pop();
-
-  if (protectedPages.includes(page)) {
-    if (!getSession()) {
-      window.location.href = "login.html";
-    }
+/* ===== CHECK AUTH ===== */
+function checkAuth() {
+  const session = localStorage.getItem(SESSION_KEY);
+  if (!session) {
+    window.location.href = "login.html";
   }
-})();
+}
+
+/* ===== GET CURRENT USER ===== */
+function currentUser() {
+  return JSON.parse(localStorage.getItem(SESSION_KEY));
+}
