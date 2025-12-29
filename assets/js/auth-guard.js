@@ -1,28 +1,14 @@
-// auth-guard.js
-(function () {
+/* ===============================
+   AUTH GUARD
+   =============================== */
 
-  const user = localStorage.getItem("loggedUser");
+const SESSION_KEY = "pos_current_user";
 
-  // لو مفيش مستخدم مسجل دخول
-  if (!user) {
-    // منع الدخول + تحويل لصفحة الدخول
-    window.location.replace("login.html");
-    return;
+/* ===== التحقق من تسجيل الدخول ===== */
+(function authGuard() {
+  const session = localStorage.getItem(SESSION_KEY);
+
+  if (!session) {
+    window.location.href = "login.html";
   }
-
-  // تحويل النص لكائن
-  try {
-    const parsedUser = JSON.parse(user);
-
-    // أمان إضافي
-    if (!parsedUser.phone) {
-      localStorage.removeItem("loggedUser");
-      window.location.replace("login.html");
-    }
-
-  } catch (e) {
-    localStorage.removeItem("loggedUser");
-    window.location.replace("login.html");
-  }
-
 })();
