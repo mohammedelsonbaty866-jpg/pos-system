@@ -1,83 +1,121 @@
-/*************************************************
- * PRODUCTS MODULE
- * إدارة الأصناف + البحث + الباركود
- *************************************************/
+/* =====================================
+   PRODUCTS MANAGEMENT
+   Add - Delete - Search - Barcode
+   ===================================== */
 
-let products = getProducts();
+document.addEventListener("DOMContentLoaded", () => {
+  renderProductsTable();
+});
 
-// ===============================
-// عرض المنتجات
-// ===============================
-function renderProducts(filter = "") {
-  const grid = document.getElementById("productsGrid");
-  if (!grid) return;
+/* ---------- ADD PRODUCT ---------- */
+function addProduct() {
+  const nameInput = document.getElementById("productName");
+  const priceInput = document.getElementById("productPrice");
+  const barcodeInput = document.getElementById("productBarcode");
 
-  grid.innerHTML = "";
+  const name = nameInput.value.trim();
+  const price = parseFloat(priceInput.value);
+  const barcode = barcodeInput.value.trim();
 
-  products
-    .filter(p =>
-      p.name.includes(filter) ||
-      p.barcode.includes(filter)
-    )
-    .forEach((product, index) => {
-      const card = document.createElement("div");
-      card.className = "product-card";
-      card.innerHTML = `
-        <strong>${product.name}</strong>
-        <small>${product.price} ${getSettings().currency}</small>
-      `;
-      card.onclick = () => addToInvoice(product.barcode);
-      grid.appendChild(card);
-    });
-}
-
-// ===============================
-// إضافة صنف جديد
-// ===============================
-function addProduct(name, price, barcode) {
-  if (!name || !price) {
+  if (!name || isNaN(price)) {
     alert("من فضلك أدخل اسم وسعر الصنف");
     return;
   }
 
-  products.push({
-    id: Date.now(),
+  let products = getProducts();
+
+  // prevent duplicate barcode
+  if (barcode && products.some(p => p.barcode === barcode)) {
+    alert("الباركود مسجل بالفعل");
+    return;
+  }
+
+  const product = {
+    id: generateID("P"),
     name,
-    price: Number(price),
-    barcode: barcode || "",
-    stock: 0
-  });
+    price,
+    barcode
+  };
 
+  products.push(product);
   saveProducts(products);
-  renderProducts();
+
+  nameInput.value = "";
+  priceInput.value = "";
+  barcodeInput.value = "";
+
+  renderProductsTable();
 }
 
-// ===============================
-// البحث بالاسم أو الباركود
-// ===============================
+/* ---------- DELETE PRODUCT ---------- */
+function deleteProduct(id) {
+  let products = getProducts();
+  products = products.filter(p => p.id !== id);
+  saveProducts(products);
+  renderProductsTable();
+}
+
+/* ---------- RENDER TABLE ---------- */
+function renderProductsTable() {
+  const table = document.getElementById("productsTable");
+  if (!table) return;
+
+  const products = getProducts();
+  table.innerHTML = "";
+
+  products.forEach((product, index) => {
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${index + 1}</td>
+      <td>${product.name}</td>
+      <td>${product.price} ج</td>
+      <td>${product.barcode || "-"}</td>
+      <td>
+        <button onclick="deleteProduct('${product.id}')">حذف</button>
+      </td>
+    `;
+
+    table.appendChild(tr);
+  });
+}
+
+/* ---------- SEARCH PRODUCT ---------- */
 function searchProduct(value) {
-  renderProducts(value.trim());
+  const products = getProducts();
+  const keyword = value.trim().toLowerCase();
+
+  const filtered = products.filter(p =>
+    p.name.toLowerCase().includes(keyword) ||
+    (p.barcode && p.barcode.includes(keyword))
+  );
+
+  renderProductsGrid(filtered);
 }
 
-// ===============================
-// صوت الباركود
-// ===============================
-const barcodeSound = new Audio("assets/sounds/beep.mp3");
+/* ---------- CASHIER GRID ---------- */
+function renderProductsGrid(list = null) {
+  const grid = document.getElementById("productsGrid");
+  if (!grid) return;
 
-// ===============================
-// إضافة للفاتورة
-// ===============================
-function addToInvoice(barcode) {
-  const product = products.find(p => p.barcode === barcode);
-  if (!product) return;
+  const products = list || getProducts();
+  grid.innerHTML = "";
 
-  barcodeSound.play();
-  addItemToInvoice(product);
+  products.forEach(product => {
+    const div = document.createElement("div");
+    div.className = "product-card";
+    div.innerHTML = `
+      <strong>${product.name}</strong>
+      <span>${product.price} ج</span>
+    `;
+
+    div.onclick = () => addToInvoice(product.id);
+    grid.appendChild(div);
+  });
 }
 
-// ===============================
-// تحديث المنتجات عند التحميل
-// ===============================
-document.addEventListener("DOMContentLoaded", () => {
-  renderProducts();
-});
+/* ---------- BARCODE SEARCH ---------- */
+function findProductByBarcode(code) {
+  const products = getProducts();
+  return products.find(p => p.barcode === code);
+}
