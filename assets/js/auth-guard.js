@@ -1,24 +1,29 @@
-/* =====================================
-   AUTH GUARD
-   يمنع فتح أي صفحة بدون تسجيل دخول
-   ===================================== */
-
+// auth-guard.js
 (function () {
-  const user = JSON.parse(localStorage.getItem("currentUser"));
+  const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
-  // الصفحات المسموح فتحها بدون تسجيل
-  const publicPages = ["login.html", "register.html"];
-
-  const currentPage = window.location.pathname.split("/").pop();
-
-  // لو المستخدم مش مسجل دخول
-  if (!user && !publicPages.includes(currentPage)) {
+  if (!currentUser) {
+    // لو مفيش مستخدم مسجل
     window.location.href = "login.html";
     return;
   }
 
-  // لو مسجل دخول وحاول يفتح login أو register
-  if (user && publicPages.includes(currentPage)) {
+  // تحديد الصلاحيات حسب الصفحة
+  const page = window.location.pathname.split("/").pop();
+
+  // صفحات مسموح بها للمالك فقط
+  const ownerOnlyPages = [
+    "settings.html",
+    "reports.html",
+    "cashiers.html"
+  ];
+
+  // لو كاشير وحاول يدخل صفحة مالك
+  if (
+    currentUser.role === "cashier" &&
+    ownerOnlyPages.includes(page)
+  ) {
+    alert("غير مسموح بالدخول لهذه الصفحة");
     window.location.href = "index.html";
   }
 })();
