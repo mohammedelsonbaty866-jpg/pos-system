@@ -1,86 +1,47 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>POS | شاشة الكاشير</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- CSS -->
-  <link rel="stylesheet" href="assets/css/style.css">
+<meta charset="UTF-8">
+<title>POS | شاشة الكاشير</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="assets/css/style.css">
 </head>
 
 <body>
 
-<!-- ===== HEADER ===== -->
+<script src="assets/js/auth-guard.js"></script>
+
 <header class="top-bar">
   <h1>نظام نقاط بيع</h1>
   <nav>
-    <a href="index.html" class="active">الكاشير</a>
-    <a href="products.html">الأصناف</a>
-    <a href="inventory.html">المخزون</a>
-    <a href="returns.html">المرتجعات</a>
-    <a href="reports.html">التقارير</a>
+    <a class="active">الكاشير</a>
+    <button onclick="logout()">خروج</button>
   </nav>
 </header>
 
-<!-- ===== MAIN ===== -->
 <main class="pos-layout">
 
-  <!-- ===== PRODUCTS PANEL ===== -->
-  <section class="products-panel">
-    <h2>المنتجات</h2>
+<section class="products-panel">
+  <h2>المنتجات</h2>
+  <input placeholder="بحث..." onkeyup="searchProduct(this.value)">
+  <div id="productsGrid"></div>
+</section>
 
-    <input
-      type="text"
-      placeholder="بحث عن صنف..."
-      id="searchInput"
-      onkeyup="searchProduct(this.value)"
-    >
+<section class="invoice-panel">
+  <h2>الفاتورة</h2>
+  <div id="invoiceItems"></div>
 
-    <div id="productsGrid">
-      <!-- يتم ملؤه من products.js -->
-    </div>
-  </section>
+  <div class="total-box">
+    الإجمالي: <strong id="total">0</strong> ج
+  </div>
 
-  <!-- ===== INVOICE PANEL ===== -->
-  <section class="invoice-panel">
-    <h2>الفاتورة</h2>
-
-    <div id="invoiceItems">
-      <!-- يتم ملؤه من cashier.js -->
-    </div>
-
-    <div class="total-box">
-      <span>الإجمالي:</span>
-      <strong id="total">0 ج</strong>
-    </div>
-
-    <div class="actions">
-      <button class="btn-save" onclick="saveInvoice()">حفظ</button>
-      <button class="btn-clear" onclick="clearInvoice()">تفريغ</button>
-    </div>
-  </section>
+  <button onclick="clearInvoice()">تفريغ</button>
+</section>
 
 </main>
 
-<!-- ===== FOOTER ===== -->
-<footer>
-  نظام كاشير احترافي ©
-</footer>
-
-<!-- ===== JS (بالترتيب الصحيح) ===== -->
-  <script src="assets/js/auth-guard.js"></script>
 <script src="assets/js/data.js"></script>
 <script src="assets/js/products.js"></script>
 <script src="assets/js/cashier.js"></script>
-<script src="assets/js/auth-guard.js"></script>
 </body>
 </html>
-<button onclick="logout()">خروج</button>
-
-<script>
-function logout(){
-  localStorage.removeItem("loggedIn");
-  window.location.href = "login.html";
-}
-</script>
