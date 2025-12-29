@@ -18,26 +18,29 @@
   </nav>
 </header>
 
-<main class="settings-page">
+<main class="settings-layout">
 
+  <!-- بيانات الحساب -->
   <section class="card">
-    <h2>بيانات المتجر</h2>
-    <input id="storeName" placeholder="اسم المتجر">
-    <input id="storePhone" placeholder="رقم الهاتف">
-    <button onclick="saveStore()">حفظ</button>
+    <h2>بيانات الحساب</h2>
+    <p><strong>رقم الهاتف:</strong> <span id="ownerPhone"></span></p>
+    <button class="btn danger" onclick="logout()">تسجيل الخروج</button>
   </section>
 
+  <!-- إدارة الكاشير -->
   <section class="card">
     <h2>إدارة الكاشير</h2>
-    <input id="cashierName" placeholder="اسم الكاشير">
-    <input id="cashierPhone" placeholder="رقم الهاتف">
-    <button onclick="addCashier()">إضافة كاشير</button>
+
+    <input id="cashierPhone" placeholder="رقم هاتف الكاشير">
+    <button class="btn" onclick="addCashier()">إضافة كاشير</button>
 
     <ul id="cashiersList"></ul>
   </section>
 
 </main>
 
+<script src="assets/js/auth-guard.js"></script>
 <script src="assets/js/settings.js"></script>
+
 </body>
 </html>
