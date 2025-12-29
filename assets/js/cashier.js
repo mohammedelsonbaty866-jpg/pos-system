@@ -1,16 +1,18 @@
 // ===== CASHIER =====
+let cart = [];
 
-let invoice = [];
-const beep = new Audio("assets/sounds/beep.mp3");
-
-function playBeep() {
-  if (localStorage.getItem("barcodeSound") !== "off") {
-    beep.play();
+function addToCart(product) {
+  let item = cart.find(i => i.id === product.id);
+  if (item) {
+    item.qty++;
+  } else {
+    cart.push({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      qty: 1
+    });
   }
-}
-
-  invoice.push(product);
-  beep.play();
   renderInvoice();
 }
 
@@ -21,18 +23,17 @@ function renderInvoice() {
   box.innerHTML = "";
   let total = 0;
 
-  invoice.forEach((item, i) => {
-    total += item.price;
+  cart.forEach(i => {
+    total += i.price * i.qty;
     box.innerHTML += `
       <div class="invoice-item">
-        ${item.name} - ${item.price} ج
-      </div>
-    `;
+        ${i.name} × ${i.qty}
+        <strong>${i.price * i.qty} ج</strong>
+      </div>`;
   });
 
-  totalBox.textContent = total + " ج";
+  totalBox.innerText = total + " ج";
 }
-
 // 🔍 بحث بالاسم أو الباركود
 function searchProduct(value) {
   const grid = document.getElementById("productsGrid");
