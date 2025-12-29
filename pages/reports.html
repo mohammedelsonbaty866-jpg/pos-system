@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>التقارير</title>
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+
+<body>
+
+<script src="../core/storage.js"></script>
+<script src="../core/auth-guard.js"></script>
+<script src="../core/invoices.js"></script>
+<script src="../core/reports.js"></script>
+
+<h1>📊 التقارير</h1>
+
+<div class="report-box">
+
+  <h3>تقرير يومي</h3>
+  <input type="date" id="day">
+  <button onclick="daily()">عرض</button>
+
+  <h3>تقرير شهري</h3>
+  <input type="month" id="month">
+  <button onclick="monthly()">عرض</button>
+
+  <h3>تقرير سنوي</h3>
+  <input type="number" id="year" placeholder="2025">
+  <button onclick="yearly()">عرض</button>
+
+</div>
+
+<div id="result" class="report-result"></div>
+
+<script>
+function show(r){
+  result.innerHTML = `
+    <p>عدد الفواتير: ${r.count}</p>
+    <p>إجمالي المبيعات: ${r.total} ج</p>
+    <p>الأكثر مبيعًا: ${r.bestItem}</p>
+  `;
+}
+
+function daily(){
+  show(Reports.daily(day.value));
+}
+
+function monthly(){
+  const [y,m] = month.value.split("-");
+  show(Reports.monthly(y,m));
+}
+
+function yearly(){
+  show(Reports.yearly(year.value));
+}
+</script>
+
+</body>
+</html>
