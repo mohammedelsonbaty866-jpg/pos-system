@@ -5,3 +5,10 @@ const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 if (!currentUser) {
   location.href = "login.html";
 }
+if (!localStorage.getItem("loggedUser")) {
+  location.href = "login.html";
+}
+
+function logout() {
+  localStorage.removeItem("loggedUser");
+}
