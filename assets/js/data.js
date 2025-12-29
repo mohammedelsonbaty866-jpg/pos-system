@@ -30,17 +30,21 @@ function generateId(list) {
 }
 let users = JSON.parse(localStorage.getItem("users")) || [
   {
-    id:1,
-    username:"admin",
-    password:"1234",
-    role:"admin"
-  },
-  {
-    id:2,
-    username:"cashier",
-    password:"1234",
-    role:"cashier"
-  }
-];
+// مستخدم افتراضي (أول مرة بس)
+if (!localStorage.users) {
+  localStorage.users = JSON.stringify([
+    {
+      username: "admin",
+      password: "1234",
+      role: "admin"
+    },
+    {
+      username: "cashier",
+      password: "1234",
+      role: "cashier"
+    }
+  ]);
+}
 
-localStorage.setItem("users", JSON.stringify(users));
+let users = JSON.parse(localStorage.users);
+
