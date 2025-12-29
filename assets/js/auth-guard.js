@@ -1,13 +1,7 @@
-/* =========================
-   AUTH GUARD - POS PRO
-========================= */
+// ===== AUTH GUARD =====
 
-const SESSION_KEY = "pos_session";
+const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
-(function () {
-  const session = localStorage.getItem(SESSION_KEY);
-
-  if (!session) {
-    window.location.replace("login.html");
-  }
-})();
+if (!currentUser) {
+  location.href = "login.html";
+}
