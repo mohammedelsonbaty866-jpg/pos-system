@@ -1,42 +1,46 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>تسجيل الدخول | POS Pro</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>تسجيل الدخول | POS Pro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- CSS -->
-  <link rel="stylesheet" href="assets/css/auth.css">
+<!-- CSS -->
+<link rel="stylesheet" href="assets/css/auth.css">
+
 </head>
+<body>
 
-<body class="auth-body">
+<div class="auth-container">
 
-  <div class="auth-box">
-    <h1>POS Pro</h1>
-    <p>تسجيل الدخول</p>
+  <h1>نظام نقاط بيع</h1>
+  <p>تسجيل الدخول</p>
 
-    <input 
-      type="tel" 
-      id="phone" 
-      placeholder="رقم الهاتف"
-    >
+  <input
+    type="tel"
+    id="phone"
+    placeholder="رقم الهاتف"
+    autocomplete="username"
+  >
 
-    <input 
-      type="password" 
-      id="password" 
-      placeholder="كلمة المرور"
-    >
+  <input
+    type="password"
+    id="password"
+    placeholder="كلمة المرور"
+    autocomplete="current-password"
+  >
 
-    <button onclick="login()">دخول</button>
+  <button onclick="login()">دخول</button>
 
-    <p class="link">
-      ليس لديك حساب؟
-      <a href="register.html">إنشاء حساب</a>
-    </p>
+  <div class="auth-footer">
+    <span>ليس لديك حساب؟</span>
+    <a href="register.html">إنشاء حساب جديد</a>
   </div>
 
-  <!-- JS -->
-  <script src="assets/js/auth.js"></script>
+</div>
+
+<!-- JS -->
+<script src="assets/js/auth.js"></script>
 
 </body>
 </html>
