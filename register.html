@@ -2,104 +2,54 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>إنشاء حساب | POS Pro</title>
+  <title>إنشاء حساب | POS</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="assets/css/style.css">
-
-  <style>
-    body {
-      background: linear-gradient(135deg, #020617, #0f172a);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-      font-family: Arial, sans-serif;
-    }
-
-    .auth-box {
-      background: #fff;
-      width: 100%;
-      max-width: 400px;
-      padding: 25px;
-      border-radius: 14px;
-      box-shadow: 0 15px 40px rgba(0,0,0,.3);
-    }
-
-    .auth-box h1 {
-      text-align: center;
-      margin-bottom: 20px;
-      color: #020617;
-    }
-
-    .auth-box input {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 12px;
-      border-radius: 10px;
-      border: 1px solid #cbd5f5;
-      font-size: 15px;
-    }
-
-    .auth-box button {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 10px;
-      background: #2563eb;
-      color: #fff;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    .auth-box button:hover {
-      opacity: .9;
-    }
-
-    .auth-box .link {
-      text-align: center;
-      margin-top: 15px;
-      font-size: 14px;
-    }
-
-    .auth-box .link a {
-      color: #22c55e;
-      text-decoration: none;
-      font-weight: bold;
-    }
-
-    .error {
-      color: #ef4444;
-      font-size: 14px;
-      text-align: center;
-      margin-bottom: 10px;
-    }
-  </style>
+  <link rel="stylesheet" href="assets/css/auth.css">
 </head>
 
 <body>
 
-  <div class="auth-box">
-    <h1>إنشاء حساب متجر</h1>
+<div class="auth-container">
 
-    <div id="errorMsg" class="error"></div>
+  <h1>إنشاء حساب جديد</h1>
 
-    <input id="shopName" placeholder="اسم المتجر">
-    <input id="phone" type="tel" placeholder="رقم الهاتف">
-    <input id="password" type="password" placeholder="كلمة المرور">
+  <form id="registerForm">
 
-    <button onclick="register()">إنشاء الحساب</button>
+    <input 
+      type="text" 
+      id="name" 
+      placeholder="اسم صاحب الحساب"
+      required
+    >
 
-    <div class="link">
-      لديك حساب؟
-      <a href="login.html">تسجيل الدخول</a>
-    </div>
-  </div>
+    <input 
+      type="tel" 
+      id="phone" 
+      placeholder="رقم الهاتف"
+      required
+    >
 
-  <!-- JS -->
-  <script src="assets/js/auth.js"></script>
+    <input 
+      type="password" 
+      id="password" 
+      placeholder="كلمة المرور"
+      required
+    >
+
+    <button type="submit">إنشاء الحساب</button>
+  </form>
+
+  <p class="switch">
+    لديك حساب بالفعل؟
+    <a href="login.html">تسجيل الدخول</a>
+  </p>
+
+</div>
+
+<!-- JS -->
+<script src="assets/js/auth.js"></script>
 
 </body>
 </html>
