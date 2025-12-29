@@ -1,35 +1,38 @@
 /* ===============================
-   AUTH SYSTEM | POS PRO
-   =============================== */
+   AUTH SYSTEM - POS PRO
+================================ */
 
-/* ===== HELPERS ===== */
+const USERS_KEY = "pos_users";
+const SESSION_KEY = "pos_session";
+
+/* ===== Helpers ===== */
 function getUsers() {
-  return JSON.parse(localStorage.getItem("pos_users")) || [];
+  return JSON.parse(localStorage.getItem(USERS_KEY)) || [];
 }
 
 function saveUsers(users) {
-  localStorage.setItem("pos_users", JSON.stringify(users));
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
 }
 
-function setCurrentUser(user) {
-  localStorage.setItem("pos_current_user", JSON.stringify(user));
+/* ===== UI Switch ===== */
+function showRegister() {
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("registerBox").style.display = "block";
 }
 
-function getCurrentUser() {
-  return JSON.parse(localStorage.getItem("pos_current_user"));
+function showLogin() {
+  document.getElementById("registerBox").style.display = "none";
+  document.getElementById("loginBox").style.display = "block";
 }
 
-/* ===== REGISTER ===== */
+/* ===== Register ===== */
 function register() {
-  const name = document.getElementById("registerName").value.trim();
-  const phone = document.getElementById("registerPhone").value.trim();
-  const password = document.getElementById("registerPassword").value.trim();
-  const errorBox = document.getElementById("registerError");
-
-  errorBox.innerText = "";
+  const name = document.getElementById("regName").value.trim();
+  const phone = document.getElementById("regPhone").value.trim();
+  const password = document.getElementById("regPassword").value.trim();
 
   if (!name || !phone || !password) {
-    errorBox.innerText = "جميع الحقول مطلوبة";
+    alert("من فضلك املأ جميع البيانات");
     return;
   }
 
@@ -37,56 +40,55 @@ function register() {
 
   const exists = users.find(u => u.phone === phone);
   if (exists) {
-    errorBox.innerText = "رقم الهاتف مسجل بالفعل";
+    alert("رقم الهاتف مسجل بالفعل");
     return;
   }
 
-  const newUser = {
+  const user = {
     id: Date.now(),
     name,
     phone,
     password,
-    role: "owner", // صاحب النظام
+    cashiers: [],   // الكاشير اللي هيضيفهم لاحقًا
     createdAt: new Date().toISOString()
   };
 
-  users.push(newUser);
+  users.push(user);
   saveUsers(users);
-  setCurrentUser(newUser);
 
-  window.location.href = "index.html";
+  alert("تم إنشاء الحساب بنجاح");
+  showLogin();
 }
 
-/* ===== LOGIN ===== */
+/* ===== Login ===== */
 function login() {
   const phone = document.getElementById("loginPhone").value.trim();
   const password = document.getElementById("loginPassword").value.trim();
-  const errorBox = document.getElementById("loginError");
-
-  errorBox.innerText = "";
 
   if (!phone || !password) {
-    errorBox.innerText = "أدخل رقم الهاتف وكلمة المرور";
+    alert("أدخل رقم الهاتف وكلمة المرور");
     return;
   }
 
   const users = getUsers();
-
   const user = users.find(
     u => u.phone === phone && u.password === password
   );
 
   if (!user) {
-    errorBox.innerText = "بيانات الدخول غير صحيحة";
+    alert("بيانات الدخول غير صحيحة");
     return;
   }
 
-  setCurrentUser(user);
-  window.location.href = "index.html";
-}
+  // حفظ الجلسة
+  localStorage.setItem(
+    SESSION_KEY,
+    JSON.stringify({
+      userId: user.id,
+      loginAt: Date.now()
+    })
+  );
 
-/* ===== LOGOUT ===== */
-function logout() {
-  localStorage.removeItem("pos_current_user");
-  window.location.href = "login.html";
+  // توجيه للنظام
+  window.location.href = "index.html";
 }
