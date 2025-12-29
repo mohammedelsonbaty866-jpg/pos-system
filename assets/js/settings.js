@@ -1,43 +1,52 @@
-// ===== SETTINGS PAGE =====
+// ===== SETTINGS =====
 
-const owner = JSON.parse(localStorage.getItem("currentUser"));
-const cashiers = JSON.parse(localStorage.getItem("cashiers")) || [];
+// تحميل البيانات
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("storeName").value =
+    localStorage.getItem("storeName") || "";
 
-document.getElementById("ownerPhone").innerText = owner.phone;
+  document.getElementById("storePhone").value =
+    localStorage.getItem("storePhone") || "";
+
+  document.getElementById("barcodeSound").checked =
+    localStorage.getItem("barcodeSound") !== "off";
+
+  renderCashiers();
+});
+
+// حفظ بيانات المحل
+function saveStore() {
+  localStorage.setItem("storeName", storeName.value);
+  localStorage.setItem("storePhone", storePhone.value);
+  alert("تم الحفظ");
+}
+
+// ===== CASHIERS =====
+function addCashier() {
+  const name = cashierName.value.trim();
+  const phone = cashierPhone.value.trim();
+  if (!name || !phone) return alert("أكمل البيانات");
+
+  const cashiers = JSON.parse(localStorage.getItem("cashiers")) || [];
+  cashiers.push({ name, phone });
+  localStorage.setItem("cashiers", JSON.stringify(cashiers));
+
+  cashierName.value = "";
+  cashierPhone.value = "";
+  renderCashiers();
+}
 
 function renderCashiers() {
   const list = document.getElementById("cashiersList");
+  const cashiers = JSON.parse(localStorage.getItem("cashiers")) || [];
   list.innerHTML = "";
 
-  cashiers.forEach((c, index) => {
-    const li = document.createElement("li");
-    li.innerHTML = `
-      ${c}
-      <button onclick="removeCashier(${index})">❌</button>
-    `;
-    list.appendChild(li);
-  });
+  cashiers.forEach(c =>
+    list.innerHTML += `<li>${c.name} - ${c.phone}</li>`
+  );
 }
 
-function addCashier() {
-  const phone = document.getElementById("cashierPhone").value.trim();
-  if (!phone) return alert("أدخل رقم الهاتف");
-
-  cashiers.push(phone);
-  localStorage.setItem("cashiers", JSON.stringify(cashiers));
-  document.getElementById("cashierPhone").value = "";
-  renderCashiers();
-}
-
-function removeCashier(index) {
-  cashiers.splice(index, 1);
-  localStorage.setItem("cashiers", JSON.stringify(cashiers));
-  renderCashiers();
-}
-
-function logout() {
-  localStorage.removeItem("currentUser");
-  location.href = "login.html";
-}
-
-renderCashiers();
+// ===== BARCODE SOUND =====
+document.getElementById("barcodeSound").addEventListener("change", e => {
+  localStorage.setItem("barcodeSound", e.target.checked ? "on" : "off");
+});
