@@ -1,56 +1,87 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>إنشاء حساب | POS Pro</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>إنشاء حساب | POS Pro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- CSS -->
-<link rel="stylesheet" href="assets/css/auth.css">
+  <!-- CSS -->
+  <link rel="stylesheet" href="assets/css/style.css">
 
+  <style>
+    body{
+      background:#020617;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      height:100vh;
+      font-family:Arial;
+    }
+    .auth-box{
+      background:#fff;
+      width:100%;
+      max-width:420px;
+      padding:25px;
+      border-radius:14px;
+      box-shadow:0 10px 30px rgba(0,0,0,.5);
+    }
+    .auth-box h1{
+      text-align:center;
+      margin-bottom:20px;
+      color:#020617;
+    }
+    .auth-box input{
+      width:100%;
+      padding:12px;
+      margin-bottom:12px;
+      border-radius:10px;
+      border:1px solid #cbd5e1;
+      font-size:15px;
+    }
+    .auth-box button{
+      width:100%;
+      padding:12px;
+      border:none;
+      border-radius:10px;
+      background:#2563eb;
+      color:#fff;
+      font-size:16px;
+      cursor:pointer;
+    }
+    .auth-box button:hover{
+      background:#1d4ed8;
+    }
+    .auth-box p{
+      text-align:center;
+      margin-top:15px;
+      font-size:14px;
+    }
+    .auth-box a{
+      color:#16a34a;
+      text-decoration:none;
+      font-weight:bold;
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="auth-container">
+<div class="auth-box">
+  <h1>إنشاء حساب جديد</h1>
 
-  <h1>نظام نقاط بيع</h1>
-  <p>إنشاء حساب جديد</p>
-
-  <input
-    type="text"
-    id="name"
-    placeholder="اسم صاحب الحساب"
-  >
-
-  <input
-    type="tel"
-    id="phone"
-    placeholder="رقم الهاتف"
-  >
-
-  <input
-    type="password"
-    id="password"
-    placeholder="كلمة المرور"
-  >
-
-  <input
-    type="password"
-    id="confirm"
-    placeholder="تأكيد كلمة المرور"
-  >
+  <input id="regName" placeholder="اسم صاحب المحل">
+  <input id="regPhone" placeholder="رقم الهاتف">
+  <input id="regPassword" type="password" placeholder="كلمة المرور">
 
   <button onclick="register()">إنشاء الحساب</button>
 
-  <div class="auth-footer">
-    <span>لديك حساب بالفعل؟</span>
+  <p>
+    لديك حساب بالفعل؟
     <a href="login.html">تسجيل الدخول</a>
-  </div>
-
+  </p>
 </div>
 
 <!-- JS -->
 <script src="assets/js/auth.js"></script>
-
 </body>
 </html>
