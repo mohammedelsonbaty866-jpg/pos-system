@@ -408,3 +408,31 @@ body {
 .btn.danger {
   background: #f44336;
 }
+.top-bar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px;
+  background:#0f172a;
+  color:#fff;
+}
+
+.top-actions button{
+  margin-right:6px;
+  background:#334155;
+  border:none;
+  color:#fff;
+  padding:6px 10px;
+  border-radius:6px;
+}
+
+.settings-page{
+  padding:12px;
+}
+
+.card{
+  background:#fff;
+  padding:12px;
+  border-radius:10px;
+  margin-bottom:12px;
+}
