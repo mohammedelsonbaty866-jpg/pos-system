@@ -2,99 +2,41 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>تسجيل الدخول | POS Pro</title>
+  <title>تسجيل الدخول | POS</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="assets/css/style.css">
-
-  <style>
-    body {
-      background: linear-gradient(135deg, #020617, #0f172a);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-      font-family: Arial, sans-serif;
-    }
-
-    .auth-box {
-      background: #fff;
-      width: 100%;
-      max-width: 380px;
-      padding: 25px;
-      border-radius: 14px;
-      box-shadow: 0 15px 40px rgba(0,0,0,.3);
-    }
-
-    .auth-box h1 {
-      text-align: center;
-      margin-bottom: 20px;
-      color: #020617;
-    }
-
-    .auth-box input {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 12px;
-      border-radius: 10px;
-      border: 1px solid #cbd5f5;
-      font-size: 15px;
-    }
-
-    .auth-box button {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 10px;
-      background: #22c55e;
-      color: #fff;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    .auth-box button:hover {
-      opacity: .9;
-    }
-
-    .auth-box .link {
-      text-align: center;
-      margin-top: 15px;
-      font-size: 14px;
-    }
-
-    .auth-box .link a {
-      color: #2563eb;
-      text-decoration: none;
-      font-weight: bold;
-    }
-
-    .error {
-      color: #ef4444;
-      font-size: 14px;
-      text-align: center;
-      margin-bottom: 10px;
-    }
-  </style>
+  <link rel="stylesheet" href="assets/css/auth.css">
 </head>
 
-<body>
+<body class="auth-body">
 
-  <div class="auth-box">
-    <h1>تسجيل الدخول</h1>
+  <div class="auth-container">
 
-    <div id="errorMsg" class="error"></div>
+    <h1>نظام نقاط بيع</h1>
+    <p class="subtitle">تسجيل الدخول / إنشاء حساب</p>
 
-    <input id="phone" type="tel" placeholder="رقم الهاتف">
-    <input id="password" type="password" placeholder="كلمة المرور">
+    <!-- رقم الهاتف -->
+    <input 
+      type="tel" 
+      id="phone" 
+      placeholder="رقم الهاتف"
+      autocomplete="off"
+    >
 
-    <button onclick="login()">دخول</button>
+    <!-- كلمة المرور -->
+    <input 
+      type="password" 
+      id="password" 
+      placeholder="كلمة المرور"
+    >
 
-    <div class="link">
-      ليس لديك حساب؟
-      <a href="register.html">إنشاء حساب جديد</a>
-    </div>
+    <!-- أزرار -->
+    <button onclick="login()">تسجيل دخول</button>
+    <button class="secondary" onclick="register()">إنشاء حساب جديد</button>
+
+    <p id="msg"></p>
+
   </div>
 
   <!-- JS -->
