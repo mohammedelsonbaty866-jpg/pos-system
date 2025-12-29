@@ -1,18 +1,34 @@
-/***********************
+/************************
  * AUTH GUARD
- * يمنع الدخول بدون تسجيل
- ***********************/
+ * حماية الصفحات
+ ************************/
 
-(function () {
-  const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+/* ===== المستخدم الحالي ===== */
+function getCurrentUser() {
+  return JSON.parse(localStorage.getItem("currentUser"));
+}
 
-  // لو مفيش مستخدم مسجل
-  if (!currentUser) {
+function setCurrentUser(phone) {
+  const users = JSON.parse(localStorage.getItem("users")) || [];
+  const user = users.find(u => u.phone === phone);
+  localStorage.setItem("currentUser", JSON.stringify(user));
+}
+
+/* ===== تسجيل خروج ===== */
+function logout() {
+  localStorage.removeItem("currentUser");
+  window.location.href = "login.html";
+}
+
+/* ===== فحص الدخول ===== */
+(function authGuard() {
+  const publicPages = ["login.html", "register.html"];
+  const currentPage = location.pathname.split("/").pop();
+
+  if (publicPages.includes(currentPage)) return;
+
+  const user = getCurrentUser();
+  if (!user) {
     window.location.href = "login.html";
-    return;
   }
-
-  // التحقق من الصلاحيات (لو احتجنا مستقبلاً)
-  window.USER_ROLE = currentUser.role; // owner | cashier
-  window.USER_NAME = currentUser.name || "صاحب المتجر";
 })();
