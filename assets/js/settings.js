@@ -1,56 +1,43 @@
-const storeNameInput = document.getElementById("storeName");
-const storePhoneInput = document.getElementById("storePhone");
-const cashiersList = document.getElementById("cashiersList");
+// ===== SETTINGS PAGE =====
 
-let store = JSON.parse(localStorage.getItem("store")) || {};
-let cashiers = JSON.parse(localStorage.getItem("cashiers")) || [];
+const owner = JSON.parse(localStorage.getItem("currentUser"));
+const cashiers = JSON.parse(localStorage.getItem("cashiers")) || [];
 
-storeNameInput.value = store.name || "";
-storePhoneInput.value = store.phone || "";
+document.getElementById("ownerPhone").innerText = owner.phone;
 
-function saveStore() {
-  store = {
-    name: storeNameInput.value,
-    phone: storePhoneInput.value
-  };
-  localStorage.setItem("store", JSON.stringify(store));
-  alert("تم حفظ بيانات المتجر");
+function renderCashiers() {
+  const list = document.getElementById("cashiersList");
+  list.innerHTML = "";
+
+  cashiers.forEach((c, index) => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      ${c}
+      <button onclick="removeCashier(${index})">❌</button>
+    `;
+    list.appendChild(li);
+  });
 }
 
 function addCashier() {
-  const name = document.getElementById("cashierName").value;
-  const phone = document.getElementById("cashierPhone").value;
+  const phone = document.getElementById("cashierPhone").value.trim();
+  if (!phone) return alert("أدخل رقم الهاتف");
 
-  if (!name || !phone) {
-    alert("أدخل البيانات كاملة");
-    return;
-  }
-
-  cashiers.push({ name, phone });
+  cashiers.push(phone);
   localStorage.setItem("cashiers", JSON.stringify(cashiers));
-
-  document.getElementById("cashierName").value = "";
   document.getElementById("cashierPhone").value = "";
-
   renderCashiers();
-}
-
-function renderCashiers() {
-  cashiersList.innerHTML = "";
-  cashiers.forEach((c, i) => {
-    cashiersList.innerHTML += `
-      <li>
-        ${c.name} - ${c.phone}
-        <button onclick="removeCashier(${i})">✖</button>
-      </li>
-    `;
-  });
 }
 
 function removeCashier(index) {
   cashiers.splice(index, 1);
   localStorage.setItem("cashiers", JSON.stringify(cashiers));
   renderCashiers();
+}
+
+function logout() {
+  localStorage.removeItem("currentUser");
+  location.href = "login.html";
 }
 
 renderCashiers();
