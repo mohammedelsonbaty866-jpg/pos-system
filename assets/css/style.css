@@ -1,8 +1,216 @@
-body { font-family: Tahoma; margin:0; background:#f4f4f4 }
-.top-bar { background:#222; color:#fff; padding:10px; display:flex; justify-content:space-between }
-.pos-layout { display:flex }
-.products-panel, .invoice-panel { padding:10px; width:50% }
-.product { background:#fff; margin:5px; padding:10px; cursor:pointer }
-.auth-page { display:flex; justify-content:center; align-items:center; height:100vh }
-.auth-box { background:#fff; padding:20px; width:300px }
-input, button { width:100%; margin:5px 0; padding:8px }
+/* =====================================
+   GLOBAL
+===================================== */
+* {
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Arial;
+}
+
+body {
+  margin: 0;
+  background: #f4f6f9;
+  color: #222;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* =====================================
+   HEADER
+===================================== */
+.top-bar {
+  background: #1e293b;
+  color: #fff;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.top-bar h1 {
+  font-size: 18px;
+  margin: 0;
+}
+
+.top-bar nav a {
+  margin: 0 6px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.top-bar nav a.active,
+.top-bar nav a:hover {
+  background: #2563eb;
+}
+
+/* =====================================
+   LAYOUT
+===================================== */
+.pos-layout {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+}
+
+/* =====================================
+   PRODUCTS PANEL
+===================================== */
+.products-panel {
+  flex: 2;
+  background: #fff;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.products-panel h2 {
+  margin: 0 0 10px;
+}
+
+.products-panel input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+#productsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.product-card {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+  text-align: center;
+  border: 1px solid #e5e7eb;
+  transition: 0.2s;
+}
+
+.product-card:hover {
+  background: #eef2ff;
+}
+
+.product-card h3 {
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+.product-card span {
+  font-weight: bold;
+  color: #2563eb;
+}
+
+/* =====================================
+   INVOICE PANEL
+===================================== */
+.invoice-panel {
+  flex: 1;
+  background: #fff;
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.invoice-panel h2 {
+  margin: 0 0 10px;
+}
+
+#invoiceItems {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.invoice-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 6px;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  padding: 6px 0;
+}
+
+.invoice-row button {
+  border: none;
+  background: #e11d48;
+  color: #fff;
+  border-radius: 4px;
+  padding: 4px 6px;
+  cursor: pointer;
+}
+
+.qty-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.qty-controls button {
+  background: #2563eb;
+}
+
+/* =====================================
+   TOTAL + ACTIONS
+===================================== */
+.total-box {
+  display: flex;
+  justify-content: space-between;
+  font-size: 18px;
+  padding: 10px 0;
+  border-top: 2px solid #eee;
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+}
+
+.actions button {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.btn-save {
+  background: #16a34a;
+  color: #fff;
+}
+
+.btn-clear {
+  background: #dc2626;
+  color: #fff;
+}
+
+/* =====================================
+   FOOTER
+===================================== */
+footer {
+  text-align: center;
+  padding: 8px;
+  font-size: 13px;
+  color: #555;
+}
+
+/* =====================================
+   RESPONSIVE (MOBILE)
+===================================== */
+@media (max-width: 900px) {
+  .pos-layout {
+    flex-direction: column;
+  }
+
+  .top-bar {
+    flex-direction: column;
+    gap: 6px;
+  }
+}
