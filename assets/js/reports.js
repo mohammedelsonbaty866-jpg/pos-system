@@ -1,45 +1,61 @@
-let invoices = JSON.parse(localStorage.getItem("invoices")) || [];
+// ===== DATA =====
+const invoices = JSON.parse(localStorage.getItem("invoices")) || [];
 
-function render(invoicesList) {
-  const table = document.getElementById("reportsTable");
-  table.innerHTML = "";
+// ===== DAILY =====
+function dailyReport() {
+  const today = new Date().toLocaleDateString();
+  const todayInvoices = invoices.filter(i =>
+    new Date(i.date).toLocaleDateString() === today
+  );
+
   let total = 0;
+  todayInvoices.forEach(i => total += i.total);
 
-  invoicesList.forEach((inv, i) => {
-    let invoiceTotal = inv.items.reduce((a, b) => a + (b.price * b.qty), 0);
-    total += invoiceTotal;
+  document.getElementById("dailyResult").innerHTML = `
+    عدد الفواتير: ${todayInvoices.length}<br>
+    إجمالي المبيعات: ${total} ج
+  `;
+}
 
-    table.innerHTML += `
-      <tr>
-        <td>${i + 1}</td>
-        <td>${inv.date}</td>
-        <td>${inv.items.length}</td>
-        <td>${invoiceTotal}</td>
-      </tr>
-    `;
+// ===== MONTHLY =====
+function monthlyReport() {
+  const month = document.getElementById("monthInput").value;
+  if (!month) return alert("اختر شهر");
+
+  let total = 0;
+  let count = 0;
+
+  invoices.forEach(i => {
+    if (i.date.startsWith(month)) {
+      total += i.total;
+      count++;
+    }
   });
 
-  document.getElementById("grandTotal").textContent = total;
+  document.getElementById("monthlyResult").innerHTML = `
+    عدد الفواتير: ${count}<br>
+    إجمالي المبيعات: ${total} ج
+  `;
 }
 
-function loadAll() {
-  render(invoices);
-}
+// ===== TOP PRODUCTS =====
+function topProducts() {
+  const map = {};
 
-function loadToday() {
-  const today = new Date().toLocaleDateString("ar-EG");
-  const todayInvoices = invoices.filter(i =>
-    i.date.includes(today)
+  invoices.forEach(inv => {
+    inv.items.forEach(it => {
+      map[it.name] = (map[it.name] || 0) + it.qty;
+    });
+  });
+
+  const sorted = Object.entries(map)
+    .sort((a,b)=>b[1]-a[1])
+    .slice(0,5);
+
+  const list = document.getElementById("topProductsList");
+  list.innerHTML = "";
+
+  sorted.forEach(p =>
+    list.innerHTML += `<li>${p[0]} - ${p[1]}</li>`
   );
-  render(todayInvoices);
 }
-
-function clearReports() {
-  if (confirm("متأكد من مسح كل التقارير؟")) {
-    localStorage.removeItem("invoices");
-    invoices = [];
-    render([]);
-  }
-}
-
-loadAll();
