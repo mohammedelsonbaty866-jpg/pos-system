@@ -8,3 +8,8 @@ let products = JSON.parse(localStorage.getItem("products")) || [
 function saveProducts() {
   localStorage.setItem("products", JSON.stringify(products));
 }
+let currentUser = JSON.parse(localStorage.getItem("loggedUser"));
+
+if (!currentUser) {
+  window.location.href = "login.html";
+}
