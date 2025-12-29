@@ -1,52 +1,31 @@
-// ===== SETTINGS =====
+let settings = JSON.parse(localStorage.getItem("settings")) || {};
+let cashiers = JSON.parse(localStorage.getItem("cashiers")) || [];
 
-// تحميل البيانات
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("storeName").value =
-    localStorage.getItem("storeName") || "";
+function saveSettings() {
+  settings.shopName = document.getElementById("shopName").value;
+  settings.shopPhone = document.getElementById("shopPhone").value;
 
-  document.getElementById("storePhone").value =
-    localStorage.getItem("storePhone") || "";
-
-  document.getElementById("barcodeSound").checked =
-    localStorage.getItem("barcodeSound") !== "off";
-
-  renderCashiers();
-});
-
-// حفظ بيانات المحل
-function saveStore() {
-  localStorage.setItem("storeName", storeName.value);
-  localStorage.setItem("storePhone", storePhone.value);
-  alert("تم الحفظ");
+  localStorage.setItem("settings", JSON.stringify(settings));
+  alert("تم حفظ الإعدادات");
 }
 
-// ===== CASHIERS =====
 function addCashier() {
-  const name = cashierName.value.trim();
-  const phone = cashierPhone.value.trim();
+  const name = document.getElementById("cashierName").value;
+  const phone = document.getElementById("cashierPhone").value;
+
   if (!name || !phone) return alert("أكمل البيانات");
 
-  const cashiers = JSON.parse(localStorage.getItem("cashiers")) || [];
   cashiers.push({ name, phone });
   localStorage.setItem("cashiers", JSON.stringify(cashiers));
-
-  cashierName.value = "";
-  cashierPhone.value = "";
   renderCashiers();
 }
 
 function renderCashiers() {
-  const list = document.getElementById("cashiersList");
-  const cashiers = JSON.parse(localStorage.getItem("cashiers")) || [];
-  list.innerHTML = "";
-
-  cashiers.forEach(c =>
-    list.innerHTML += `<li>${c.name} - ${c.phone}</li>`
-  );
+  const box = document.getElementById("cashiersList");
+  box.innerHTML = "";
+  cashiers.forEach(c => {
+    box.innerHTML += `<div>👤 ${c.name} - ${c.phone}</div>`;
+  });
 }
 
-// ===== BARCODE SOUND =====
-document.getElementById("barcodeSound").addEventListener("change", e => {
-  localStorage.setItem("barcodeSound", e.target.checked ? "on" : "off");
-});
+renderCashiers();
