@@ -1,10 +1,57 @@
-// ===== CASHIER =====
+/* =========================
+   CASHIER.JS | POS PRO
+========================= */
+
+// عناصر الصفحة
+const productsGrid = document.getElementById("productsGrid");
+const invoiceItems = document.getElementById("invoiceItems");
+const totalEl = document.getElementById("total");
+const barcodeInput = document.getElementById("barcodeInput");
+
+// الفاتورة الحالية
 let cart = [];
 
+// صوت الباركود
+const beep = new Audio("assets/sounds/beep.mp3");
+
+// =========================
+// تحميل المنتجات
+// =========================
+function renderProducts(list = products) {
+  productsGrid.innerHTML = "";
+
+  list.forEach(product => {
+    const div = document.createElement("div");
+    div.className = "product-card";
+    div.innerHTML = `
+      <h4>${product.name}</h4>
+      <p>${product.price} ج</p>
+    `;
+    div.onclick = () => addToCart(product);
+    productsGrid.appendChild(div);
+  });
+}
+
+renderProducts();
+
+// =========================
+// البحث
+// =========================
+function searchProduct(keyword) {
+  const filtered = products.filter(p =>
+    p.name.toLowerCase().includes(keyword.toLowerCase())
+  );
+  renderProducts(filtered);
+}
+
+// =========================
+// إضافة للفاتورة
+// =========================
 function addToCart(product) {
-  let item = cart.find(i => i.id === product.id);
-  if (item) {
-    item.qty++;
+  const existing = cart.find(item => item.id === product.id);
+
+  if (existing) {
+    existing.qty += 1;
   } else {
     cart.push({
       id: product.id,
@@ -13,95 +60,93 @@ function addToCart(product) {
       qty: 1
     });
   }
+
   renderInvoice();
 }
 
+// =========================
+// رسم الفاتورة
+// =========================
 function renderInvoice() {
-  const box = document.getElementById("invoiceItems");
-  const totalBox = document.getElementById("total");
-
-  box.innerHTML = "";
+  invoiceItems.innerHTML = "";
   let total = 0;
 
-  cart.forEach(i => {
-    total += i.price * i.qty;
-    box.innerHTML += `
-      <div class="invoice-item">
-        ${i.name} × ${i.qty}
-        <strong>${i.price * i.qty} ج</strong>
-      </div>`;
+  cart.forEach((item, index) => {
+    total += item.price * item.qty;
+
+    const row = document.createElement("div");
+    row.className = "invoice-row";
+    row.innerHTML = `
+      <span>${item.name}</span>
+      <span>${item.qty} × ${item.price}</span>
+      <button onclick="removeItem(${index})">❌</button>
+    `;
+    invoiceItems.appendChild(row);
   });
 
-  totalBox.innerText = total + " ج";
-}
-// 🔍 بحث بالاسم أو الباركود
-function searchProduct(value) {
-  const grid = document.getElementById("productsGrid");
-  grid.innerHTML = "";
-
-  products
-    .filter(p =>
-      p.name.includes(value) || p.barcode === value
-    )
-    .forEach(p => {
-      grid.innerHTML += `
-        <div class="product-card" onclick="addToInvoice(${p.id})">
-          <strong>${p.name}</strong>
-          <span>${p.price} ج</span>
-        </div>
-      `;
-    });
+  totalEl.textContent = total + " ج";
 }
 
-// 📷 مسح باركود (كأنه كيبورد)
-let barcodeBuffer = "";
-document.addEventListener("keydown", e => {
-  if (e.key === "Enter") {
-    const product = products.find(p => p.barcode === barcodeBuffer);
-    if (product) addToInvoice(product.id);
-    barcodeBuffer = "";
-  } else {
-    barcodeBuffer += e.key;
-  }
-});
-let cart = [];
-let discount = 0;
-let vat = 0.14; // 14%
-
-function calculateTotal() {
-  let subtotal = cart.reduce((a,i)=>a + i.price*i.qty,0);
-  let vatValue = subtotal * vat;
-  let final = subtotal + vatValue - discount;
-
-  document.getElementById("total").innerText =
-    `الإجمالي: ${final.toFixed(2)} ج`;
+// =========================
+// حذف عنصر
+// =========================
+function removeItem(index) {
+  cart.splice(index, 1);
+  renderInvoice();
 }
 
-function applyDiscount(val) {
-  discount = +val;
-  calculateTotal();
-}
-function openSettings() {
-  window.location.href = "settings.html";
-}
+// =========================
+// تفريغ الفاتورة
+// =========================
+function clearInvoice() {
+  if (!cart.length) return;
+  if (!confirm("تفريغ الفاتورة؟")) return;
 
-function logout() {
-  localStorage.removeItem("loggedUser");
-  window.location.href = "login.html";
-}
-function saveInvoice() {
-  if (cart.length === 0) return;
-
-  invoices.push({
-    id: Date.now(),
-    user: currentUser.name,
-    role: currentUser.role,
-    total: totalAmount,
-    items: cart,
-    date: new Date().toLocaleString()
-  });
-
-  localStorage.setItem("invoices", JSON.stringify(invoices));
   cart = [];
   renderInvoice();
 }
+
+// =========================
+// حفظ الفاتورة
+// =========================
+function saveInvoice() {
+  if (!cart.length) {
+    alert("الفاتورة فارغة");
+    return;
+  }
+
+  const invoices = JSON.parse(localStorage.getItem("invoices") || "[]");
+
+  invoices.push({
+    id: Date.now(),
+    date: new Date().toLocaleString("ar-EG"),
+    items: cart,
+    total: totalEl.textContent
+  });
+
+  localStorage.setItem("invoices", JSON.stringify(invoices));
+
+  alert("تم حفظ الفاتورة");
+  clearInvoice();
+}
+
+// =========================
+// دعم الباركود
+// =========================
+barcodeInput?.addEventListener("keydown", function (e) {
+  if (e.key === "Enter") {
+    const code = barcodeInput.value.trim();
+    if (!code) return;
+
+    const product = products.find(p => p.barcode === code);
+
+    if (product) {
+      beep.play();
+      addToCart(product);
+    } else {
+      alert("المنتج غير موجود");
+    }
+
+    barcodeInput.value = "";
+  }
+});
