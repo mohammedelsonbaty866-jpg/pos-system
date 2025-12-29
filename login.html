@@ -1,46 +1,86 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>تسجيل الدخول | POS Pro</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>تسجيل الدخول | POS Pro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- CSS -->
-<link rel="stylesheet" href="assets/css/auth.css">
+  <!-- CSS -->
+  <link rel="stylesheet" href="assets/css/style.css">
 
+  <style>
+    body{
+      background:#0f172a;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      height:100vh;
+      font-family:Arial;
+    }
+    .auth-box{
+      background:#fff;
+      width:100%;
+      max-width:380px;
+      padding:25px;
+      border-radius:14px;
+      box-shadow:0 10px 30px rgba(0,0,0,.4);
+    }
+    .auth-box h1{
+      text-align:center;
+      margin-bottom:20px;
+      color:#020617;
+    }
+    .auth-box input{
+      width:100%;
+      padding:12px;
+      margin-bottom:12px;
+      border-radius:10px;
+      border:1px solid #cbd5e1;
+      font-size:15px;
+    }
+    .auth-box button{
+      width:100%;
+      padding:12px;
+      border:none;
+      border-radius:10px;
+      background:#22c55e;
+      color:#fff;
+      font-size:16px;
+      cursor:pointer;
+    }
+    .auth-box button:hover{
+      background:#16a34a;
+    }
+    .auth-box p{
+      text-align:center;
+      margin-top:15px;
+      font-size:14px;
+    }
+    .auth-box a{
+      color:#2563eb;
+      text-decoration:none;
+      font-weight:bold;
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="auth-container">
+<div class="auth-box">
+  <h1>POS Pro</h1>
 
-  <h1>نظام نقاط بيع</h1>
-  <p>تسجيل الدخول</p>
+  <input id="loginPhone" placeholder="رقم الهاتف">
+  <input id="loginPassword" type="password" placeholder="كلمة المرور">
 
-  <input
-    type="tel"
-    id="phone"
-    placeholder="رقم الهاتف"
-    autocomplete="username"
-  >
+  <button onclick="login()">تسجيل الدخول</button>
 
-  <input
-    type="password"
-    id="password"
-    placeholder="كلمة المرور"
-    autocomplete="current-password"
-  >
-
-  <button onclick="login()">دخول</button>
-
-  <div class="auth-footer">
-    <span>ليس لديك حساب؟</span>
-    <a href="register.html">إنشاء حساب جديد</a>
-  </div>
-
+  <p>
+    ليس لديك حساب؟
+    <a href="register.html">إنشاء حساب</a>
+  </p>
 </div>
 
 <!-- JS -->
 <script src="assets/js/auth.js"></script>
-
 </body>
 </html>
