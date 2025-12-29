@@ -1,37 +1,24 @@
-/*************************************************
- * AUTH GUARD
- * حماية الصفحات من الدخول بدون تسجيل
- *************************************************/
+/* =====================================
+   AUTH GUARD
+   يمنع فتح أي صفحة بدون تسجيل دخول
+   ===================================== */
 
 (function () {
+  const user = JSON.parse(localStorage.getItem("currentUser"));
 
   // الصفحات المسموح فتحها بدون تسجيل
-  const publicPages = [
-    "login.html",
-    "register.html"
-  ];
+  const publicPages = ["login.html", "register.html"];
 
-  const currentPage = location.pathname.split("/").pop();
+  const currentPage = window.location.pathname.split("/").pop();
 
-  // لو الصفحة عامة → خروج
-  if (publicPages.includes(currentPage)) return;
-
-  // فحص المستخدم الحالي
-  const user = localStorage.getItem("currentUser");
-
-  if (!user) {
-    location.replace("login.html");
+  // لو المستخدم مش مسجل دخول
+  if (!user && !publicPages.includes(currentPage)) {
+    window.location.href = "login.html";
     return;
   }
 
-  try {
-    const parsed = JSON.parse(user);
-    if (!parsed.phone) {
-      throw "invalid user";
-    }
-  } catch (e) {
-    localStorage.removeItem("currentUser");
-    location.replace("login.html");
+  // لو مسجل دخول وحاول يفتح login أو register
+  if (user && publicPages.includes(currentPage)) {
+    window.location.href = "index.html";
   }
-
 })();
