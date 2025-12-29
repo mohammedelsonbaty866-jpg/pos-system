@@ -1,80 +1,91 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>POS Pro | الكاشير</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>POS | شاشة الكاشير</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link rel="stylesheet" href="assets/css/style.css">
-  <div class="barcode-box">
-  <input
-    id="barcodeInput"
-    type="text"
-    placeholder="باركود / اسم الصنف"
-    onkeyup="handleBarcodeInput(event)"
-    autofocus
-  >
-  <audio id="beepSound" src="assets/sounds/beep.mp3" preload="auto"></audio>
-</div>
+  <!-- ===== CSS ===== -->
+  <link rel="stylesheet" href="assets/css/style.css">
+
+  <!-- منع الدخول بدون تسجيل -->
+  <script src="assets/js/auth-guard.js"></script>
 </head>
 
 <body>
 
-<script src="assets/js/auth-guard.js"></script>
-
-<!-- ===== TOP BAR ===== -->
+<!-- ===== HEADER ===== -->
 <header class="top-bar">
-  <h1>نظام نقاط بيع</h1>
+  <div class="logo">نظام نقاط بيع</div>
 
-  <div class="top-actions">
-    <button onclick="openSettings()">⚙️ الإعدادات</button>
-    <button onclick="logout()">🚪 خروج</button>
-  </div>
+  <nav class="nav-links">
+    <a href="index.html" class="active">الكاشير</a>
+    <a href="products.html">الأصناف</a>
+    <a href="reports.html">التقارير</a>
+    <a href="settings.html">الإعدادات</a>
+  </nav>
+
+  <button class="logout-btn" onclick="logout()">خروج</button>
 </header>
 
 <!-- ===== MAIN ===== -->
-<main class="pos-container">
+<main class="pos-layout">
 
-  <!-- المنتجات -->
-  <section class="products-section">
+  <!-- ===== المنتجات ===== -->
+  <section class="products-panel">
     <h2>المنتجات</h2>
 
-    <input 
-      type="text" 
-      placeholder="بحث بالاسم أو الباركود"
-      class="search-input"
+    <!-- البحث -->
+    <input
+      type="text"
+      id="searchInput"
+      placeholder="بحث بالاسم أو الباركود..."
       onkeyup="searchProduct(this.value)"
+      autofocus
     >
 
+    <!-- شبكة المنتجات -->
     <div id="productsGrid" class="products-grid"></div>
   </section>
 
-  <!-- الفاتورة -->
-  <section class="invoice-section">
+  <!-- ===== الفاتورة ===== -->
+  <section class="invoice-panel">
     <h2>الفاتورة</h2>
 
     <div id="invoiceItems" class="invoice-items"></div>
 
-    <div class="invoice-total">
-      <span>الإجمالي</span>
+    <div class="total-box">
+      <span>الإجمالي:</span>
       <strong id="total">0 ج</strong>
     </div>
 
-    <div class="invoice-actions">
-      <button onclick="saveInvoice()" class="btn primary">حفظ</button>
-      <button onclick="clearInvoice()" class="btn danger">تفريغ</button>
+    <div class="actions">
+      <button class="btn-save" onclick="saveInvoice()">حفظ الفاتورة</button>
+      <button class="btn-clear" onclick="clearInvoice()">تفريغ</button>
     </div>
   </section>
 
 </main>
 
-<footer class="footer">
-  POS PRO ©
+<!-- ===== صوت الباركود ===== -->
+<audio id="beepSound" src="assets/sounds/beep.mp3" preload="auto"></audio>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  نسخة PRO — نظام كاشير احترافي
 </footer>
 
+<!-- ===== JS ===== -->
 <script src="assets/js/data.js"></script>
 <script src="assets/js/products.js"></script>
 <script src="assets/js/cashier.js"></script>
+
+<script>
+  function logout() {
+    localStorage.removeItem("loggedUser");
+    window.location.href = "login.html";
+  }
+</script>
 
 </body>
 </html>
