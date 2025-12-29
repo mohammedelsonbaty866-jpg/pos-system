@@ -1,61 +1,48 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>إنشاء حساب | POS</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>إنشاء حساب | POS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link rel="stylesheet" href="assets/css/style.css">
-
-<style>
-body{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  height:100vh;
-  background:#020617;
-  font-family:Arial;
-}
-.auth-box{
-  background:#fff;
-  padding:25px;
-  width:320px;
-  border-radius:12px;
-}
-.auth-box h2{
-  text-align:center;
-  margin-bottom:15px;
-}
-.auth-box input{
-  width:100%;
-  padding:10px;
-  margin-bottom:10px;
-}
-.auth-box button{
-  width:100%;
-  padding:10px;
-  background:#2563eb;
-  border:none;
-  color:#fff;
-  font-size:16px;
-  cursor:pointer;
-}
-</style>
+  <!-- CSS -->
+  <link rel="stylesheet" href="assets/css/auth.css">
 </head>
 
-<body>
+<body class="auth-page">
 
-<div class="auth-box">
-  <h2>إنشاء حساب</h2>
+  <div class="auth-box">
+    <h2>إنشاء حساب جديد</h2>
 
-  <input id="regUser" placeholder="اسم المستخدم">
-  <input id="regPass" type="password" placeholder="كلمة المرور">
+    <input 
+      type="text" 
+      id="registerName" 
+      placeholder="اسم صاحب النظام"
+    >
 
-  <button onclick="register()">تسجيل</button>
-</div>
+    <input 
+      type="tel" 
+      id="registerPhone" 
+      placeholder="رقم الهاتف"
+    >
 
-<script src="assets/js/core/data.js"></script>
-<script src="assets/js/core/auth.js"></script>
+    <input 
+      type="password" 
+      id="registerPassword" 
+      placeholder="كلمة المرور"
+    >
 
+    <button onclick="register()">إنشاء الحساب</button>
+
+    <p class="auth-link">
+      لديك حساب بالفعل؟
+      <a href="login.html">تسجيل الدخول</a>
+    </p>
+
+    <div id="registerError" class="error"></div>
+  </div>
+
+  <!-- JS -->
+  <script src="assets/js/auth.js"></script>
 </body>
 </html>
