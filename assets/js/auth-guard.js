@@ -1,32 +1,28 @@
-/* ===============================
-   AUTH GUARD - POS PRO
-================================ */
+// auth-guard.js
+(function () {
 
-const SESSION_KEY = "pos_session";
-const USERS_KEY = "pos_users";
+  const user = localStorage.getItem("loggedUser");
 
-/* ===== Check Session ===== */
-(function checkAuth() {
-  const session = JSON.parse(localStorage.getItem(SESSION_KEY));
-
-  if (!session || !session.userId) {
-    // مش مسجل دخول
-    window.location.href = "login.html";
+  // لو مفيش مستخدم مسجل دخول
+  if (!user) {
+    // منع الدخول + تحويل لصفحة الدخول
+    window.location.replace("login.html");
     return;
   }
 
-  // تأكد إن المستخدم لسه موجود
-  const users = JSON.parse(localStorage.getItem(USERS_KEY)) || [];
-  const userExists = users.find(u => u.id === session.userId);
+  // تحويل النص لكائن
+  try {
+    const parsedUser = JSON.parse(user);
 
-  if (!userExists) {
-    localStorage.removeItem(SESSION_KEY);
-    window.location.href = "login.html";
+    // أمان إضافي
+    if (!parsedUser.phone) {
+      localStorage.removeItem("loggedUser");
+      window.location.replace("login.html");
+    }
+
+  } catch (e) {
+    localStorage.removeItem("loggedUser");
+    window.location.replace("login.html");
   }
-})();
 
-/* ===== Logout ===== */
-function logout() {
-  localStorage.removeItem(SESSION_KEY);
-  window.location.href = "login.html";
-}
+})();
