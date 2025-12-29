@@ -12,3 +12,8 @@ if (!localStorage.getItem("loggedUser")) {
 function logout() {
   localStorage.removeItem("loggedUser");
 }
+let currentUser = JSON.parse(localStorage.getItem("loggedUser"));
+
+if (!currentUser) {
+  window.location.href = "login.html";
+}
