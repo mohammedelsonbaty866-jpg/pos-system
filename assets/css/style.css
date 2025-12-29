@@ -257,3 +257,110 @@ footer {
   justify-content: space-between;
   padding: 6px 0;
 }
+/* ===== POS PRO UI ===== */
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #f5f6fa;
+}
+
+.top-bar {
+  background: #111827;
+  color: #fff;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-links a {
+  color: #fff;
+  margin-left: 15px;
+  text-decoration: none;
+}
+
+.nav-links .active {
+  border-bottom: 2px solid #22c55e;
+}
+
+.settings-btn {
+  background: #22c55e;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+.pos-container {
+  display: flex;
+  gap: 15px;
+  padding: 15px;
+}
+
+.products-section,
+.invoice-section {
+  background: #fff;
+  border-radius: 10px;
+  padding: 15px;
+}
+
+.products-section {
+  flex: 2;
+}
+
+.invoice-section {
+  flex: 1;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.invoice-items {
+  min-height: 200px;
+}
+
+.invoice-total {
+  display: flex;
+  justify-content: space-between;
+  font-size: 20px;
+  margin-top: 10px;
+}
+
+.invoice-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.btn {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.primary {
+  background: #22c55e;
+  color: #fff;
+}
+
+.danger {
+  background: #ef4444;
+  color: #fff;
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+  .pos-container {
+    flex-direction: column;
+  }
+}
