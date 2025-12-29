@@ -2,47 +2,158 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>تسجيل الدخول | POS</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تسجيل الدخول | POS Pro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-<link rel="stylesheet" href="assets/css/auth.css">
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#0f172a;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+.auth-box{
+  background:#fff;
+  width:100%;
+  max-width:360px;
+  border-radius:14px;
+  padding:20px;
+}
+h2{
+  text-align:center;
+  margin-bottom:15px;
+}
+input{
+  width:100%;
+  padding:12px;
+  margin-bottom:10px;
+  border-radius:10px;
+  border:1px solid #ccc;
+}
+button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  background:#22c55e;
+  color:#fff;
+  font-size:16px;
+  cursor:pointer;
+}
+.switch{
+  text-align:center;
+  margin-top:10px;
+  cursor:pointer;
+  color:#2563eb;
+}
+.error{
+  color:#ef4444;
+  font-size:14px;
+  text-align:center;
+}
+</style>
 </head>
 
-<body class="auth-page">
+<body>
 
 <div class="auth-box">
 
-  <h2>نظام نقاط بيع</h2>
+  <h2 id="title">تسجيل الدخول</h2>
 
-  <!-- ===== تسجيل دخول ===== -->
-  <div id="loginBox">
-    <input id="loginPhone" placeholder="رقم الهاتف">
-    <input id="loginPassword" type="password" placeholder="كلمة المرور">
+  <input id="phone" placeholder="رقم الهاتف">
+  <input id="password" type="password" placeholder="كلمة المرور">
 
-    <button onclick="login()">تسجيل الدخول</button>
+  <div id="error" class="error"></div>
 
-    <p>
-      ليس لديك حساب؟
-      <span onclick="showRegister()">إنشاء حساب</span>
-    </p>
-  </div>
+  <button onclick="submitAuth()">دخول</button>
 
-  <!-- ===== إنشاء حساب ===== -->
-  <div id="registerBox" style="display:none">
-    <input id="regName" placeholder="اسم المالك">
-    <input id="regPhone" placeholder="رقم الهاتف">
-    <input id="regPassword" type="password" placeholder="كلمة المرور">
-
-    <button onclick="register()">إنشاء الحساب</button>
-
-    <p>
-      لديك حساب؟
-      <span onclick="showLogin()">تسجيل الدخول</span>
-    </p>
+  <div class="switch" onclick="toggleMode()">
+    إنشاء حساب جديد
   </div>
 
 </div>
 
-<script src="assets/js/auth.js"></script>
+<script>
+const USERS_KEY = "pos_users";
+const SESSION_KEY = "pos_session";
+
+let mode = "login";
+
+/* ===== Toggle Login/Register ===== */
+function toggleMode(){
+  mode = mode === "login" ? "register" : "login";
+  document.getElementById("title").innerText =
+    mode === "login" ? "تسجيل الدخول" : "إنشاء حساب";
+  document.querySelector("button").innerText =
+    mode === "login" ? "دخول" : "تسجيل";
+  document.querySelector(".switch").innerText =
+    mode === "login" ? "إنشاء حساب جديد" : "لديك حساب؟ تسجيل دخول";
+  document.getElementById("error").innerText = "";
+}
+
+/* ===== Submit ===== */
+function submitAuth(){
+  const phone = phoneInput();
+  const pass = passwordInput();
+
+  if(!phone || !pass){
+    showError("أدخل البيانات كاملة");
+    return;
+  }
+
+  let users = JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+
+  if(mode === "register"){
+    if(users.find(u => u.phone === phone)){
+      showError("رقم الهاتف مسجل بالفعل");
+      return;
+    }
+
+    const user = {
+      id: Date.now(),
+      phone,
+      password: pass,
+      role: "owner",
+      created: new Date().toISOString()
+    };
+
+    users.push(user);
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+
+    createSession(user.id);
+  } else {
+    const user = users.find(u => u.phone === phone && u.password === pass);
+    if(!user){
+      showError("بيانات غير صحيحة");
+      return;
+    }
+    createSession(user.id);
+  }
+}
+
+/* ===== Helpers ===== */
+function createSession(userId){
+  localStorage.setItem(SESSION_KEY, JSON.stringify({
+    userId,
+    time: Date.now()
+  }));
+  window.location.href = "index.html";
+}
+
+function showError(msg){
+  document.getElementById("error").innerText = msg;
+}
+
+function phoneInput(){
+  return document.getElementById("phone").value.trim();
+}
+function passwordInput(){
+  return document.getElementById("password").value.trim();
+}
+</script>
+
 </body>
 </html>
