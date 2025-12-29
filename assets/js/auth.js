@@ -1,65 +1,88 @@
-/* ===============================
-   AUTH SYSTEM (Owner Account)
-   =============================== */
+/* ================================
+   AUTH SYSTEM - POS PRO
+================================ */
 
+// LocalStorage Keys
 const USERS_KEY = "pos_users";
-const SESSION_KEY = "pos_current_user";
+const SESSION_KEY = "pos_session";
 
-/* ===== تحميل المستخدمين ===== */
+/* ================================
+   HELPERS
+================================ */
 function getUsers() {
   return JSON.parse(localStorage.getItem(USERS_KEY)) || [];
 }
 
-/* ===== حفظ المستخدمين ===== */
 function saveUsers(users) {
   localStorage.setItem(USERS_KEY, JSON.stringify(users));
 }
 
-/* ===== إنشاء حساب ===== */
-function register() {
-  const name = document.getElementById("registerName").value.trim();
-  const phone = document.getElementById("registerPhone").value.trim();
-  const password = document.getElementById("registerPassword").value;
+function setSession(user) {
+  localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+}
 
-  if (!name || !phone || !password) {
-    alert("من فضلك اكمل جميع البيانات");
+function getSession() {
+  return JSON.parse(localStorage.getItem(SESSION_KEY));
+}
+
+function clearSession() {
+  localStorage.removeItem(SESSION_KEY);
+}
+
+/* ================================
+   REGISTER
+================================ */
+function register() {
+  const storeName = document.getElementById("storeName")?.value.trim();
+  const phone = document.getElementById("phone")?.value.trim();
+  const password = document.getElementById("password")?.value;
+  const confirm = document.getElementById("confirmPassword")?.value;
+  const error = document.getElementById("errorMsg");
+
+  if (!storeName || !phone || !password || !confirm) {
+    error.innerText = "جميع الحقول مطلوبة";
     return;
   }
 
-  const users = getUsers();
+  if (password !== confirm) {
+    error.innerText = "كلمة المرور غير متطابقة";
+    return;
+  }
 
-  const exists = users.find(u => u.phone === phone);
-  if (exists) {
-    alert("رقم الهاتف مسجل بالفعل");
+  let users = getUsers();
+
+  if (users.find(u => u.phone === phone)) {
+    error.innerText = "رقم الهاتف مسجل بالفعل";
     return;
   }
 
   const newUser = {
     id: Date.now(),
-    name,
+    storeName,
     phone,
     password,
     role: "owner",
-    cashiers: []
+    cashiers: [],
+    createdAt: new Date().toISOString()
   };
 
   users.push(newUser);
   saveUsers(users);
+  setSession(newUser);
 
-  alert("تم إنشاء الحساب بنجاح، يمكنك تسجيل الدخول الآن");
-
-  document.getElementById("registerName").value = "";
-  document.getElementById("registerPhone").value = "";
-  document.getElementById("registerPassword").value = "";
+  window.location.href = "index.html";
 }
 
-/* ===== تسجيل دخول ===== */
+/* ================================
+   LOGIN
+================================ */
 function login() {
-  const phone = document.getElementById("loginPhone").value.trim();
-  const password = document.getElementById("loginPassword").value;
+  const phone = document.getElementById("phone")?.value.trim();
+  const password = document.getElementById("password")?.value;
+  const error = document.getElementById("errorMsg");
 
   if (!phone || !password) {
-    alert("ادخل رقم الهاتف وكلمة المرور");
+    error.innerText = "أدخل رقم الهاتف وكلمة المرور";
     return;
   }
 
@@ -69,21 +92,28 @@ function login() {
   );
 
   if (!user) {
-    alert("بيانات الدخول غير صحيحة");
+    error.innerText = "بيانات الدخول غير صحيحة";
     return;
   }
 
-  localStorage.setItem(SESSION_KEY, JSON.stringify({
-    id: user.id,
-    name: user.name,
-    role: user.role
-  }));
-
+  setSession(user);
   window.location.href = "index.html";
 }
 
-/* ===== تسجيل خروج ===== */
+/* ================================
+   AUTH GUARD
+================================ */
+function requireAuth() {
+  const session = getSession();
+  if (!session) {
+    window.location.href = "login.html";
+  }
+}
+
+/* ================================
+   LOGOUT
+================================ */
 function logout() {
-  localStorage.removeItem(SESSION_KEY);
+  clearSession();
   window.location.href = "login.html";
 }
