@@ -1,57 +1,22 @@
-/* ===============================
-   PRODUCTS.JS
-   عرض + بحث + إضافة للسلة
-================================ */
+let products = [
+  { id: 1, name: "شيبسي", price: 5 },
+  { id: 2, name: "بيبسي", price: 10 },
+  { id: 3, name: "مياه", price: 6 }
+];
 
-/*
-  يعتمد على:
-  - products (Array) من data.js
-  - addToCart(product) من cashier.js
-*/
-
-/* ===== عرض المنتجات ===== */
 function renderProducts(list = products) {
-  const grid = document.getElementById("productsGrid");
-  if (!grid) return;
-
-  grid.innerHTML = "";
-
-  if (list.length === 0) {
-    grid.innerHTML = `<p class="empty">لا توجد أصناف</p>`;
-    return;
-  }
-
-  list.forEach((product, index) => {
-    const card = document.createElement("div");
-    card.className = "product-card";
-
-    card.innerHTML = `
-      <h3>${product.name}</h3>
-      <p class="price">${product.price} ج</p>
-      <button onclick="addToCart(${index})">إضافة</button>
-    `;
-
-    grid.appendChild(card);
+  productsGrid.innerHTML = "";
+  list.forEach(p => {
+    const div = document.createElement("div");
+    div.className = "product";
+    div.innerText = `${p.name} - ${p.price}ج`;
+    div.onclick = () => addToInvoice(p);
+    productsGrid.appendChild(div);
   });
 }
 
-/* ===== البحث ===== */
-function searchProduct(keyword) {
-  keyword = keyword.trim().toLowerCase();
-
-  if (keyword === "") {
-    renderProducts(products);
-    return;
-  }
-
-  const filtered = products.filter(p =>
-    p.name.toLowerCase().includes(keyword)
-  );
-
-  renderProducts(filtered);
+function searchProduct(v) {
+  renderProducts(products.filter(p => p.name.includes(v)));
 }
 
-/* ===== تحميل تلقائي ===== */
-document.addEventListener("DOMContentLoaded", () => {
-  renderProducts();
-});
+renderProducts();
