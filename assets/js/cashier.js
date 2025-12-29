@@ -89,3 +89,19 @@ function logout() {
   localStorage.removeItem("loggedUser");
   window.location.href = "login.html";
 }
+function saveInvoice() {
+  if (cart.length === 0) return;
+
+  invoices.push({
+    id: Date.now(),
+    user: currentUser.name,
+    role: currentUser.role,
+    total: totalAmount,
+    items: cart,
+    date: new Date().toLocaleString()
+  });
+
+  localStorage.setItem("invoices", JSON.stringify(invoices));
+  cart = [];
+  renderInvoice();
+}
