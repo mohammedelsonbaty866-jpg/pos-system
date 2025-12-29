@@ -1,28 +1,27 @@
-// auth-guard.js
-(function () {
-  const user = JSON.parse(localStorage.getItem("currentUser"));
+function login() {
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const error = document.getElementById("error");
 
-  // مش مسجل دخول
-  if (!user) {
-    window.location.href = "login.html";
+  if (!username || !password) {
+    error.innerText = "ادخل اسم المستخدم وكلمة المرور";
     return;
   }
 
-  // تحديد الصفحة الحالية
-  const page = window.location.pathname.split("/").pop();
+  const user = users.find(
+    u => u.username === username && u.password === password
+  );
 
-  // الصلاحيات
-  const permissions = {
-    admin: ["index.html", "products.html", "inventory.html", "returns.html", "reports.html"],
-    cashier: ["index.html"]
-  };
-
-  // لو الصفحة مش مسموحة
-  if (!permissions[user.role]?.includes(page)) {
-    alert("❌ ليس لديك صلاحية الدخول لهذه الصفحة");
-    window.location.href = "index.html";
+  if (!user) {
+    error.innerText = "بيانات الدخول غير صحيحة";
+    return;
   }
-})();
-if(localStorage.getItem("loggedIn") !== "true"){
-  window.location.href = "login.html";
+
+  localStorage.session = JSON.stringify({
+    username: user.username,
+    role: user.role,
+    loginAt: Date.now()
+  });
+
+  window.location.href = "index.html";
 }
