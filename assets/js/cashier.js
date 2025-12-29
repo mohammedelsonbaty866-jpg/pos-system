@@ -1,116 +1,63 @@
-/************************
- * CASHIER MODULE
- * الفاتورة والكاشير
- ************************/
+// ===== CASHIER =====
 
-let cart = [];
+let invoice = [];
+const beep = new Audio("assets/sounds/beep.mp3");
 
-/*
-  شكل عنصر الفاتورة:
-  {
-    id,
-    name,
-    price,
-    qty
-  }
-*/
-
-/* ===== إضافة صنف للفاتورة ===== */
-function addToCart(productId) {
-  const product = getProductById(productId);
+function addToInvoice(productId) {
+  const product = products.find(p => p.id === productId);
   if (!product) return;
 
-  // صوت الباركود
-  playBeep();
-
-  const item = cart.find(i => i.id === productId);
-
-  if (item) {
-    item.qty += 1;
-  } else {
-    cart.push({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      qty: 1
-    });
-  }
-
+  invoice.push(product);
+  beep.play();
   renderInvoice();
 }
 
-/* ===== عرض الفاتورة ===== */
 function renderInvoice() {
   const box = document.getElementById("invoiceItems");
   const totalBox = document.getElementById("total");
 
-  if (!box || !totalBox) return;
-
   box.innerHTML = "";
   let total = 0;
 
-  cart.forEach((item, index) => {
-    total += item.price * item.qty;
-
-    const row = document.createElement("div");
-    row.className = "invoice-item";
-    row.innerHTML = `
-      <span>${item.name}</span>
-      <span>${item.qty} × ${item.price}</span>
-      <span>${item.qty * item.price} ج</span>
-      <button onclick="removeItem(${index})">✖</button>
+  invoice.forEach((item, i) => {
+    total += item.price;
+    box.innerHTML += `
+      <div class="invoice-item">
+        ${item.name} - ${item.price} ج
+      </div>
     `;
-    box.appendChild(row);
   });
 
-  totalBox.innerText = total + " ج";
+  totalBox.textContent = total + " ج";
 }
 
-/* ===== حذف صنف ===== */
-function removeItem(index) {
-  cart.splice(index, 1);
-  renderInvoice();
+// 🔍 بحث بالاسم أو الباركود
+function searchProduct(value) {
+  const grid = document.getElementById("productsGrid");
+  grid.innerHTML = "";
+
+  products
+    .filter(p =>
+      p.name.includes(value) || p.barcode === value
+    )
+    .forEach(p => {
+      grid.innerHTML += `
+        <div class="product-card" onclick="addToInvoice(${p.id})">
+          <strong>${p.name}</strong>
+          <span>${p.price} ج</span>
+        </div>
+      `;
+    });
 }
 
-/* ===== تفريغ الفاتورة ===== */
-function clearInvoice() {
-  if (!confirm("تفريغ الفاتورة؟")) return;
-  cart = [];
-  renderInvoice();
-}
-
-/* ===== حفظ الفاتورة ===== */
-function saveInvoice() {
-  if (cart.length === 0) {
-    alert("الفاتورة فارغة");
-    return;
+// 📷 مسح باركود (كأنه كيبورد)
+let barcodeBuffer = "";
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    const product = products.find(p => p.barcode === barcodeBuffer);
+    if (product) addToInvoice(product.id);
+    barcodeBuffer = "";
+  } else {
+    barcodeBuffer += e.key;
   }
-
-  const invoices = JSON.parse(localStorage.getItem("invoices")) || [];
-
-  const invoice = {
-    id: Date.now(),
-    date: new Date().toLocaleString(),
-    items: cart,
-    total: cart.reduce((s, i) => s + i.price * i.qty, 0)
-  };
-
-  invoices.push(invoice);
-  localStorage.setItem("invoices", JSON.stringify(invoices));
-
-  // خصم من المخزون
-  cart.forEach(i => updateStock(i.id, i.qty));
-
-  cart = [];
-  renderInvoice();
-
-  alert("تم حفظ الفاتورة بنجاح");
-}
-
-/* ===== صوت الباركود ===== */
-function playBeep() {
-  const audio = new Audio(
-    "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQgAAAAA"
-  );
-  audio.play();
-}
+});
