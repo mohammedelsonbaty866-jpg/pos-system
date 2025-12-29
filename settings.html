@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>الإعدادات</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
 
@@ -15,32 +14,38 @@
   <nav>
     <a href="index.html">الكاشير</a>
     <a href="settings.html" class="active">الإعدادات</a>
+    <a href="login.html" onclick="logout()">خروج</a>
   </nav>
 </header>
 
 <main class="settings-layout">
 
-  <!-- بيانات الحساب -->
   <section class="card">
-    <h2>بيانات الحساب</h2>
-    <p><strong>رقم الهاتف:</strong> <span id="ownerPhone"></span></p>
-    <button class="btn danger" onclick="logout()">تسجيل الخروج</button>
+    <h2>🏪 بيانات المحل</h2>
+    <input id="storeName" placeholder="اسم المحل">
+    <input id="storePhone" placeholder="رقم الهاتف">
+    <button onclick="saveStore()">حفظ</button>
   </section>
 
-  <!-- إدارة الكاشير -->
   <section class="card">
-    <h2>إدارة الكاشير</h2>
-
-    <input id="cashierPhone" placeholder="رقم هاتف الكاشير">
-    <button class="btn" onclick="addCashier()">إضافة كاشير</button>
-
+    <h2>👤 إضافة كاشير</h2>
+    <input id="cashierName" placeholder="اسم الكاشير">
+    <input id="cashierPhone" placeholder="رقم الهاتف">
+    <button onclick="addCashier()">إضافة</button>
     <ul id="cashiersList"></ul>
+  </section>
+
+  <section class="card">
+    <h2>🔔 الباركود</h2>
+    <label>
+      <input type="checkbox" id="barcodeSound">
+      تفعيل صوت الباركود
+    </label>
   </section>
 
 </main>
 
 <script src="assets/js/auth-guard.js"></script>
 <script src="assets/js/settings.js"></script>
-
 </body>
 </html>
