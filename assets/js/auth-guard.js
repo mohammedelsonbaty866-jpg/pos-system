@@ -23,3 +23,6 @@
     window.location.href = "index.html";
   }
 })();
+if(localStorage.getItem("loggedIn") !== "true"){
+  window.location.href = "login.html";
+}
