@@ -1,121 +1,109 @@
-/* =====================================
-   PRODUCTS MANAGEMENT
-   Add - Delete - Search - Barcode
-   ===================================== */
+/************************
+ * PRODUCTS MODULE
+ * إدارة الأصناف + البحث
+ ************************/
 
-document.addEventListener("DOMContentLoaded", () => {
-  renderProductsTable();
-});
+/*
+  شكل الصنف:
+  {
+    id: Number,
+    name: String,
+    price: Number,
+    barcode: String,
+    stock: Number
+  }
+*/
 
-/* ---------- ADD PRODUCT ---------- */
-function addProduct() {
-  const nameInput = document.getElementById("productName");
-  const priceInput = document.getElementById("productPrice");
-  const barcodeInput = document.getElementById("productBarcode");
+let products = JSON.parse(localStorage.getItem("products")) || [];
 
-  const name = nameInput.value.trim();
-  const price = parseFloat(priceInput.value);
-  const barcode = barcodeInput.value.trim();
+/* ===== حفظ ===== */
+function saveProducts() {
+  localStorage.setItem("products", JSON.stringify(products));
+}
 
-  if (!name || isNaN(price)) {
-    alert("من فضلك أدخل اسم وسعر الصنف");
+/* ===== إضافة صنف ===== */
+function addProduct(name, price, barcode, stock = 0) {
+  if (!name || !price) {
+    alert("اسم الصنف والسعر مطلوبين");
     return;
   }
 
-  let products = getProducts();
-
-  // prevent duplicate barcode
-  if (barcode && products.some(p => p.barcode === barcode)) {
-    alert("الباركود مسجل بالفعل");
+  const exists = products.find(p => p.barcode === barcode && barcode);
+  if (exists) {
+    alert("الباركود مستخدم بالفعل");
     return;
   }
 
   const product = {
-    id: generateID("P"),
-    name,
-    price,
-    barcode
+    id: Date.now(),
+    name: name.trim(),
+    price: Number(price),
+    barcode: barcode ? barcode.trim() : "",
+    stock: Number(stock)
   };
 
   products.push(product);
-  saveProducts(products);
-
-  nameInput.value = "";
-  priceInput.value = "";
-  barcodeInput.value = "";
-
-  renderProductsTable();
+  saveProducts();
+  renderProducts();
 }
 
-/* ---------- DELETE PRODUCT ---------- */
-function deleteProduct(id) {
-  let products = getProducts();
-  products = products.filter(p => p.id !== id);
-  saveProducts(products);
-  renderProductsTable();
-}
-
-/* ---------- RENDER TABLE ---------- */
-function renderProductsTable() {
-  const table = document.getElementById("productsTable");
-  if (!table) return;
-
-  const products = getProducts();
-  table.innerHTML = "";
-
-  products.forEach((product, index) => {
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-      <td>${index + 1}</td>
-      <td>${product.name}</td>
-      <td>${product.price} ج</td>
-      <td>${product.barcode || "-"}</td>
-      <td>
-        <button onclick="deleteProduct('${product.id}')">حذف</button>
-      </td>
-    `;
-
-    table.appendChild(tr);
-  });
-}
-
-/* ---------- SEARCH PRODUCT ---------- */
-function searchProduct(value) {
-  const products = getProducts();
-  const keyword = value.trim().toLowerCase();
-
-  const filtered = products.filter(p =>
-    p.name.toLowerCase().includes(keyword) ||
-    (p.barcode && p.barcode.includes(keyword))
-  );
-
-  renderProductsGrid(filtered);
-}
-
-/* ---------- CASHIER GRID ---------- */
-function renderProductsGrid(list = null) {
+/* ===== عرض الأصناف ===== */
+function renderProducts(list = products) {
   const grid = document.getElementById("productsGrid");
   if (!grid) return;
 
-  const products = list || getProducts();
   grid.innerHTML = "";
 
-  products.forEach(product => {
-    const div = document.createElement("div");
-    div.className = "product-card";
-    div.innerHTML = `
-      <strong>${product.name}</strong>
-      <span>${product.price} ج</span>
-    `;
+  if (list.length === 0) {
+    grid.innerHTML = "<p style='text-align:center'>لا توجد أصناف</p>";
+    return;
+  }
 
-    div.onclick = () => addToInvoice(product.id);
+  list.forEach(p => {
+    const div = document.createElement("div");
+    div.className = "product";
+    div.innerHTML = `
+      <b>${p.name}</b>
+      <small>${p.price} ج</small>
+    `;
+    div.onclick = () => addToCart(p.id);
     grid.appendChild(div);
   });
 }
 
-/* ---------- BARCODE SEARCH ---------- */
-function findProductByBarcode(code) {
-  const products = getProducts();
-  return products.find(p => p.barcode === code);
+/* ===== البحث بالاسم أو الباركود ===== */
+function searchProduct(keyword) {
+  keyword = keyword.trim();
+
+  if (!keyword) {
+    renderProducts(products);
+    return;
+  }
+
+  const result = products.filter(p =>
+    p.name.includes(keyword) ||
+    (p.barcode && p.barcode === keyword)
+  );
+
+  renderProducts(result);
 }
+
+/* ===== جلب صنف بالـ ID ===== */
+function getProductById(id) {
+  return products.find(p => p.id === id);
+}
+
+/* ===== تحديث المخزون ===== */
+function updateStock(productId, qty) {
+  const product = getProductById(productId);
+  if (!product) return;
+
+  product.stock -= qty;
+  if (product.stock < 0) product.stock = 0;
+  saveProducts();
+}
+
+/* ===== تهيئة ===== */
+document.addEventListener("DOMContentLoaded", () => {
+  renderProducts();
+});
