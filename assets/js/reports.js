@@ -59,3 +59,30 @@ function topProducts() {
     list.innerHTML += `<li>${p[0]} - ${p[1]}</li>`
   );
 }
+let invoices = JSON.parse(localStorage.getItem("invoices")) || [];
+let user = JSON.parse(localStorage.getItem("loggedUser"));
+
+function renderReport() {
+  const box = document.getElementById("reportBox");
+  box.innerHTML = "";
+
+  let data =
+    user.role === "admin"
+      ? invoices
+      : invoices.filter(i => i.user === user.name);
+
+  let total = 0;
+
+  data.forEach(inv => {
+    total += inv.total;
+    box.innerHTML += `
+      <div class="card">
+        👤 ${inv.user}<br>
+        💰 ${inv.total} ج<br>
+        🕒 ${inv.date}
+      </div>
+    `;
+  });
+
+  box.innerHTML += `<h3>الإجمالي: ${total} ج</h3>`;
+}
