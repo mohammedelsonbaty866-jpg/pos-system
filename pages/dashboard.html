@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard | لوحة التحكم</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/dashboard.css">
+</head>
+
+<body>
+
+<!-- حماية PRO -->
+<script src="../core/storage.js"></script>
+<script src="../core/license.js"></script>
+<script src="../core/pro-guard.js"></script>
+
+<header class="top-bar">
+  <h1>📊 لوحة التحكم</h1>
+  <nav>
+    <a href="../index.html">الكاشير</a>
+    <a href="dashboard.html" class="active">Dashboard</a>
+    <a href="reports.html">التقارير</a>
+  </nav>
+</header>
+
+<main class="dashboard">
+
+  <!-- KPIs -->
+  <section class="kpis">
+    <div class="kpi">
+      <span>مبيعات اليوم</span>
+      <strong id="todaySales">0</strong>
+    </div>
+
+    <div class="kpi">
+      <span>مبيعات الشهر</span>
+      <strong id="monthSales">0</strong>
+    </div>
+
+    <div class="kpi">
+      <span>عدد الفواتير</span>
+      <strong id="invoiceCount">0</strong>
+    </div>
+
+    <div class="kpi">
+      <span>أكثر صنف مبيعًا</span>
+      <strong id="topProduct">—</strong>
+    </div>
+  </section>
+
+  <!-- آخر الفواتير -->
+  <section class="card">
+    <h2>🧾 آخر الفواتير</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>التاريخ</th>
+          <th>الإجمالي</th>
+        </tr>
+      </thead>
+      <tbody id="lastInvoices"></tbody>
+    </table>
+  </section>
+
+</main>
+
+<script src="../assets/js/dashboard.js"></script>
+</body>
+</html>
