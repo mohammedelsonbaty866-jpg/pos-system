@@ -1,17 +1,11 @@
-/* ================================
-   AUTH GUARD
-   يمنع الدخول بدون تسجيل
-================================ */
+/* ===============================
+   AUTH GUARD | POS PRO
+   =============================== */
 
 (function () {
-  const user = JSON.parse(localStorage.getItem("currentUser"));
+  const user = localStorage.getItem("pos_current_user");
 
-  // الصفحات المسموح فتحها بدون تسجيل
-  const publicPages = ["login.html", "register.html"];
-
-  const currentPage = window.location.pathname.split("/").pop();
-
-  if (!user && !publicPages.includes(currentPage)) {
+  if (!user) {
     window.location.href = "login.html";
   }
 })();
