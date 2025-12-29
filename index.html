@@ -72,6 +72,14 @@
 <script src="assets/js/data.js"></script>
 <script src="assets/js/products.js"></script>
 <script src="assets/js/cashier.js"></script>
-
+<script src="assets/js/auth-guard.js"></script>
 </body>
 </html>
+<button onclick="logout()">خروج</button>
+
+<script>
+function logout(){
+  localStorage.removeItem("loggedIn");
+  window.location.href = "login.html";
+}
+</script>
