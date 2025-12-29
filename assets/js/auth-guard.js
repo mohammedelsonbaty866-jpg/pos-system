@@ -2,7 +2,10 @@ function login() {
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value.trim();
   const error = document.getElementById("error");
-
+const user = JSON.parse(localStorage.getItem("currentUser"));
+if (!user) {
+  location.href = "login.html";
+}
   if (!username || !password) {
     error.innerText = "ادخل اسم المستخدم وكلمة المرور";
     return;
