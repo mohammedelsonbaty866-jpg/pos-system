@@ -2,46 +2,208 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>POS | شاشة الكاشير</title>
+<title>POS Pro | الكاشير</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- حماية الصفحة -->
+<script src="assets/js/auth-guard.js"></script>
+
+<!-- CSS -->
 <link rel="stylesheet" href="assets/css/style.css">
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f1f5f9;
+}
+
+/* ===== HEADER ===== */
+header{
+  background:#0f172a;
+  color:#fff;
+  padding:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+header button{
+  background:#ef4444;
+  border:none;
+  color:#fff;
+  padding:8px 12px;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+/* ===== LAYOUT ===== */
+.main{
+  display:grid;
+  grid-template-columns:2fr 1fr;
+  height:calc(100vh - 56px);
+}
+
+/* ===== PRODUCTS ===== */
+.products{
+  padding:10px;
+  overflow:auto;
+}
+.products h2{margin-top:0}
+.products-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+  gap:10px;
+}
+.product{
+  background:#fff;
+  padding:10px;
+  border-radius:12px;
+  text-align:center;
+  box-shadow:0 4px 8px rgba(0,0,0,.1);
+  cursor:pointer;
+}
+.product b{display:block}
+
+/* ===== INVOICE ===== */
+.invoice{
+  background:#fff;
+  padding:10px;
+  border-right:2px solid #e5e7eb;
+  display:flex;
+  flex-direction:column;
+}
+.invoice-items{
+  flex:1;
+  overflow:auto;
+}
+.item{
+  border-bottom:1px solid #e5e7eb;
+  padding:6px 0;
+}
+.total{
+  font-size:18px;
+  font-weight:bold;
+  margin:10px 0;
+}
+.actions button{
+  width:100%;
+  padding:12px;
+  margin-bottom:8px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  font-size:16px;
+}
+.save{background:#22c55e;color:#fff}
+.clear{background:#64748b;color:#fff}
+</style>
 </head>
 
 <body>
 
-<script src="assets/js/auth-guard.js"></script>
-
-<header class="top-bar">
-  <h1>نظام نقاط بيع</h1>
-  <nav>
-    <a class="active">الكاشير</a>
-    <button onclick="logout()">خروج</button>
-  </nav>
+<header>
+  <span>نظام نقاط بيع – برو</span>
+  <button onclick="logout()">خروج</button>
 </header>
 
-<main class="pos-layout">
+<div class="main">
 
-<section class="products-panel">
-  <h2>المنتجات</h2>
-  <input placeholder="بحث..." onkeyup="searchProduct(this.value)">
-  <div id="productsGrid"></div>
-</section>
-
-<section class="invoice-panel">
-  <h2>الفاتورة</h2>
-  <div id="invoiceItems"></div>
-
-  <div class="total-box">
-    الإجمالي: <strong id="total">0</strong> ج
+  <!-- المنتجات -->
+  <div class="products">
+    <h2>الأصناف</h2>
+    <div id="productsGrid" class="products-grid"></div>
   </div>
 
-  <button onclick="clearInvoice()">تفريغ</button>
-</section>
+  <!-- الفاتورة -->
+  <div class="invoice">
+    <h2>الفاتورة</h2>
 
-</main>
+    <div id="invoiceItems" class="invoice-items"></div>
 
-<script src="assets/js/data.js"></script>
-<script src="assets/js/products.js"></script>
-<script src="assets/js/cashier.js"></script>
+    <div class="total">
+      الإجمالي: <span id="total">0</span> ج
+    </div>
+
+    <div class="actions">
+      <button class="save" onclick="saveInvoice()">حفظ الفاتورة</button>
+      <button class="clear" onclick="clearInvoice()">تفريغ</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ===== DATA ===== */
+let products = JSON.parse(localStorage.getItem("products")) || [
+  {id:1,name:"سكر",price:10},
+  {id:2,name:"زيت",price:25},
+  {id:3,name:"أرز",price:15}
+];
+let cart = [];
+
+/* ===== INIT ===== */
+renderProducts();
+
+/* ===== PRODUCTS ===== */
+function renderProducts(){
+  const grid = document.getElementById("productsGrid");
+  grid.innerHTML = "";
+  products.forEach(p=>{
+    const d = document.createElement("div");
+    d.className = "product";
+    d.innerHTML = `<b>${p.name}</b>${p.price} ج`;
+    d.onclick = ()=>addToCart(p);
+    grid.appendChild(d);
+  });
+}
+
+/* ===== CART ===== */
+function addToCart(p){
+  cart.push(p);
+  renderInvoice();
+}
+
+function renderInvoice(){
+  const box = document.getElementById("invoiceItems");
+  box.innerHTML = "";
+  let total = 0;
+  cart.forEach(i=>{
+    total += i.price;
+    box.innerHTML += `<div class="item">${i.name} - ${i.price} ج</div>`;
+  });
+  document.getElementById("total").innerText = total;
+}
+
+/* ===== ACTIONS ===== */
+function clearInvoice(){
+  cart = [];
+  renderInvoice();
+}
+
+function saveInvoice(){
+  if(cart.length === 0){
+    alert("الفاتورة فارغة");
+    return;
+  }
+
+  let invoices = JSON.parse(localStorage.getItem("invoices")) || [];
+  invoices.push({
+    date: new Date().toLocaleString(),
+    total: document.getElementById("total").innerText,
+    items: cart
+  });
+
+  localStorage.setItem("invoices", JSON.stringify(invoices));
+  clearInvoice();
+  alert("تم حفظ الفاتورة");
+}
+
+/* ===== LOGOUT ===== */
+function logout(){
+  localStorage.removeItem("pos_session");
+  window.location.href = "login.html";
+}
+</script>
+
 </body>
 </html>
