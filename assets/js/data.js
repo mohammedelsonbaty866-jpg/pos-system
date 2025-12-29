@@ -22,14 +22,20 @@ function saveData() {
   localStorage.setItem("products", JSON.stringify(products));
   localStorage.setItem("invoices", JSON.stringify(invoices));
 }
-
-/* ===== توليد ID جديد ===== */
-function generateId(list) {
-  if (list.length === 0) return 1;
-  return Math.max(...list.map(i => i.id)) + 1;
+function getUsers() {
+  return JSON.parse(localStorage.getItem("users")) || [];
 }
-let users = JSON.parse(localStorage.getItem("users")) || [
-  {
+
+function saveUsers(users) {
+  localStorage.setItem("users", JSON.stringify(users));
+}
+
+function logout() {
+  localStorage.removeItem("currentUser");
+  window.location.href = "login.html";
+}
+/* ===== توليد ID جديد ===== */
+
 // مستخدم افتراضي (أول مرة بس)
 if (!localStorage.users) {
   localStorage.users = JSON.stringify([
