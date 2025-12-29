@@ -1,90 +1,102 @@
-/*************************************************
- * AUTH SYSTEM
- * تسجيل دخول + إنشاء حساب
- * ربط برقم الهاتف
- *************************************************/
+/* ================================
+   AUTH SYSTEM (REGISTER + LOGIN)
+   ================================ */
 
-// عناصر الصفحة
-const phoneInput = document.getElementById("phone");
-const passwordInput = document.getElementById("password");
-const msg = document.getElementById("msg");
-
-// جلب المستخدمين
-let users = JSON.parse(localStorage.getItem("users")) || [];
-
-// =====================
-// تسجيل الدخول
-// =====================
-function login() {
-  const phone = phoneInput.value.trim();
-  const password = passwordInput.value.trim();
-
-  if (!phone || !password) {
-    showMsg("❌ أدخل رقم الهاتف وكلمة المرور");
-    return;
-  }
-
-  const user = users.find(
-    u => u.phone === phone && u.password === password
-  );
-
-  if (!user) {
-    showMsg("❌ بيانات الدخول غير صحيحة");
-    return;
-  }
-
-  // حفظ المستخدم الحالي
-  localStorage.setItem("currentUser", JSON.stringify(user));
-
-  showMsg("✅ تم تسجيل الدخول");
-
-  setTimeout(() => {
-    window.location.href = "index.html";
-  }, 800);
+/* ===== HELPERS ===== */
+function getUsers() {
+  return JSON.parse(localStorage.getItem("users") || "[]");
 }
 
-// =====================
-// إنشاء حساب جديد
-// =====================
-function register() {
-  const phone = phoneInput.value.trim();
-  const password = passwordInput.value.trim();
-
-  if (!phone || !password) {
-    showMsg("❌ أدخل رقم الهاتف وكلمة المرور");
-    return;
-  }
-
-  const exists = users.find(u => u.phone === phone);
-  if (exists) {
-    showMsg("❌ هذا الرقم مسجل بالفعل");
-    return;
-  }
-
-  const newUser = {
-    id: Date.now(),
-    phone: phone,
-    password: password,
-    role: "owner",       // صاحب الحساب
-    createdAt: new Date().toLocaleString()
-  };
-
-  users.push(newUser);
+function saveUsers(users) {
   localStorage.setItem("users", JSON.stringify(users));
-
-  // تسجيل دخول تلقائي
-  localStorage.setItem("currentUser", JSON.stringify(newUser));
-
-  showMsg("✅ تم إنشاء الحساب");
-
-  setTimeout(() => {
-    window.location.href = "index.html";
-  }, 800);
 }
 
-// =====================
-// رسائل
-// =====================
-function showMsg(text) {
-  msg.innerText = text;
+function setSession(user) {
+  localStorage.setItem("currentUser", JSON.stringify(user));
+}
+
+function getSession() {
+  return JSON.parse(localStorage.getItem("currentUser"));
+}
+
+/* ================================
+   REGISTER
+   ================================ */
+const registerForm = document.getElementById("registerForm");
+
+if (registerForm) {
+  registerForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const name = document.getElementById("name").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const password = document.getElementById("password").value;
+
+    if (!name || !phone || !password) {
+      alert("من فضلك أكمل جميع البيانات");
+      return;
+    }
+
+    let users = getUsers();
+
+    // منع تكرار رقم الهاتف
+    const exists = users.find(u => u.phone === phone);
+    if (exists) {
+      alert("رقم الهاتف مسجل بالفعل");
+      return;
+    }
+
+    const newUser = {
+      id: Date.now(),
+      name,
+      phone,
+      password,
+      cashiers: [], // الكاشير اللي هيضيفهم صاحب الحساب
+      createdAt: new Date().toISOString()
+    };
+
+    users.push(newUser);
+    saveUsers(users);
+
+    // تسجيل دخول تلقائي
+    setSession(newUser);
+
+    window.location.href = "index.html";
+  });
+}
+
+/* ================================
+   LOGIN
+   ================================ */
+const loginForm = document.getElementById("loginForm");
+
+if (loginForm) {
+  loginForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const phone = document.getElementById("phone").value.trim();
+    const password = document.getElementById("password").value;
+
+    let users = getUsers();
+
+    const user = users.find(
+      u => u.phone === phone && u.password === password
+    );
+
+    if (!user) {
+      alert("بيانات الدخول غير صحيحة");
+      return;
+    }
+
+    setSession(user);
+    window.location.href = "index.html";
+  });
+}
+
+/* ================================
+   LOGOUT
+   ================================ */
+function logout() {
+  localStorage.removeItem("currentUser");
+  window.location.href = "login.html";
 }
