@@ -2,133 +2,167 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>POS | إدارة الأصناف</title>
+<title>POS Pro | الأصناف</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- CSS -->
+<!-- حماية الصفحة -->
+<script src="assets/js/auth-guard.js"></script>
+
 <link rel="stylesheet" href="assets/css/style.css">
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f1f5f9;
+}
+
+/* HEADER */
+header{
+  background:#0f172a;
+  color:#fff;
+  padding:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+header a{
+  color:#fff;
+  text-decoration:none;
+  background:#22c55e;
+  padding:6px 10px;
+  border-radius:8px;
+}
+
+/* CONTENT */
+.container{
+  padding:12px;
+}
+form{
+  background:#fff;
+  padding:12px;
+  border-radius:12px;
+  margin-bottom:12px;
+}
+input{
+  width:100%;
+  padding:10px;
+  margin-bottom:8px;
+  border-radius:8px;
+  border:1px solid #cbd5f5;
+}
+
+button{
+  padding:10px;
+  width:100%;
+  border:none;
+  border-radius:10px;
+  background:#0ea5e9;
+  color:#fff;
+  font-size:16px;
+  cursor:pointer;
+}
+
+/* TABLE */
+table{
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
+  border-radius:12px;
+  overflow:hidden;
+}
+th,td{
+  padding:10px;
+  border-bottom:1px solid #e5e7eb;
+  text-align:center;
+}
+th{background:#e5e7eb}
+.delete{
+  background:#ef4444;
+  color:#fff;
+  border:none;
+  padding:6px 10px;
+  border-radius:6px;
+  cursor:pointer;
+}
+</style>
 </head>
 
 <body>
 
-<!-- ===== HEADER ===== -->
-<header class="top-bar">
-  <h1>إدارة الأصناف</h1>
-  <nav>
-    <a href="index.html">الكاشير</a>
-    <a href="products.html" class="active">الأصناف</a>
-    <a href="inventory.html">المخزون</a>
-    <a href="returns.html">المرتجعات</a>
-    <a href="reports.html">التقارير</a>
-  </nav>
+<header>
+  <span>إدارة الأصناف</span>
+  <a href="index.html">رجوع للكاشير</a>
 </header>
 
-<!-- ===== MAIN ===== -->
-<main class="products-layout">
+<div class="container">
 
   <!-- إضافة صنف -->
-  <section class="form-card">
-    <h2>إضافة صنف جديد</h2>
-
-    <input id="productName" type="text" placeholder="اسم الصنف">
-    <input id="productPrice" type="number" placeholder="سعر البيع">
-
-    <button class="btn-save" onclick="addProduct()">حفظ الصنف</button>
-  </section>
+  <form onsubmit="addProduct(event)">
+    <h3>إضافة صنف جديد</h3>
+    <input id="name" placeholder="اسم الصنف" required>
+    <input id="price" type="number" placeholder="سعر البيع" required>
+    <button>حفظ الصنف</button>
+  </form>
 
   <!-- جدول الأصناف -->
-  <section class="table-card">
-    <h2>قائمة الأصناف</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>الصنف</th>
+        <th>السعر</th>
+        <th>حذف</th>
+      </tr>
+    </thead>
+    <tbody id="productsTable"></tbody>
+  </table>
 
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>اسم الصنف</th>
-          <th>السعر</th>
-          <th>حذف</th>
-        </tr>
-      </thead>
-      <tbody id="productsTable"></tbody>
-    </table>
-  </section>
-
-</main>
-
-<!-- ===== FOOTER ===== -->
-<footer>
-  إدارة الأصناف – POS System
-</footer>
-
-<!-- ===== JS ===== -->
-<script src="assets/js/data.js"></script>
+</div>
 
 <script>
-/* ===============================
-   PRODUCTS PAGE LOGIC
-================================ */
+let products = JSON.parse(localStorage.getItem("products")) || [];
 
-/* ===== عرض الأصناف ===== */
-function renderProductsTable() {
+/* عرض الأصناف */
+function render(){
   const table = document.getElementById("productsTable");
   table.innerHTML = "";
-
-  if (products.length === 0) {
-    table.innerHTML = `
+  products.forEach((p,i)=>{
+    table.innerHTML += `
       <tr>
-        <td colspan="4" style="text-align:center">لا توجد أصناف</td>
+        <td>${i+1}</td>
+        <td>${p.name}</td>
+        <td>${p.price} ج</td>
+        <td>
+          <button class="delete" onclick="removeProduct(${i})">حذف</button>
+        </td>
       </tr>
     `;
-    return;
-  }
-
-  products.forEach((p, index) => {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${index + 1}</td>
-      <td>${p.name}</td>
-      <td>${p.price} ج</td>
-      <td>
-        <button class="btn-delete" onclick="deleteProduct(${index})">حذف</button>
-      </td>
-    `;
-    table.appendChild(row);
   });
 }
 
-/* ===== إضافة صنف ===== */
-function addProduct() {
-  const name = document.getElementById("productName").value.trim();
-  const price = Number(document.getElementById("productPrice").value);
-
-  if (!name || price <= 0) {
-    alert("أدخل اسم وسعر صحيح");
-    return;
-  }
-
+/* إضافة */
+function addProduct(e){
+  e.preventDefault();
   products.push({
-    id: generateId(products),
-    name: name,
-    price: price
+    id:Date.now(),
+    name: name.value,
+    price: Number(price.value)
   });
-
-  saveData();
-  renderProductsTable();
-
-  document.getElementById("productName").value = "";
-  document.getElementById("productPrice").value = "";
+  localStorage.setItem("products", JSON.stringify(products));
+  e.target.reset();
+  render();
 }
 
-/* ===== حذف صنف ===== */
-function deleteProduct(index) {
-  if (!confirm("حذف الصنف؟")) return;
-  products.splice(index, 1);
-  saveData();
-  renderProductsTable();
+/* حذف */
+function removeProduct(i){
+  if(!confirm("حذف الصنف؟")) return;
+  products.splice(i,1);
+  localStorage.setItem("products", JSON.stringify(products));
+  render();
 }
 
-/* ===== تحميل ===== */
-document.addEventListener("DOMContentLoaded", renderProductsTable);
+render();
 </script>
 
 </body>
