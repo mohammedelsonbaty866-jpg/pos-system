@@ -2,156 +2,126 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>تسجيل الدخول | POS Pro</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>POS Pro | تسجيل الدخول</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="assets/css/style.css">
 
 <style>
 body{
   margin:0;
   font-family:Arial;
-  background:#0f172a;
+  background:#020617;
   display:flex;
-  justify-content:center;
   align-items:center;
+  justify-content:center;
   height:100vh;
 }
-.auth-box{
+
+.card{
   background:#fff;
+  padding:20px;
+  border-radius:16px;
   width:100%;
   max-width:360px;
-  border-radius:14px;
-  padding:20px;
 }
+
 h2{
   text-align:center;
-  margin-bottom:15px;
+  margin-bottom:12px;
 }
+
 input{
   width:100%;
   padding:12px;
   margin-bottom:10px;
   border-radius:10px;
-  border:1px solid #ccc;
+  border:1px solid #cbd5f5;
 }
+
 button{
   width:100%;
   padding:12px;
   border:none;
-  border-radius:10px;
+  border-radius:12px;
   background:#22c55e;
   color:#fff;
   font-size:16px;
   cursor:pointer;
 }
+
 .switch{
   text-align:center;
   margin-top:10px;
-  cursor:pointer;
   color:#2563eb;
-}
-.error{
-  color:#ef4444;
-  font-size:14px;
-  text-align:center;
+  cursor:pointer;
 }
 </style>
 </head>
 
 <body>
 
-<div class="auth-box">
+<div class="card">
 
   <h2 id="title">تسجيل الدخول</h2>
 
   <input id="phone" placeholder="رقم الهاتف">
   <input id="password" type="password" placeholder="كلمة المرور">
 
-  <div id="error" class="error"></div>
+  <button onclick="submit()">دخول</button>
 
-  <button onclick="submitAuth()">دخول</button>
-
-  <div class="switch" onclick="toggleMode()">
+  <div class="switch" onclick="toggleMode()" id="switchText">
     إنشاء حساب جديد
   </div>
 
 </div>
 
 <script>
-const USERS_KEY = "pos_users";
-const SESSION_KEY = "pos_session";
+let users = JSON.parse(localStorage.getItem("users")) || [];
+let mode = "login"; // login | register
 
-let mode = "login";
-
-/* ===== Toggle Login/Register ===== */
 function toggleMode(){
   mode = mode === "login" ? "register" : "login";
-  document.getElementById("title").innerText =
-    mode === "login" ? "تسجيل الدخول" : "إنشاء حساب";
-  document.querySelector("button").innerText =
-    mode === "login" ? "دخول" : "تسجيل";
-  document.querySelector(".switch").innerText =
-    mode === "login" ? "إنشاء حساب جديد" : "لديك حساب؟ تسجيل دخول";
-  document.getElementById("error").innerText = "";
+  title.innerText = mode === "login" ? "تسجيل الدخول" : "إنشاء حساب";
+  switchText.innerText = mode === "login"
+    ? "إنشاء حساب جديد"
+    : "لديك حساب؟ تسجيل الدخول";
 }
 
-/* ===== Submit ===== */
-function submitAuth(){
-  const phone = phoneInput();
-  const pass = passwordInput();
-
-  if(!phone || !pass){
-    showError("أدخل البيانات كاملة");
+function submit(){
+  if(!phone.value || !password.value){
+    alert("أكمل البيانات");
     return;
   }
 
-  let users = JSON.parse(localStorage.getItem(USERS_KEY)) || [];
-
   if(mode === "register"){
-    if(users.find(u => u.phone === phone)){
-      showError("رقم الهاتف مسجل بالفعل");
+    if(users.find(u=>u.phone===phone.value)){
+      alert("الحساب موجود");
       return;
     }
-
-    const user = {
-      id: Date.now(),
-      phone,
-      password: pass,
-      role: "owner",
-      created: new Date().toISOString()
-    };
-
-    users.push(user);
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
-
-    createSession(user.id);
-  } else {
-    const user = users.find(u => u.phone === phone && u.password === pass);
-    if(!user){
-      showError("بيانات غير صحيحة");
-      return;
-    }
-    createSession(user.id);
+    users.push({
+      phone: phone.value,
+      password: password.value,
+      role: "owner"
+    });
+    localStorage.setItem("users", JSON.stringify(users));
+    alert("تم إنشاء الحساب");
+    toggleMode();
+    return;
   }
-}
 
-/* ===== Helpers ===== */
-function createSession(userId){
-  localStorage.setItem(SESSION_KEY, JSON.stringify({
-    userId,
-    time: Date.now()
-  }));
-  window.location.href = "index.html";
-}
+  // login
+  const user = users.find(
+    u=>u.phone===phone.value && u.password===password.value
+  );
 
-function showError(msg){
-  document.getElementById("error").innerText = msg;
-}
+  if(!user){
+    alert("بيانات غير صحيحة");
+    return;
+  }
 
-function phoneInput(){
-  return document.getElementById("phone").value.trim();
-}
-function passwordInput(){
-  return document.getElementById("password").value.trim();
+  localStorage.setItem("loggedUser", JSON.stringify(user));
+  location.href = "index.html";
 }
 </script>
 
